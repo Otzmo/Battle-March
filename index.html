@@ -246,6 +246,7 @@ button:hover{ background:var(--maroon-dark); }
 
 <div class="tabbar" role="tablist" aria-label="Battle March Werkzeuge">
   <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
+  <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="false" tabindex="-1">Armee &amp; Magie</button>
   <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="false" tabindex="-1">Kartenbau</button>
 </div>
 
@@ -255,15 +256,14 @@ button:hover{ background:var(--maroon-dark); }
 
 <div class="toc"><h2>Inhalt</h2><ul>
 <li>1. Spielablauf</li>
-<li>2. Armeeaufbau</li>
-<li>3. Magische Gegenstände</li>
-<li>4. Geländeregeln</li>
-<li>5. Geländeaufstellung</li>
-<li>6. Random Happenings</li>
-<li>7. Missionen</li>
-<li>8. Aufstellungszonen</li>
-<li>9. Siegpunkte</li>
-</ul></div>
+<li>2. Geländeregeln</li>
+<li>3. Geländeaufstellung</li>
+<li>4. Random Happenings</li>
+<li>5. Missionen</li>
+<li>6. Aufstellungszonen</li>
+<li>7. Siegpunkte</li>
+</ul>
+<p class="italic" style="margin-top:.5rem;">Armeeaufbau und Magische Gegenstände befinden sich im Reiter „Armee &amp; Magie“ oben.</p></div>
 
 <h1>1. Spielablauf</h1>
 <p>Vor dem Spiel wird der Reihe nach gewürfelt:</p><ul>
@@ -276,51 +276,7 @@ button:hover{ background:var(--maroon-dark); }
 <li>W6 gegeneinander – Sieger bestimmt, wer zuerst am Zug ist</li>
 </ul>
 
-<h1>2. Armeeaufbau</h1><ul>
-<li>Gespielt wird mit 500 Punkten</li>
-<li>Minimum 2 Einheiten ohne Charaktere</li>
-<li>Ein General muss bestimmt werden</li>
-<li>Alle Charaktere dürfen Magische Gegenstände aus diesem Dokument nehmen (auch Zwerge und Dämonen), Zwergenrunen und dämonische Geschenke sind nicht erlaubt. Champions oder Standartenträger dürfen keine nehmen.</li>
-<li>Die 1+ Beschränkung entfallen, die 0–X-pro-1000-Punkte-Beschränkung wird eine 0-1 Beschränkung</li>
-</ul>
-<table><tbody><tr><th>Kategorie</th><th>Minimum</th><th>Maximum</th></tr>
-<tr><td>Kerneinheiten</td><td>125 Punkte</td><td>175 Punkte pro Einheit</td></tr>
-<tr><td>Charaktere</td><td>–</td><td>250 Punkte, 125 Punkte pro Einheit</td></tr>
-<tr><td>Elite-Einheiten</td><td>–</td><td>250 Punkte, 150 Punkte pro Einheit</td></tr>
-<tr><td>Seltene Einheiten</td><td>–</td><td>125 Punkte, 125 Punkte pro Einheit</td></tr>
-</tbody></table>
-
-<h1>3. Magische Gegenstände</h1>
-<p>Diese Gegenstände ergänzen die allgemeinen Magischen Gegenstände aus dem Regelbuch von Warhammer: The Old World. Sie stellen die bescheideneren Artefakte dar, die Befehlshaber von Kundschaftertrupps und Reiterkompanien führen, und dürfen von Modellen aller Aufmarschlisten genommen werden, die für Gefechtsmarsch-Spiele geschrieben wurden.</p>
-<p class="italic">Sie dürfen nur in Aufmarschlisten für Gefechtsmarsch-Spiele verwendet werden – nicht in regulären Spielen. Ein Gegenstand mit Sternchen (*) gilt als besonders häufig (wie im Regelbuch beschrieben).</p>
-<h2>Magische Waffen</h2>
-<div class="item"><p class="name-cost">Plänklerklinge – 25 Punkte</p><p class="italic">Der Träger schlägt unerwartet und mit tödlicher Effizienz zu.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S</td><td>-1</td><td>Magische Attacken, Zusatzattacken (+1)</td></tr></tbody></table><p>Wenn der Träger im Flanken- oder Rückenbereich einer feindlichen Einheit kämpft, darf er misslungene Verwundungswürfe wiederholen.</p></div>
-<div class="item"><p class="name-cost">Dornspeierstab – 20 Punkte</p><p class="italic">Ein knorriger Holzstab, der seinem Träger erlaubt, aus der Ferne zu attackieren.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Fernkampf</td><td>24" 4</td><td>-</td><td>Gewichtig, Magische Attacken, Rüstungsfluch (1)</td></tr><tr><td>Nahkampf</td><td>Nahkampf S+1</td><td>-</td><td>Magische Attacken, Rüstungsfluch (1)</td></tr></tbody></table><p>Zwei Profile – je nachdem, ob im Fernkampf oder Nahkampf eingesetzt.</p></div>
-<div class="item"><p class="name-cost">Pionierbeil – 15 Punkte</p><p class="italic">Glüht von der Hitze der Schmiede und durchschlägt Rüstung wie dichtes Unterholz.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S+1</td><td>-1</td><td>Durch Deckung bewegen, Flammenattacken, Magische Attacken</td></tr></tbody></table><p>Nur für Infanterie. Einmal pro Spiel kann der Träger in seiner Unterphase „Beginn des Zuges“ den Pfad offenbaren: Bis Zugende erhalten Träger und Einheit die Sonderregel Durch Deckung bewegen.</p></div>
-<div class="item"><p class="name-cost">Diestros Klinge – 10 Punkte</p><p class="italic">Schlägt schneller zu, als das Auge folgen kann.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S</td><td>-1</td><td>Magische Attacken</td></tr></tbody></table><p>Der Träger erhält +1 auf seinen Initiativewert.</p></div>
-<h2>Magische Rüstung</h2>
-<div class="item"><p class="name-cost">Helm des Mutes – 25 Punkte</p><p class="italic">Verleiht eine Aura der Selbstbeherrschung, die jeden unter seinem Befehl mit Mut erfüllt.</p><p>Kann mit anderer Rüstung kombiniert werden. Der Träger (oder der, dem er angeschlossen ist) verbessert seinen Rüstungswert um 1 und darf einmal pro Spiel einen misslungenen Aufriebtest wiederholen.</p></div>
-<div class="item"><p class="name-cost">Wattiertes Kettenhemd – 20 Punkte</p><p class="italic">Schwere Rüstung, die selbst den schärfsten Klingen kaum etwas entgegenzusetzen hat.</p><p>Schwere Rüstung. Verbessert den Rüstungswert um 1 gegenüber dem üblichen Modifikator (bis maximal 2+).</p></div>
-<div class="item"><p class="name-cost">Schild mit Eisenrand – 15 Punkte</p><p class="italic">Trotz Größe und Gewicht lässt sich dieser ausbalancierte Schild leicht als improvisierte Waffe einsetzen.</p><p>Zählt als Schild. Der Träger erhält +1 auf seinen Attackenwert; diese Zusatzattacke muss mit einer gewöhnlichen Handwaffe ausgeführt werden.</p></div>
-<div class="item"><p class="name-cost">Schattenmantel – 10 Punkte</p><p class="italic">Der Träger dieser dunklen Brigantine scheint in der Menge der Krieger zu verschwinden.</p><p>Nur für Infanterie. Der Träger kann nicht Ziel feindlicher Fernkampfattacken oder Zauber sein, solange er sich innerhalb von 3" um eine befreundete Einheit befindet – außer er ist das nächstgelegene Ziel.</p></div>
-<h2>Talismane</h2>
-<div class="item"><p class="name-cost">Talisman der Autorität – 30 Punkte</p><p class="italic">Ein Blick des Trägers genügt, damit ein Feind seine Waffen senkt und strammsteht.</p><p>Beschränkt. Feindliche Modelle, die im Nahkampf gegen den Träger attackieren wollen, müssen zuerst einen Moralwerttest bestehen – sonst dürfen sie nicht attackieren.</p></div>
-<div class="item"><p class="name-cost">Behütender Talisman – 15 Punkte</p><p class="italic">Die Luft um den Talisman schimmert und raubt feindlichen Attacken ihre Kraft.</p><p>Gibt dem Träger eine 6+-Rettung gegen alle erlittenen Verwundungen.</p></div>
-<h2>Magische Standarten</h2>
-<div class="item"><p class="name-cost">Banner der Berühmtheit – 15 Punkte</p><p class="italic">Schon der Anblick dieses Banners kann den Feind mit Furcht erfüllen.</p><p>Beschränkt. Beim Berechnen des Kampfergebnisses gibt die tragende Einheit zusätzlich +1 Kampfergebnispunkt.</p></div>
-<div class="item"><p class="name-cost">Banner der Tapferen – 10 Punkte</p><p class="italic">Von Veteranen unzähliger Schlachten emporgehalten – erfüllt die Einheit mit Stolz und Mut.</p><p>Die tragende Einheit erhält die Sonderregel Veteranen.</p></div>
-<h2>Verzauberte Gegenstände</h2>
-<div class="item"><p class="name-cost">Fernglas des Kundschafters – 20 Punkte</p><p class="italic">Erfahrene Kundschafter-Befehlshaber schätzen die Landschaft immer vorausschauend ab.</p><p>Trägt der General das Fernglas, addiert er +2 auf seinen Wurf, wer den ersten Zug erhält.</p></div>
-<div class="item"><p class="name-cost">Numas’ allsehendes Auge – 15 Punkte</p><p class="italic">Eine aus einer staubigen Gruft geborgene Glaskugel – entdeckt Feinde selbst im dichtesten Unterholz.</p><p>Der Träger ignoriert Deckungsmodifikatoren und ignoriert beim Schießen Wälder für die Sichtlinie.</p></div>
-<div class="item"><p class="name-cost">Karte der Wildnis* – 10 Punkte</p><p class="italic">Wer alte Karten studiert, kennt die Gefahren der Wildnis besser.</p><p>Löst der Träger (oder seine Einheit) einen Wurf auf der Tabelle Wildnisgelände (Kapitel 6) aus, darf dieser Wurf wiederholt werden.</p></div>
-<div class="item"><p class="name-cost">Verzauberter Almanach – 5 Punkte</p><p class="italic">Die vergilbten Seiten offenbaren gelegentlich nützliche Informationen.</p><p>Ein Charaktermodell mit dem Almanach darf seinen Wurf auf der Tabelle Unwägbarkeiten des Krieges (Kapitel 6) wiederholen.</p></div>
-<h2>Arkane Artefakte</h2>
-<div class="item"><p class="name-cost">Schriftrolle feuriger Beschwörung* – 15 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Feuerball (Lehre der Kampfmagie) zu wirken.</p></div>
-<div class="item"><p class="name-cost">Schriftrolle tödlichen Flüsterns* – 10 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Totenkabale (Lehre der Nekromantie) zu wirken.</p></div>
-<div class="item"><p class="name-cost">Wyrdsteinsplitter – 5 Punkte</p><p class="italic"></p><p>Beschränkt. Unmittelbar bevor der Träger einen Zauber- oder Bannwurf ausführt, darf er ansagen, den Splitter einzusetzen: +1 auf diesen Wurf.</p></div>
-<div class="item"><p class="name-cost">Schriftrolle der Verschleierung* – 5 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Überwältigendes Blendwerk (Lehre der Illusion) zu wirken.</p></div>
-
-<h1>4. Geländeregeln</h1>
+<h1>2. Geländeregeln</h1>
 <p>Alle Geländestücke haben klare Kanten (Zonengelände). Wenn möglich wird 2D-Gelände genutzt, auf das zur Verschönerung 3D-Modelle gelegt werden.</p>
 <table><tbody><tr><th>Geländetyp</th><th>Eigenschaften</th></tr>
 <tr><td>Wälder</td><td>Blockiert Sicht dahinter · Kanonenschüsse stoppen hinten · Schweres Gelände · Deckung (treffen −1) · natürliches Gelände</td></tr>
@@ -331,10 +287,10 @@ button:hover{ background:var(--maroon-dark); }
 <tr><td>Hügel</td><td>Schießen aus zwei Reihen möglich · Blockiert Sicht dahinter, Kanonenschüsse stoppen davor</td></tr>
 </tbody></table>
 
-<h1>5. Geländeaufstellung</h1>
+<h1>3. Geländeaufstellung</h1>
 <p>Gespielt wird auf einer Matte von 48×36 Zoll. Vor dem Spiel wird mit einem W6 eine der sechs Geländekarten bestimmt. Alternativ setze von jedem Geländestück eins auf die Matte. In der Mitte sollte ein 16 Zoll Kreis frei bleiben. Alternativ nutze den <b>Kartenbau</b>-Reiter oben auf dieser Seite.</p>
 
-<h1>6. Random Happenings</h1>
+<h1>4. Random Happenings</h1>
 <p>Zu Beginn wird mit einem W3 festgelegt, welche der drei folgenden Tabellen verwendet wird. Danach entscheidet ein W6 über das genaue Ereignis.</p>
 <h2>Tabelle 1 – Störendes Wetter</h2>
 <p class="italic">Wird zu Beginn des Spiels einmalig gewürfelt und gilt für die gesamte Spieldauer.</p>
@@ -363,7 +319,7 @@ button:hover{ background:var(--maroon-dark); }
 <p class="italic">Zu Beginn jeder Unterphase „Beginn des Zuges“ (ab dem zweiten Zug) wird ein W6 gewürfelt; ist das Ergebnis gleich oder niedriger als die Zugnummer, würfelt der Gegner auf dieser Tabelle (bereits gewürfelte Ergebnisse werden neu gewürfelt).</p>
 <table><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
 <tr><td>1</td><td>Ätherische Instabilität: Würfelt ein Spieler bei einem Zauberwurf einen natürlichen Pasch aus 1er, 2er oder 3er, erleidet er eine Verhexung.</td></tr>
-<tr><td>2</td><td>Verlegte Ressourcen: Ein verirrter Versorgungswagen taucht am Schlachtfeldrand auf; beide Spieler würfeln gegeneinander, der Gewinner erhält ihn (siehe Kapitel 7), der Verlierer muss ihn angreifen und zerstören.</td></tr>
+<tr><td>2</td><td>Verlegte Ressourcen: Ein verirrter Versorgungswagen taucht am Schlachtfeldrand auf; beide Spieler würfeln gegeneinander, der Gewinner erhält ihn (siehe Kapitel 5), der Verlierer muss ihn angreifen und zerstören.</td></tr>
 <tr><td>3</td><td>Schwindende Munition: Eine Einheit, die in ihrem Zug mit einer Fernkampfwaffe geschossen hat, darf im folgenden Zug nicht erneut damit schießen.</td></tr>
 <tr><td>4</td><td>Schätze des Hinterlands: Schatzfunde und Landmarken geben in dieser Schlacht 50 Siegpunkte extra.</td></tr>
 <tr><td>5</td><td>Schleppender Konflikt: Das Spiel dauert sechs statt fünf Runden.</td></tr>
@@ -373,7 +329,7 @@ button:hover{ background:var(--maroon-dark); }
 <table class="profile-table"><tbody><tr><th>B</th><th>KG</th><th>BF</th><th>S</th><th>W</th><th>LP</th><th>I</th><th>A</th><th>MW</th></tr><tr><td>4</td><td>3</td><td>3</td><td>3</td><td>3</td><td>1</td><td>3</td><td>1</td><td>7</td></tr></tbody></table>
 <p class="italic">Ausrüstung: Handwaffen und Schilde oder Handwaffen und Kurzbögen. Sonderregeln: Durch Deckung bewegen, Söldner. Tritt an einem beliebigen Punkt der Schlachtfeldkante ein (nicht in einer Aufstellungszone). Wert für Siegpunkte: 50 Punkte.</p></div>
 
-<h1>7. Missionen</h1>
+<h1>5. Missionen</h1>
 <p>Zu Beginn wird mit einem W3 eine der folgenden drei Missionen bestimmt.</p>
 <h2>Mission 1 – Schätze</h2>
 <p>Schätze sind Geländedekorationen, die Beute, Vorräte, Nahrung, Waffen, verwundete Kameraden oder wichtige Informationen darstellen.</p>
@@ -411,7 +367,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 <p class="italic">Ausrüstung – Fahrer: Handwaffe. Zugtiere: Hufe, Hörner, Stoßzähne oder Ähnliches (Handwaffen). Rüstungswert: 5+. Sonderregeln: Einzelgänger, Geschlossene Reihen, In Sicherheit fliehen, Nichtkämpfer.</p></div>
 <p><b>Siegpunkte:</b></p><ul><li>Ist der Wagen am Spielende auf dem Feld und intakt: <b>50 Punkte</b>.</li><li>Steht der Wagen am Spielende vollständig in der gegnerischen Aufstellungszone oder ist in der gegnerischen Aufstellungszone vom Schalchtfeld gefahren: zusätzlich <b>50 Punkte</b>.</li><li>Die Zerstörung des Wagens gibt <b>50 Punkte</b>.</li></ul>
 
-<h1>8. Aufstellungszonen</h1>
+<h1>6. Aufstellungszonen</h1>
 <p>Nach dem Auswürfeln von Gelände, Random Happenings und Mission wird mit einem W6 die Aufstellungszone bestimmt. Danach würfeln beide Spieler gegeneinander: Der Gewinner wählt seine Seite, dann stellen die Spieler abwechselnd ihre Einheiten auf.</p>
 <p class="italic"><b>Abweichende Aufstellung:</b> Auf Wunsch dürfen die Zonen 2, 3, 4 und 6 horizontal gespiegelt werden – je nach Geländeaufbau kann das die Partie deutlich verändern. Im Zweifel entscheidet ein W6.</p>
 <div class="zones">
@@ -485,8 +441,64 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 </svg></div>
 </div>
 
-<h1>9. Siegpunkte</h1>
-<p>Am Ende von Runde 5 werden alle Siegpunkte zusammengerechnet. Wer mehr Punkte hat, gewinnt.</p><ul><li><b>Zerstörte Einheiten und Charaktere:</b> Punkte für vernichtete oder aus dem Spiel geflohene gegnerische Einheiten.</li><li><b>General getötet:</b> +50 Siegpunkte.</li><li><b>Missionspunkte:</b> siehe Kapitel 7.</li></ul>
+<h1>7. Siegpunkte</h1>
+<p>Am Ende von Runde 5 werden alle Siegpunkte zusammengerechnet. Wer mehr Punkte hat, gewinnt.</p><ul><li><b>Zerstörte Einheiten und Charaktere:</b> Punkte für vernichtete oder aus dem Spiel geflohene gegnerische Einheiten.</li><li><b>General getötet:</b> +50 Siegpunkte.</li><li><b>Missionspunkte:</b> siehe Kapitel 5.</li></ul>
+
+</div>
+</div>
+
+<!-- ===================== ARMEE & MAGIE ===================== -->
+<div class="tab-content" id="panel-armee" role="tabpanel" aria-labelledby="tab-armee" tabindex="0" hidden="">
+<div class="guide">
+
+<div class="toc"><h2>Inhalt</h2><ul>
+<li>1. Armeeaufbau</li>
+<li>2. Magische Gegenstände</li>
+</ul></div>
+
+<h1>1. Armeeaufbau</h1><ul>
+<li>Gespielt wird mit 500 Punkten</li>
+<li>Minimum 2 Einheiten ohne Charaktere</li>
+<li>Ein General muss bestimmt werden</li>
+<li>Alle Charaktere dürfen Magische Gegenstände aus diesem Dokument nehmen (auch Zwerge und Dämonen), Zwergenrunen und dämonische Geschenke sind nicht erlaubt. Champions oder Standartenträger dürfen keine nehmen.</li>
+<li>Die 1+ Beschränkung entfallen, die 0–X-pro-1000-Punkte-Beschränkung wird eine 0-1 Beschränkung</li>
+</ul>
+<table><tbody><tr><th>Kategorie</th><th>Minimum</th><th>Maximum</th></tr>
+<tr><td>Kerneinheiten</td><td>125 Punkte</td><td>175 Punkte pro Einheit</td></tr>
+<tr><td>Charaktere</td><td>–</td><td>250 Punkte, 125 Punkte pro Einheit</td></tr>
+<tr><td>Elite-Einheiten</td><td>–</td><td>250 Punkte, 150 Punkte pro Einheit</td></tr>
+<tr><td>Seltene Einheiten</td><td>–</td><td>125 Punkte, 125 Punkte pro Einheit</td></tr>
+</tbody></table>
+
+<h1>2. Magische Gegenstände</h1>
+<p>Diese Gegenstände ergänzen die allgemeinen Magischen Gegenstände aus dem Regelbuch von Warhammer: The Old World. Sie stellen die bescheideneren Artefakte dar, die Befehlshaber von Kundschaftertrupps und Reiterkompanien führen, und dürfen von Modellen aller Aufmarschlisten genommen werden, die für Gefechtsmarsch-Spiele geschrieben wurden.</p>
+<p class="italic">Sie dürfen nur in Aufmarschlisten für Gefechtsmarsch-Spiele verwendet werden – nicht in regulären Spielen. Ein Gegenstand mit Sternchen (*) gilt als besonders häufig (wie im Regelbuch beschrieben).</p>
+<h2>Magische Waffen</h2>
+<div class="item"><p class="name-cost">Plänklerklinge – 25 Punkte</p><p class="italic">Der Träger schlägt unerwartet und mit tödlicher Effizienz zu.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S</td><td>-1</td><td>Magische Attacken, Zusatzattacken (+1)</td></tr></tbody></table><p>Wenn der Träger im Flanken- oder Rückenbereich einer feindlichen Einheit kämpft, darf er misslungene Verwundungswürfe wiederholen.</p></div>
+<div class="item"><p class="name-cost">Dornspeierstab – 20 Punkte</p><p class="italic">Ein knorriger Holzstab, der seinem Träger erlaubt, aus der Ferne zu attackieren.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Fernkampf</td><td>24" 4</td><td>-</td><td>Gewichtig, Magische Attacken, Rüstungsfluch (1)</td></tr><tr><td>Nahkampf</td><td>Nahkampf S+1</td><td>-</td><td>Magische Attacken, Rüstungsfluch (1)</td></tr></tbody></table><p>Zwei Profile – je nachdem, ob im Fernkampf oder Nahkampf eingesetzt.</p></div>
+<div class="item"><p class="name-cost">Pionierbeil – 15 Punkte</p><p class="italic">Glüht von der Hitze der Schmiede und durchschlägt Rüstung wie dichtes Unterholz.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S+1</td><td>-1</td><td>Durch Deckung bewegen, Flammenattacken, Magische Attacken</td></tr></tbody></table><p>Nur für Infanterie. Einmal pro Spiel kann der Träger in seiner Unterphase „Beginn des Zuges“ den Pfad offenbaren: Bis Zugende erhalten Träger und Einheit die Sonderregel Durch Deckung bewegen.</p></div>
+<div class="item"><p class="name-cost">Diestros Klinge – 10 Punkte</p><p class="italic">Schlägt schneller zu, als das Auge folgen kann.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S</td><td>-1</td><td>Magische Attacken</td></tr></tbody></table><p>Der Träger erhält +1 auf seinen Initiativewert.</p></div>
+<h2>Magische Rüstung</h2>
+<div class="item"><p class="name-cost">Helm des Mutes – 25 Punkte</p><p class="italic">Verleiht eine Aura der Selbstbeherrschung, die jeden unter seinem Befehl mit Mut erfüllt.</p><p>Kann mit anderer Rüstung kombiniert werden. Der Träger (oder der, dem er angeschlossen ist) verbessert seinen Rüstungswert um 1 und darf einmal pro Spiel einen misslungenen Aufriebtest wiederholen.</p></div>
+<div class="item"><p class="name-cost">Wattiertes Kettenhemd – 20 Punkte</p><p class="italic">Schwere Rüstung, die selbst den schärfsten Klingen kaum etwas entgegenzusetzen hat.</p><p>Schwere Rüstung. Verbessert den Rüstungswert um 1 gegenüber dem üblichen Modifikator (bis maximal 2+).</p></div>
+<div class="item"><p class="name-cost">Schild mit Eisenrand – 15 Punkte</p><p class="italic">Trotz Größe und Gewicht lässt sich dieser ausbalancierte Schild leicht als improvisierte Waffe einsetzen.</p><p>Zählt als Schild. Der Träger erhält +1 auf seinen Attackenwert; diese Zusatzattacke muss mit einer gewöhnlichen Handwaffe ausgeführt werden.</p></div>
+<div class="item"><p class="name-cost">Schattenmantel – 10 Punkte</p><p class="italic">Der Träger dieser dunklen Brigantine scheint in der Menge der Krieger zu verschwinden.</p><p>Nur für Infanterie. Der Träger kann nicht Ziel feindlicher Fernkampfattacken oder Zauber sein, solange er sich innerhalb von 3" um eine befreundete Einheit befindet – außer er ist das nächstgelegene Ziel.</p></div>
+<h2>Talismane</h2>
+<div class="item"><p class="name-cost">Talisman der Autorität – 30 Punkte</p><p class="italic">Ein Blick des Trägers genügt, damit ein Feind seine Waffen senkt und strammsteht.</p><p>Beschränkt. Feindliche Modelle, die im Nahkampf gegen den Träger attackieren wollen, müssen zuerst einen Moralwerttest bestehen – sonst dürfen sie nicht attackieren.</p></div>
+<div class="item"><p class="name-cost">Behütender Talisman – 15 Punkte</p><p class="italic">Die Luft um den Talisman schimmert und raubt feindlichen Attacken ihre Kraft.</p><p>Gibt dem Träger eine 6+-Rettung gegen alle erlittenen Verwundungen.</p></div>
+<h2>Magische Standarten</h2>
+<div class="item"><p class="name-cost">Banner der Berühmtheit – 15 Punkte</p><p class="italic">Schon der Anblick dieses Banners kann den Feind mit Furcht erfüllen.</p><p>Beschränkt. Beim Berechnen des Kampfergebnisses gibt die tragende Einheit zusätzlich +1 Kampfergebnispunkt.</p></div>
+<div class="item"><p class="name-cost">Banner der Tapferen – 10 Punkte</p><p class="italic">Von Veteranen unzähliger Schlachten emporgehalten – erfüllt die Einheit mit Stolz und Mut.</p><p>Die tragende Einheit erhält die Sonderregel Veteranen.</p></div>
+<h2>Verzauberte Gegenstände</h2>
+<div class="item"><p class="name-cost">Fernglas des Kundschafters – 20 Punkte</p><p class="italic">Erfahrene Kundschafter-Befehlshaber schätzen die Landschaft immer vorausschauend ab.</p><p>Trägt der General das Fernglas, addiert er +2 auf seinen Wurf, wer den ersten Zug erhält.</p></div>
+<div class="item"><p class="name-cost">Numas’ allsehendes Auge – 15 Punkte</p><p class="italic">Eine aus einer staubigen Gruft geborgene Glaskugel – entdeckt Feinde selbst im dichtesten Unterholz.</p><p>Der Träger ignoriert Deckungsmodifikatoren und ignoriert beim Schießen Wälder für die Sichtlinie.</p></div>
+<div class="item"><p class="name-cost">Karte der Wildnis* – 10 Punkte</p><p class="italic">Wer alte Karten studiert, kennt die Gefahren der Wildnis besser.</p><p>Löst der Träger (oder seine Einheit) einen Wurf auf der Tabelle Wildnisgelände (siehe Reiter „Leitfaden“ – Random Happenings) aus, darf dieser Wurf wiederholt werden.</p></div>
+<div class="item"><p class="name-cost">Verzauberter Almanach – 5 Punkte</p><p class="italic">Die vergilbten Seiten offenbaren gelegentlich nützliche Informationen.</p><p>Ein Charaktermodell mit dem Almanach darf seinen Wurf auf der Tabelle Unwägbarkeiten des Krieges (siehe Reiter „Leitfaden“ – Random Happenings) wiederholen.</p></div>
+<h2>Arkane Artefakte</h2>
+<div class="item"><p class="name-cost">Schriftrolle feuriger Beschwörung* – 15 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Feuerball (Lehre der Kampfmagie) zu wirken.</p></div>
+<div class="item"><p class="name-cost">Schriftrolle tödlichen Flüsterns* – 10 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Totenkabale (Lehre der Nekromantie) zu wirken.</p></div>
+<div class="item"><p class="name-cost">Wyrdsteinsplitter – 5 Punkte</p><p class="italic"></p><p>Beschränkt. Unmittelbar bevor der Träger einen Zauber- oder Bannwurf ausführt, darf er ansagen, den Splitter einzusetzen: +1 auf diesen Wurf.</p></div>
+<div class="item"><p class="name-cost">Schriftrolle der Verschleierung* – 5 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Überwältigendes Blendwerk (Lehre der Illusion) zu wirken.</p></div>
 
 </div>
 </div>
@@ -1274,6 +1286,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
   const tabs = Array.from(document.querySelectorAll('.tab-btn'));
   const panels = {
     leitfaden: document.getElementById('panel-leitfaden'),
+    armee: document.getElementById('panel-armee'),
     baukasten: document.getElementById('panel-baukasten')
   };
   function activate(name, focusTab) {
