@@ -1,173 +1,503 @@
 <!DOCTYPE html>
-<!-- saved from url=(0052)file:///C:/Users/phili/Downloads/kartenbauer_14.html -->
+<!-- saved from url=(0050)file:///C:/Users/phili/Downloads/battle-march.html -->
 <html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Terrain-Baukasten</title>
+<title>Battle March – Leitfaden &amp; Terrain-Baukasten</title>
 <style>
-  :root {
-    --maroon: #7a1f1f;
-    --maroon-dark: #591414;
-    --tan: #eee0c8;
-    --beige: #f4ecd8;
-    --p1: #e2c48c;
-    --p2: #b9c6d6;
-    --nml: #ded6c2;
-    --text: #1a1a1a;
-    --scale: 13px;
-  }
-  * { box-sizing: border-box; }
-  body {
-    font-family: "Georgia", "DejaVu Serif", serif;
-    background: #ded2b8;
-    margin: 0;
-    padding: 24px;
-    color: var(--text);
-  }
-  h1 { text-align: center; color: var(--maroon); letter-spacing: 0.06em; margin: 0 0 4px; font-size: 2.1rem; }
-  .subtitle { text-align: center; font-style: italic; color: #4a3f2f; margin: 0 0 20px; font-size: 0.9rem; }
+:root{
+  --maroon:#7a1f1f; --maroon-dark:#591414;
+  --tan:#eee0c8; --beige:#f4ecd8;
+  --p1:#e2c48c; --p2:#b9c6d6; --nml:#ded6c2;
+  --grey-line:#999; --text:#1a1a1a;
+  --scale:13px;
+}
+*{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  font-family:"Georgia","DejaVu Serif",serif;
+  background:#ded2b8; color:var(--text);
+  margin:0; padding:20px 24px; line-height:1.5;
+}
 
-  .layout { display: flex; gap: 22px; align-items: flex-start; max-width: 1320px; margin: 0 auto; flex-wrap: wrap; }
-  .panel { background: var(--beige); border: 2.5px solid var(--maroon); border-radius: 4px; padding: 14px 16px; }
-  .palette { width: 210px; flex-shrink: 0; }
-  .panel h2 { font-size: 1.02rem; color: var(--maroon); border-bottom: 2px solid var(--maroon); padding-bottom: 6px; margin: 0 0 10px; }
+/* ---------- Seitenkopf ---------- */
+.page-header{ text-align:center; max-width:1320px; margin:0 auto 14px; }
+.page-header h1{ color:var(--maroon); font-size:2.1rem; letter-spacing:.05em; margin:0 0 2px; }
+.page-subtitle{ color:#4a3f2f; font-style:italic; margin:0; font-size:.95rem; }
 
-  .chip {
-    display: flex; align-items: center; gap: 8px; padding: 7px 8px; margin-bottom: 7px;
-    border: 1.3px solid #2b2620; border-radius: 5px; cursor: grab; background: #fff;
-    user-select: none; touch-action: none;
-  }
-  .chip:active { cursor: grabbing; }
-  .chip .swatch { width: 26px; height: 20px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.35); flex-shrink: 0; }
-  .chip .info { font-size: 0.78rem; line-height: 1.2; }
-  .chip .info b { display: block; font-size: 0.82rem; }
+/* ---------- Tabs ---------- */
+.tabbar{
+  position:sticky; top:0; z-index:100;
+  display:flex; gap:6px; justify-content:center;
+  max-width:1320px; margin:0 auto 18px; padding:8px 0;
+  background:#ded2b8;
+}
+.tab-btn{
+  font-family:inherit; font-size:1rem; cursor:pointer;
+  padding:10px 24px; border:2px solid var(--maroon);
+  border-radius:6px 6px 0 0; background:var(--beige); color:var(--maroon);
+}
+.tab-btn[aria-selected="true"]{ background:var(--maroon); color:#fff; }
+.tab-btn:hover{ background:var(--maroon); color:#fff; }
+.tab-btn:focus-visible{ outline:3px solid #c98a2f; outline-offset:2px; }
 
-  .hint { font-size: 0.72rem; color: #5a4f3f; font-style: italic; margin-top: 8px; line-height: 1.4; }
+.tab-content{ max-width:1320px; margin:0 auto; }
+.tab-content[hidden]{ display:none; }
 
-  .custom-form { margin-top: 14px; border-top: 1px dashed var(--maroon); padding-top: 10px; }
-  .custom-form label { display: block; font-size: 0.72rem; margin: 6px 0 2px; color: #4a3f2f; }
-  .custom-form input { width: 100%; padding: 4px 6px; font-size: 0.8rem; border: 1px solid #9a8f7a; border-radius: 3px; font-family: inherit; }
-  .custom-form input[type=color] { padding: 1px; height: 28px; }
-  button {
-    font-family: inherit; cursor: pointer; border: none; border-radius: 4px;
-    background: var(--maroon); color: #fff; font-size: 0.8rem;
-  }
-  button:hover { background: var(--maroon-dark); }
-  .custom-form button { margin-top: 10px; width: 100%; padding: 7px; }
+/* ---------- Leitfaden ---------- */
+.guide{
+  max-width:900px; margin:0 auto;
+  background:var(--beige); border:2.5px solid var(--maroon); border-radius:4px;
+  padding:8px 26px 30px;
+}
+.guide h1{ font-size:1.5rem; border-bottom:3px solid var(--maroon); padding-bottom:6px; margin-top:2.4rem; }
+.guide h2{ font-size:1.15rem; margin-top:1.6rem; }
+.guide h3{ font-size:1.02rem; margin-top:1.2rem; margin-bottom:.3rem; }
+.guide .italic{ font-style:italic; }
+.guide table{ border-collapse:collapse; width:100%; margin:.8rem 0; }
+.guide th,.guide td{ border:1px solid var(--grey-line); padding:6px 10px; text-align:left; font-size:.95rem; }
+.guide th{ background:var(--tan); }
+.guide .statbox{ background:#fff; border-left:4px solid var(--maroon); padding:10px 14px; margin:1rem 0; }
+.guide .statbox table{ background:transparent; }
+.guide .statbox th{ background:var(--tan); }
+.guide .item{ margin:.8rem 0 1.2rem; }
+.guide .item .name-cost{ font-weight:bold; }
+.guide .profile-table td,.guide .profile-table th{ text-align:center; }
+.guide .profile-table td:first-child,.guide .profile-table th:first-child{ text-align:left; }
+.guide .toc ul{ padding-left:1.2rem; }
+.guide .zones{ display:grid; grid-template-columns:1fr 1fr; gap:0 2rem; }
+.guide .zone-block{ margin-bottom:1.2rem; }
+.guide .zone-block svg{ display:block; margin-top:4px; }
+.guide .note{ background:#fff8e1; border:1px solid #e0c060; padding:8px 12px; font-size:.9rem; margin:1rem 0; }
+.guide caption,.guide figcaption{ font-style:italic; font-size:.85rem; color:#444; }
 
-  .center-col { flex: 1; min-width: 0; }
+/* ---------- Baukasten ---------- */
+.builder h2.section-title{ text-align:center; color:var(--maroon); letter-spacing:.06em; margin:0 0 4px; font-size:1.6rem; border:none; }
+.builder .subtitle{ text-align:center; font-style:italic; color:#4a3f2f; margin:0 0 18px; font-size:.9rem; }
 
-  .toolbar { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
-  .toolbar > button { padding: 8px 14px; }
-  .settings, .zone-toolbar {
-    display: flex; gap: 10px; align-items: center; font-size: 0.78rem; background: #fff;
-    border: 1px solid #9a8f7a; border-radius: 4px; padding: 6px 10px; flex-wrap: wrap;
-  }
-  .settings label { display: flex; align-items: center; gap: 4px; }
-  .settings input { width: 52px; padding: 2px 4px; font-family: inherit; }
-  .settings button, .zone-toolbar > button { padding: 5px 10px; }
+.layout{ display:flex; gap:22px; align-items:flex-start; margin:0 auto; flex-wrap:wrap; }
+.panel{ background:var(--beige); border:2.5px solid var(--maroon); border-radius:4px; padding:14px 16px; }
+.palette{ width:210px; flex-shrink:0; }
+.panel h2{ font-size:1.02rem; color:var(--maroon); border-bottom:2px solid var(--maroon); padding-bottom:6px; margin:0 0 10px; }
 
-  .zone-panel { margin-bottom: 12px; }
-  .zone-panel .row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; align-items: center; }
-  .brush-btn {
-    display: flex; align-items: center; gap: 6px; padding: 5px 9px;
-    background: #fff; color: var(--text); border: 1.5px solid #9a8f7a;
-  }
-  .brush-btn.active { border-color: var(--maroon); box-shadow: 0 0 0 2px rgba(122,31,31,0.25); }
-  .brush-btn .dot { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.35); }
-  .preset-btn { background: #fff; color: var(--maroon); border: 1.5px solid var(--maroon); padding: 5px 10px; font-size: 0.74rem; }
-  .preset-btn:hover { background: var(--maroon); color: #fff; }
-  #zoneModeBtn.active { background: var(--maroon-dark); }
-  .legend { display: flex; gap: 14px; font-size: 0.74rem; margin-top: 4px; flex-wrap: wrap; }
-  .legend span { display: inline-flex; align-items: center; gap: 5px; }
-  .legend .dot { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.3); }
+.chip{
+  display:flex; align-items:center; gap:8px; padding:7px 8px; margin-bottom:7px;
+  border:1.3px solid #2b2620; border-radius:5px; cursor:grab; background:#fff;
+  user-select:none; touch-action:none;
+}
+.chip:active{ cursor:grabbing; }
+.chip .swatch{ width:26px; height:20px; border-radius:3px; border:1px solid rgba(0,0,0,.35); flex-shrink:0; }
+.chip .info{ font-size:.78rem; line-height:1.2; }
+.chip .info b{ display:block; font-size:.82rem; }
 
-  .board-outer { display: inline-block; background: var(--beige); border: 4px solid var(--maroon); padding: 14px 16px 30px 16px; position: relative; }
-  .board-row { display: flex; gap: 12px; align-items: flex-start; }
-  .zone-legend { position: relative; width: 168px; flex-shrink: 0; }
-  .zone-legend-item {
-    position: absolute; left: 0; width: 100%;
-    transform: translateY(-50%);
-    background: var(--beige); border: 1.3px solid var(--maroon); border-radius: 4px;
-    padding: 4px 7px; font-size: 0.68rem; line-height: 1.35;
-  }
-  .zone-legend-item b { color: var(--maroon); display: block; font-size: 0.72rem; }
-  .zone-legend-item .swatchline { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
-  .zone-legend-item::before {
-    content: ""; position: absolute; left: -13px; top: 50%; width: 12px; height: 0;
-    border-top: 1.3px dashed var(--maroon);
-  }
-  .board {
-    position: relative;
-    background-color: var(--beige);
-    background-image:
-      repeating-linear-gradient(to right, rgba(138,131,120,0.55) 0 1px, transparent 1px calc(6 * var(--scale))),
-      repeating-linear-gradient(to right, rgba(138,131,120,0.22) 0 1px, transparent 1px var(--scale)),
-      repeating-linear-gradient(to bottom, rgba(138,131,120,0.55) 0 1px, transparent 1px calc(6 * var(--scale))),
-      repeating-linear-gradient(to bottom, rgba(138,131,120,0.22) 0 1px, transparent 1px var(--scale));
-    border: 2px solid var(--maroon);
-  }
-  #zoneCanvas { position: absolute; top: 0; left: 0; touch-action: none; }
+.hint{ font-size:.72rem; color:#5a4f3f; font-style:italic; margin-top:8px; line-height:1.4; }
 
-  .no-terrain-circle {
-    position: absolute; border-radius: 50%; border: 1.6px solid var(--maroon);
-    background: repeating-linear-gradient(45deg, rgba(122,31,31,0.22) 0 4px, transparent 4px 9px), rgba(233,217,217,0.35);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-    pointer-events: none; z-index: 3; overflow: hidden; box-sizing: border-box;
-  }
-  .no-terrain-circle span { color: var(--maroon); font-style: italic; font-size: 0.68rem; line-height: 1.25; }
-  .no-terrain-circle span.strong { font-weight: bold; }
+.custom-form{ margin-top:14px; border-top:1px dashed var(--maroon); padding-top:10px; }
+.custom-form label{ display:block; font-size:.72rem; margin:6px 0 2px; color:#4a3f2f; }
+.custom-form input{ width:100%; padding:4px 6px; font-size:.8rem; border:1px solid #9a8f7a; border-radius:3px; font-family:inherit; }
+.custom-form input[type=color]{ padding:1px; height:28px; }
+button{
+  font-family:inherit; cursor:pointer; border:none; border-radius:4px;
+  background:var(--maroon); color:#fff; font-size:.8rem;
+}
+button:hover{ background:var(--maroon-dark); }
+.custom-form button{ margin-top:10px; width:100%; padding:7px; }
 
-  .piece {
-    position: absolute; border-radius: 6px; border: 1.4px solid #2b2620;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-    box-shadow: 1px 2px 3px rgba(0,0,0,0.3); cursor: grab; touch-action: none; user-select: none; z-index: 4;
-  }
-  .piece.dragging { cursor: grabbing; z-index: 50; box-shadow: 2px 4px 8px rgba(0,0,0,0.45); }
-  .piece .name { font-weight: bold; font-size: 0.76rem; z-index: 2; }
-  .piece .dims { font-style: italic; font-size: 0.62rem; z-index: 2; }
-  .piece .name, .piece .dims { color: #fff; }
-  .piece.dark .name, .piece.dark .dims { color: #1a1a1a; }
-  .piece .btns { position: absolute; top: -11px; right: -8px; display: flex; gap: 3px; z-index: 5; }
-  .piece .btns button { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #2b2620; background: #fff; color: #1a1a1a; font-size: 0.66rem; line-height: 1; padding: 0; }
-  .piece .btns button:hover { background: #eee; }
-  .piece .coord-tag {
-    position: absolute; bottom: -18px; left: 0; font-size: 0.6rem; font-weight: bold; color: var(--maroon);
-    background: var(--beige); border: 1px solid var(--maroon); border-radius: 3px; padding: 0 3px; white-space: nowrap; z-index: 4;
-  }
+.center-col{ flex:1; min-width:0; }
 
-  .tex-forest { background-color: #6f9a4f; background-image:
-      radial-gradient(circle at 25% 30%, #4d7a37 4px, transparent 5px),
-      radial-gradient(circle at 65% 22%, #4d7a37 5px, transparent 6px),
-      radial-gradient(circle at 40% 55%, #4d7a37 4px, transparent 5px),
-      radial-gradient(circle at 75% 60%, #4d7a37 5px, transparent 6px),
-      radial-gradient(circle at 30% 80%, #4d7a37 4px, transparent 5px); }
-  .tex-brick { background-color: #a8541c; background-image:
-      repeating-linear-gradient(to bottom, rgba(240,230,210,0.35) 0 1px, transparent 1px calc(2 * var(--scale))),
-      repeating-linear-gradient(to right, rgba(240,230,210,0.3) 0 1px, transparent 1px calc(3 * var(--scale))); }
-  .tex-brick.ruine { background-color: #7d7568; }
-  .tex-hill { background-color: #a9834a; background-image: linear-gradient(to top, rgba(92,67,38,0.35), transparent 70%); }
-  .tex-field { background-color: #d9c179; background-image: repeating-linear-gradient(to right, rgba(138,116,47,0.5) 0 1.5px, transparent 1.5px calc(1.3 * var(--scale))); }
-  .tex-water { background-color: #4c85b8; background-image: repeating-linear-gradient(to bottom, rgba(219,233,245,0.55) 0 2px, transparent 2px calc(1.6 * var(--scale))); }
+.toolbar{ display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+.toolbar > button{ padding:8px 14px; }
+.settings, .zone-toolbar{
+  display:flex; gap:10px; align-items:center; font-size:.78rem; background:#fff;
+  border:1px solid #9a8f7a; border-radius:4px; padding:6px 10px; flex-wrap:wrap;
+}
+.settings label{ display:flex; align-items:center; gap:4px; }
+.settings input{ width:52px; padding:2px 4px; font-family:inherit; }
+.settings button, .zone-toolbar > button{ padding:5px 10px; }
 
-  .export-box { margin-top: 16px; background: #fff; border: 1.5px solid var(--maroon); border-radius: 4px; padding: 10px 12px; font-size: 0.78rem; display: none; }
-  .export-box.show { display: block; }
-  .export-box pre { white-space: pre-wrap; margin: 6px 0 0; font-family: "Courier New", monospace; font-size: 0.75rem; }
-  .export-box h3 { margin: 0; color: var(--maroon); font-size: 0.88rem; }
+.zone-panel{ margin-bottom:12px; }
+.zone-panel .row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px; align-items:center; }
+.brush-btn{
+  display:flex; align-items:center; gap:6px; padding:5px 9px;
+  background:#fff; color:var(--text); border:1.5px solid #9a8f7a;
+}
+.brush-btn.active{ border-color:var(--maroon); box-shadow:0 0 0 2px rgba(122,31,31,.25); }
+.brush-btn .dot{ width:14px; height:14px; border-radius:3px; border:1px solid rgba(0,0,0,.35); }
+.preset-btn{ background:#fff; color:var(--maroon); border:1.5px solid var(--maroon); padding:5px 10px; font-size:.74rem; }
+.preset-btn:hover{ background:var(--maroon); color:#fff; }
+#zoneModeBtn.active{ background:var(--maroon-dark); }
+.legend{ display:flex; gap:14px; font-size:.74rem; margin-top:4px; flex-wrap:wrap; }
+.legend span{ display:inline-flex; align-items:center; gap:5px; }
+.legend .dot{ width:12px; height:12px; border-radius:3px; border:1px solid rgba(0,0,0,.3); }
 
-  .footer-note { text-align: center; font-size: 0.72rem; color: #5a4f3f; font-style: italic; margin-top: 16px; }
-  .coord-explainer {
-    max-width: 900px; margin: 0 auto 20px; background: var(--beige); border: 1.5px solid var(--maroon);
-    border-radius: 4px; padding: 8px 14px; font-size: 0.78rem; line-height: 1.5; color: #4a3f2f; text-align: center;
-  }
-  .coord-explainer b { color: var(--maroon); }
+.board-outer{ display:inline-block; max-width:100%; overflow-x:auto; background:var(--beige); border:4px solid var(--maroon); padding:14px 16px 30px 16px; position:relative; }
+.board-row{ display:flex; gap:12px; align-items:flex-start; }
+.zone-legend{ position:relative; width:168px; flex-shrink:0; }
+.zone-legend-item{
+  position:absolute; left:0; width:100%;
+  transform:translateY(-50%);
+  background:var(--beige); border:1.3px solid var(--maroon); border-radius:4px;
+  padding:4px 7px; font-size:.68rem; line-height:1.35;
+}
+.zone-legend-item b{ color:var(--maroon); display:block; font-size:.72rem; }
+.zone-legend-item .swatchline{ display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:4px; vertical-align:middle; }
+.zone-legend-item::before{
+  content:""; position:absolute; left:-13px; top:50%; width:12px; height:0;
+  border-top:1.3px dashed var(--maroon);
+}
+.board{
+  position:relative;
+  background-color:var(--beige);
+  background-image:
+    repeating-linear-gradient(to right, rgba(138,131,120,.55) 0 1px, transparent 1px calc(6 * var(--scale))),
+    repeating-linear-gradient(to right, rgba(138,131,120,.22) 0 1px, transparent 1px var(--scale)),
+    repeating-linear-gradient(to bottom, rgba(138,131,120,.55) 0 1px, transparent 1px calc(6 * var(--scale))),
+    repeating-linear-gradient(to bottom, rgba(138,131,120,.22) 0 1px, transparent 1px var(--scale));
+  border:2px solid var(--maroon);
+}
+#zoneCanvas{ position:absolute; top:0; left:0; touch-action:none; }
+
+.no-terrain-circle{
+  position:absolute; border-radius:50%; border:1.6px solid var(--maroon);
+  background:repeating-linear-gradient(45deg, rgba(122,31,31,.22) 0 4px, transparent 4px 9px), rgba(233,217,217,.35);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+  pointer-events:none; z-index:3; overflow:hidden; box-sizing:border-box;
+}
+.no-terrain-circle span{ color:var(--maroon); font-style:italic; font-size:.68rem; line-height:1.25; }
+.no-terrain-circle span.strong{ font-weight:bold; }
+
+.piece{
+  position:absolute; border-radius:6px; border:1.4px solid #2b2620;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+  box-shadow:1px 2px 3px rgba(0,0,0,.3); cursor:grab; touch-action:none; user-select:none; z-index:4;
+}
+.piece.dragging{ cursor:grabbing; z-index:50; box-shadow:2px 4px 8px rgba(0,0,0,.45); }
+.piece .name{ font-weight:bold; font-size:.76rem; z-index:2; }
+.piece .dims{ font-style:italic; font-size:.62rem; z-index:2; }
+.piece .name, .piece .dims{ color:#fff; }
+.piece.dark .name, .piece.dark .dims{ color:#1a1a1a; }
+.piece .btns{ position:absolute; top:-11px; right:-8px; display:flex; gap:3px; z-index:5; }
+.piece .btns button{ width:18px; height:18px; border-radius:50%; border:1px solid #2b2620; background:#fff; color:#1a1a1a; font-size:.66rem; line-height:1; padding:0; }
+.piece .btns button:hover{ background:#eee; }
+.piece .coord-tag{
+  position:absolute; bottom:-18px; left:0; font-size:.6rem; font-weight:bold; color:var(--maroon);
+  background:var(--beige); border:1px solid var(--maroon); border-radius:3px; padding:0 3px; white-space:nowrap; z-index:4;
+}
+
+.tex-forest{ background-color:#6f9a4f; background-image:
+    radial-gradient(circle at 25% 30%, #4d7a37 4px, transparent 5px),
+    radial-gradient(circle at 65% 22%, #4d7a37 5px, transparent 6px),
+    radial-gradient(circle at 40% 55%, #4d7a37 4px, transparent 5px),
+    radial-gradient(circle at 75% 60%, #4d7a37 5px, transparent 6px),
+    radial-gradient(circle at 30% 80%, #4d7a37 4px, transparent 5px); }
+.tex-brick{ background-color:#a8541c; background-image:
+    repeating-linear-gradient(to bottom, rgba(240,230,210,.35) 0 1px, transparent 1px calc(2 * var(--scale))),
+    repeating-linear-gradient(to right, rgba(240,230,210,.3) 0 1px, transparent 1px calc(3 * var(--scale))); }
+.tex-brick.ruine{ background-color:#7d7568; }
+.tex-hill{ background-color:#a9834a; background-image:linear-gradient(to top, rgba(92,67,38,.35), transparent 70%); }
+.tex-field{ background-color:#d9c179; background-image:repeating-linear-gradient(to right, rgba(138,116,47,.5) 0 1.5px, transparent 1.5px calc(1.3 * var(--scale))); }
+.tex-water{ background-color:#4c85b8; background-image:repeating-linear-gradient(to bottom, rgba(219,233,245,.55) 0 2px, transparent 2px calc(1.6 * var(--scale))); }
+
+.export-box{ margin-top:16px; background:#fff; border:1.5px solid var(--maroon); border-radius:4px; padding:10px 12px; font-size:.78rem; display:none; }
+.export-box.show{ display:block; }
+.export-box pre{ white-space:pre-wrap; margin:6px 0 0; font-family:"Courier New", monospace; font-size:.75rem; }
+.export-box h3{ margin:0; color:var(--maroon); font-size:.88rem; }
+
+.footer-note{ text-align:center; font-size:.72rem; color:#5a4f3f; font-style:italic; margin-top:16px; }
+.coord-explainer{
+  max-width:900px; margin:0 auto 20px; background:var(--beige); border:1.5px solid var(--maroon);
+  border-radius:4px; padding:8px 14px; font-size:.78rem; line-height:1.5; color:#4a3f2f; text-align:center;
+}
+.coord-explainer b{ color:var(--maroon); }
+
+/* ---------- Mobil ---------- */
+@media (max-width:720px){
+  body{ padding:12px 12px 24px; }
+  .page-header h1{ font-size:1.7rem; }
+  .tabbar{ margin-bottom:12px; }
+  .tab-btn{ flex:1; padding:10px 8px; font-size:.95rem; }
+
+  .guide{ padding:6px 14px 24px; }
+  .guide h1{ font-size:1.3rem; }
+  .guide .zones{ grid-template-columns:1fr; }
+  .guide table{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .guide table tbody{ display:table; width:100%; }
+
+  .layout{ gap:14px; }
+  .palette{ width:100%; }
+  #paletteList{ display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:7px; }
+  #paletteList .chip{ margin-bottom:0; }
+
+  .board-row{ flex-direction:column; }
+  .zone-legend{ position:static; width:100%; height:auto !important; display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .zone-legend-item{ position:static !important; top:auto !important; transform:none; width:auto; flex:1 1 44%; }
+  .zone-legend-item::before{ display:none; }
+
+  .board-outer{ width:100%; }
+}
 </style>
 </head>
 <body>
 
-<h1>TERRAIN-BAUKASTEN</h1>
+<div class="page-header">
+  <h1>Battle March</h1>
+  <p class="page-subtitle">Leitfaden für Gefechtsmarsch-Spiele · 500 Punkte</p>
+</div>
+
+<div class="tabbar" role="tablist" aria-label="Battle March Werkzeuge">
+  <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
+  <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="false" tabindex="-1">Kartenbau</button>
+</div>
+
+<!-- ===================== LEITFADEN ===================== -->
+<div class="tab-content" id="panel-leitfaden" role="tabpanel" aria-labelledby="tab-leitfaden" tabindex="0">
+<div class="guide">
+
+<div class="toc"><h2>Inhalt</h2><ul>
+<li>1. Spielablauf</li>
+<li>2. Armeeaufbau</li>
+<li>3. Magische Gegenstände</li>
+<li>4. Geländeregeln</li>
+<li>5. Geländeaufstellung</li>
+<li>6. Random Happenings</li>
+<li>7. Missionen</li>
+<li>8. Aufstellungszonen</li>
+<li>9. Siegpunkte</li>
+</ul></div>
+
+<h1>1. Spielablauf</h1>
+<p>Vor dem Spiel wird der Reihe nach gewürfelt:</p><ul>
+<li>W6 – Geländeaufstellung (Karte)</li>
+<li>W3 – Art der Random Happenings</li>
+<li>W3 – Mission</li>
+<li>W6 – Aufstellungszone</li>
+<li>W6 gegeneinander – Sieger wählt die Tischseite</li>
+<li>W6 gegeneinander – Sieger bestimmt, wer zuerst eine Einheit aufstellt</li>
+<li>W6 gegeneinander – Sieger bestimmt, wer zuerst am Zug ist</li>
+</ul>
+
+<h1>2. Armeeaufbau</h1><ul>
+<li>Gespielt wird mit 500 Punkten</li>
+<li>Minimum 2 Einheiten ohne Charaktere</li>
+<li>Ein General muss bestimmt werden</li>
+<li>Alle Charaktere dürfen Magische Gegenstände aus diesem Dokument nehmen (auch Zwerge und Dämonen), Zwergenrunen und dämonische Geschenke sind nicht erlaubt. Champions oder Standartenträger dürfen keine nehmen.</li>
+<li>Die 1+ Beschränkung entfallen, die 0–X-pro-1000-Punkte-Beschränkung wird eine 0-1 Beschränkung</li>
+</ul>
+<table><tbody><tr><th>Kategorie</th><th>Minimum</th><th>Maximum</th></tr>
+<tr><td>Kerneinheiten</td><td>125 Punkte</td><td>175 Punkte pro Einheit</td></tr>
+<tr><td>Charaktere</td><td>–</td><td>250 Punkte, 125 Punkte pro Einheit</td></tr>
+<tr><td>Elite-Einheiten</td><td>–</td><td>250 Punkte, 150 Punkte pro Einheit</td></tr>
+<tr><td>Seltene Einheiten</td><td>–</td><td>125 Punkte, 125 Punkte pro Einheit</td></tr>
+</tbody></table>
+
+<h1>3. Magische Gegenstände</h1>
+<p>Diese Gegenstände ergänzen die allgemeinen Magischen Gegenstände aus dem Regelbuch von Warhammer: The Old World. Sie stellen die bescheideneren Artefakte dar, die Befehlshaber von Kundschaftertrupps und Reiterkompanien führen, und dürfen von Modellen aller Aufmarschlisten genommen werden, die für Gefechtsmarsch-Spiele geschrieben wurden.</p>
+<p class="italic">Sie dürfen nur in Aufmarschlisten für Gefechtsmarsch-Spiele verwendet werden – nicht in regulären Spielen. Ein Gegenstand mit Sternchen (*) gilt als besonders häufig (wie im Regelbuch beschrieben).</p>
+<h2>Magische Waffen</h2>
+<div class="item"><p class="name-cost">Plänklerklinge – 25 Punkte</p><p class="italic">Der Träger schlägt unerwartet und mit tödlicher Effizienz zu.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S</td><td>-1</td><td>Magische Attacken, Zusatzattacken (+1)</td></tr></tbody></table><p>Wenn der Träger im Flanken- oder Rückenbereich einer feindlichen Einheit kämpft, darf er misslungene Verwundungswürfe wiederholen.</p></div>
+<div class="item"><p class="name-cost">Dornspeierstab – 20 Punkte</p><p class="italic">Ein knorriger Holzstab, der seinem Träger erlaubt, aus der Ferne zu attackieren.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Fernkampf</td><td>24" 4</td><td>-</td><td>Gewichtig, Magische Attacken, Rüstungsfluch (1)</td></tr><tr><td>Nahkampf</td><td>Nahkampf S+1</td><td>-</td><td>Magische Attacken, Rüstungsfluch (1)</td></tr></tbody></table><p>Zwei Profile – je nachdem, ob im Fernkampf oder Nahkampf eingesetzt.</p></div>
+<div class="item"><p class="name-cost">Pionierbeil – 15 Punkte</p><p class="italic">Glüht von der Hitze der Schmiede und durchschlägt Rüstung wie dichtes Unterholz.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S+1</td><td>-1</td><td>Durch Deckung bewegen, Flammenattacken, Magische Attacken</td></tr></tbody></table><p>Nur für Infanterie. Einmal pro Spiel kann der Träger in seiner Unterphase „Beginn des Zuges“ den Pfad offenbaren: Bis Zugende erhalten Träger und Einheit die Sonderregel Durch Deckung bewegen.</p></div>
+<div class="item"><p class="name-cost">Diestros Klinge – 10 Punkte</p><p class="italic">Schlägt schneller zu, als das Auge folgen kann.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S</td><td>-1</td><td>Magische Attacken</td></tr></tbody></table><p>Der Träger erhält +1 auf seinen Initiativewert.</p></div>
+<h2>Magische Rüstung</h2>
+<div class="item"><p class="name-cost">Helm des Mutes – 25 Punkte</p><p class="italic">Verleiht eine Aura der Selbstbeherrschung, die jeden unter seinem Befehl mit Mut erfüllt.</p><p>Kann mit anderer Rüstung kombiniert werden. Der Träger (oder der, dem er angeschlossen ist) verbessert seinen Rüstungswert um 1 und darf einmal pro Spiel einen misslungenen Moralwerttest wiederholen.</p></div>
+<div class="item"><p class="name-cost">Wattiertes Kettenhemd – 20 Punkte</p><p class="italic">Schwere Rüstung, die selbst den schärfsten Klingen kaum etwas entgegenzusetzen hat.</p><p>Schwere Rüstung. Verbessert den Rüstungswert um 1 gegenüber dem üblichen Modifikator (bis maximal 2+).</p></div>
+<div class="item"><p class="name-cost">Schild mit Eisenrand – 15 Punkte</p><p class="italic">Trotz Größe und Gewicht lässt sich dieser ausbalancierte Schild leicht als improvisierte Waffe einsetzen.</p><p>Zählt als Schild. Der Träger erhält +1 auf seinen Attackenwert; diese Zusatzattacke muss mit einer gewöhnlichen Handwaffe ausgeführt werden.</p></div>
+<div class="item"><p class="name-cost">Schattenmantel – 10 Punkte</p><p class="italic">Der Träger dieser dunklen Brigantine scheint in der Menge der Krieger zu verschwinden.</p><p>Nur für Infanterie. Der Träger kann nicht Ziel feindlicher Fernkampfattacken oder Zauber sein, solange er sich innerhalb von 3" um eine befreundete Einheit befindet – außer er ist das nächstgelegene Ziel.</p></div>
+<h2>Talismane</h2>
+<div class="item"><p class="name-cost">Talisman der Autorität – 30 Punkte</p><p class="italic">Ein Blick des Trägers genügt, damit ein Feind seine Waffen senkt und strammsteht.</p><p>Beschränkt. Feindliche Modelle, die im Nahkampf gegen den Träger attackieren wollen, müssen zuerst einen Moralwerttest bestehen – sonst dürfen sie nicht attackieren.</p></div>
+<div class="item"><p class="name-cost">Behütender Talisman – 15 Punkte</p><p class="italic">Die Luft um den Talisman schimmert und raubt feindlichen Attacken ihre Kraft.</p><p>Gibt dem Träger eine 6+-Rettung gegen alle erlittenen Verwundungen.</p></div>
+<h2>Magische Standarten</h2>
+<div class="item"><p class="name-cost">Banner der Berühmtheit – 15 Punkte</p><p class="italic">Schon der Anblick dieses Banners kann den Feind mit Furcht erfüllen.</p><p>Beschränkt. Beim Berechnen des Kampfergebnisses gibt die tragende Einheit zusätzlich +1 Kampfergebnispunkt.</p></div>
+<div class="item"><p class="name-cost">Banner der Tapferen – 10 Punkte</p><p class="italic">Von Veteranen unzähliger Schlachten emporgehalten – erfüllt die Einheit mit Stolz und Mut.</p><p>Die tragende Einheit erhält die Sonderregel Veteranen.</p></div>
+<h2>Verzauberte Gegenstände</h2>
+<div class="item"><p class="name-cost">Fernglas des Kundschafters – 20 Punkte</p><p class="italic">Erfahrene Kundschafter-Befehlshaber schätzen die Landschaft immer vorausschauend ab.</p><p>Trägt der General das Fernglas, addiert er +2 auf seinen Wurf, wer den ersten Zug erhält.</p></div>
+<div class="item"><p class="name-cost">Numas’ allsehendes Auge – 15 Punkte</p><p class="italic">Eine aus einer staubigen Gruft geborgene Glaskugel – entdeckt Feinde selbst im dichtesten Unterholz.</p><p>Der Träger ignoriert Deckungsmodifikatoren und ignoriert beim Schießen Wälder für die Sichtlinie.</p></div>
+<div class="item"><p class="name-cost">Karte der Wildnis* – 10 Punkte</p><p class="italic">Wer alte Karten studiert, kennt die Gefahren der Wildnis besser.</p><p>Löst der Träger (oder seine Einheit) einen Wurf auf der Tabelle Wildnisgelände (Kapitel 6) aus, darf dieser Wurf wiederholt werden.</p></div>
+<div class="item"><p class="name-cost">Verzauberter Almanach – 5 Punkte</p><p class="italic">Die vergilbten Seiten offenbaren gelegentlich nützliche Informationen.</p><p>Ein Charaktermodell mit dem Almanach darf seinen Wurf auf der Tabelle Unwägbarkeiten des Krieges (Kapitel 6) wiederholen.</p></div>
+<h2>Arkane Artefakte</h2>
+<div class="item"><p class="name-cost">Schriftrolle feuriger Beschwörung* – 15 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Feuerball (Lehre der Kampfmagie) zu wirken.</p></div>
+<div class="item"><p class="name-cost">Schriftrolle tödlichen Flüsterns* – 10 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Totenkabale (Lehre der Nekromantie) zu wirken.</p></div>
+<div class="item"><p class="name-cost">Wyrdsteinsplitter – 5 Punkte</p><p class="italic"></p><p>Beschränkt. Unmittelbar bevor der Träger einen Zauber- oder Bannwurf ausführt, darf er ansagen, den Splitter einzusetzen: +1 auf diesen Wurf.</p></div>
+<div class="item"><p class="name-cost">Schriftrolle der Verschleierung* – 5 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Überwältigendes Blendwerk (Lehre der Illusion) zu wirken.</p></div>
+
+<h1>4. Geländeregeln</h1>
+<p>Alle Geländestücke haben klare Kanten (Zonengelände). Wenn möglich wird 2D-Gelände genutzt, auf das zur Verschönerung 3D-Modelle gelegt werden.</p>
+<table><tbody><tr><th>Geländetyp</th><th>Eigenschaften</th></tr>
+<tr><td>Wälder</td><td>Blockiert Sicht dahinter · Kanonenschüsse stoppen hinten · Schweres Gelände · Deckung (treffen −1) · natürliches Gelände</td></tr>
+<tr><td>Hohe Felsen / Gebäude</td><td>Nicht passierbar · Blockiert Sicht dahinter · Kanonenschüsse stoppen davor</td></tr>
+<tr><td>Ruinen</td><td>Blockiert Sicht dahinter · Deckung (treffen −1) · Schweres Gelände · Gefährliches Gelände · Kanonenschüsse stoppen davor</td></tr>
+<tr><td>Feld / Friedhof</td><td>Deckung (treffen −1) · Schweres Gelände · Kanonenschüsse stoppen hinten</td></tr>
+<tr><td>See / Sumpf</td><td>Schweres Gelände · Gefährliches Gelände · Kanonenschüsse stoppen hinten · natürliches Gelände</td></tr>
+<tr><td>Hügel</td><td>Schießen aus zwei Reihen möglich · Blockiert Sicht dahinter, Kanonenschüsse stoppen davor</td></tr>
+</tbody></table>
+
+<h1>5. Geländeaufstellung</h1>
+<p>Gespielt wird auf einer Matte von 48×36 Zoll. Vor dem Spiel wird mit einem W6 eine der sechs Geländekarten bestimmt. Alternativ setze von jedem Geländestück eins auf die Matte. In der Mitte sollte ein 16 Zoll Kreis frei bleiben. Alternativ nutze den <b>Kartenbau</b>-Reiter oben auf dieser Seite.</p>
+
+<h1>6. Random Happenings</h1>
+<p>Zu Beginn wird mit einem W3 festgelegt, welche der drei folgenden Tabellen verwendet wird. Danach entscheidet ein W6 über das genaue Ereignis.</p>
+<h2>Tabelle 1 – Störendes Wetter</h2>
+<p class="italic">Wird zu Beginn des Spiels einmalig gewürfelt und gilt für die gesamte Spieldauer.</p>
+<table><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
+<tr><td>1</td><td>Heftiger Platzregen: Alle Einheiten erhalten −1 auf ihren Bewegungswert (Minimum 1); Schnelle Bewegung und Fliegen (2) sind nicht nutzbar.</td></tr>
+<tr><td>2</td><td>Steife Brise: Reichweite aller Fernkampfwaffen mit Stärke 5 oder weniger sinkt um 6" (Minimum 3").</td></tr>
+<tr><td>3</td><td>Sengende Hitze: Zu Beginn jeder Unterphase „Beginn des Zuges“ würfelt jede Einheit einen W6; bei einer 1 (schwere Rüstung/Plattenrüstung/Rossharnisch: bei 1–2) müssen W3 Modelle einen Widerstandstest bestehen oder verlieren einen Lebenspunkt.</td></tr>
+<tr><td>4</td><td>Blitzeinschläge: Zu Beginn jeder Unterphase „Beginn des Zuges“ würfelt jeder Spieler einen W6; bei 1–2 erleidet eine zufällige Einheit W6 Treffer mit Stärke 4, DS −1.</td></tr>
+<tr><td>5</td><td>Staubteufel: Eine 3-Zoll-Schablone bewegt sich zufällig über das Feld und verursacht Treffer bei Berührung; betroffene Einheiten erhalten bis zum nächsten Zugbeginn −1 auf ihre Ballistische Fertigkeit (Minimum 1).</td></tr>
+<tr><td>6</td><td>Eisiger Wind: Zu Beginn jeder Unterphase „Beginn des Zuges“ würfelt jede Einheit einen W6; bei einer 1 muss sie einen Moraltest bestehen oder darf in diesem Zug nicht angreifen oder zaubern. Pflichtbewegungen (z. B. Fliehen) sind davon nicht betroffen.</td></tr>
+</tbody></table>
+<h2>Tabelle 2 – Wildnisgelände</h2>
+<p class="italic">Wird ausgelöst, wenn eine Einheit ihre Bewegung in natürlichem Gelände (Wälder, Felsen, Sümpfe usw.) beendet oder dort aufgestellt wird.</p>
+<table><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
+<tr><td>1</td><td>Dornengestrüpp: Einheiten, die sich hindurchbewegen, angreifen, fliehen oder verfolgen, tun dies in Unordnung.</td></tr>
+<tr><td>2</td><td>Verteidigungsposition: Eine Einheit, die dieses Geländestück besetzt, ignoriert Sichtlinien-Einschränkungen beim Verteidigen.</td></tr>
+<tr><td>3</td><td>Giftige Sporen: Jedes Modell im Geländestück muss einen Widerstandstest bestehen oder verliert einen Lebenspunkt.</td></tr>
+<tr><td>4</td><td>Anhaltende Magie: Einheiten auf diesem Geländestück erhalten Magieresistenz (1).</td></tr>
+<tr><td>5</td><td>Heilkräuter: Ein Modell in diesem Geländestück (nicht im Nahkampf) erhält sofort einen verlorenen Lebenspunkt zurück.</td></tr>
+<tr><td>6</td><td>Trollversteck: Ein Aufgebrachter Troll (siehe unten) greift die entdeckende Einheit an.</td></tr>
+</tbody></table>
+<div class="statbox"><p><b>Aufgebrachter Troll</b> · Monströse Infanterie · Basegröße 40×40&nbsp;mm · Einheitengröße 1</p>
+<table class="profile-table"><tbody><tr><th>B</th><th>KG</th><th>BF</th><th>S</th><th>W</th><th>LP</th><th>I</th><th>A</th><th>MW</th></tr><tr><td>6</td><td>3</td><td>1</td><td>5</td><td>4</td><td>3</td><td>10</td><td>3</td><td>5</td></tr></tbody></table>
+<p class="italic">Ausrüstung: Handwaffe, Trollkotze, Schwielige Haut (Leichte Rüstung). Sonderregeln: Angst, Brennbar, Plänkler, Regeneration (5+), Rüstungsfluch (1). Trollkotze (Nahkampf, S3, DS−2): zusätzliche automatisch treffende Attacke, die zuletzt ausgeführt wird.</p></div>
+<h2>Tabelle 3 – Unwägbarkeiten des Krieges</h2>
+<p class="italic">Zu Beginn jeder Unterphase „Beginn des Zuges“ (ab dem zweiten Zug) wird ein W6 gewürfelt; ist das Ergebnis gleich oder niedriger als die Zugnummer, würfelt der Gegner auf dieser Tabelle (bereits gewürfelte Ergebnisse werden neu gewürfelt).</p>
+<table><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
+<tr><td>1</td><td>Ätherische Instabilität: Würfelt ein Spieler bei einem Zauberwurf einen natürlichen Pasch aus 1er, 2er oder 3er, erleidet er eine Verhexung.</td></tr>
+<tr><td>2</td><td>Verlegte Ressourcen: Ein verirrter Versorgungswagen taucht am Schlachtfeldrand auf; beide Spieler würfeln gegeneinander, der Gewinner erhält ihn (siehe Kapitel 7), der Verlierer muss ihn angreifen und zerstören.</td></tr>
+<tr><td>3</td><td>Schwindende Munition: Eine Einheit, die in ihrem Zug mit einer Fernkampfwaffe geschossen hat, darf im folgenden Zug nicht erneut damit schießen.</td></tr>
+<tr><td>4</td><td>Schätze des Hinterlands: Schatzfunde und Landmarken geben in dieser Schlacht 50 Siegpunkte extra.</td></tr>
+<tr><td>5</td><td>Schleppender Konflikt: Das Spiel dauert sechs statt fünf Runden.</td></tr>
+<tr><td>6</td><td>Wandernde Söldner: Beide Spieler würfeln gegeneinander um eine Einheit von 10 Wandernden Söldnern (siehe unten); bei Gleichstand erhalten beide Spieler eine Einheit.</td></tr>
+</tbody></table>
+<div class="statbox"><p><b>Wandernder Söldner</b> · Reguläre Infanterie · Basegröße 25×25&nbsp;mm · Einheitengröße 10</p>
+<table class="profile-table"><tbody><tr><th>B</th><th>KG</th><th>BF</th><th>S</th><th>W</th><th>LP</th><th>I</th><th>A</th><th>MW</th></tr><tr><td>4</td><td>3</td><td>3</td><td>3</td><td>3</td><td>1</td><td>3</td><td>1</td><td>7</td></tr></tbody></table>
+<p class="italic">Ausrüstung: Handwaffen und Schilde oder Handwaffen und Kurzbögen. Sonderregeln: Durch Deckung bewegen, Söldner. Tritt an einem beliebigen Punkt der Schlachtfeldkante ein (nicht in einer Aufstellungszone). Wert für Siegpunkte: 50 Punkte.</p></div>
+
+<h1>7. Missionen</h1>
+<p>Zu Beginn wird mit einem W3 eine der folgenden drei Missionen bestimmt.</p>
+<h2>Mission 1 – Schätze</h2>
+<p>Schätze sind Geländedekorationen, die Beute, Vorräte, Nahrung, Waffen, verwundete Kameraden oder wichtige Informationen darstellen.</p>
+<p class="italic"><b>Aufstellung:</b> Schätze werden gemäß der jeweiligen Geländekarte platziert, jedoch nicht innerhalb von 3" um ein Geländestück oder auf einem niedrigen linearen Hindernis. Nötigenfalls wird das Gelände um die geringstmögliche Distanz verschoben.</p>
+<figure class="zone-block"><svg viewBox="0 0 300 170" width="100%" style="max-width:300px">
+<rect x="0" y="0" width="300" height="170" fill="#fdfcf9" stroke="#ccc" stroke-width="1"></rect>
+<line x1="0" y1="85.0" x2="300" y2="85.0" stroke="#ccc" stroke-width="1"></line>
+<line x1="150.0" y1="0" x2="150.0" y2="170" stroke="#ccc" stroke-width="1"></line>
+<line x1="60.0" y1="85.0" x2="240.0" y2="85.0" stroke="#666" stroke-width="1.5"></line>
+<circle cx="60.0" cy="85.0" r="6" fill="#085674" stroke="#fff" stroke-width="1.2"></circle>
+<text x="60.0" y="71.0" text-anchor="middle" font-size="11" font-weight="bold">Ziel</text>
+<circle cx="150.0" cy="85.0" r="6" fill="#085674" stroke="#fff" stroke-width="1.2"></circle>
+<text x="150.0" y="71.0" text-anchor="middle" font-size="11" font-weight="bold">Ziel</text>
+<circle cx="240.0" cy="85.0" r="6" fill="#085674" stroke="#fff" stroke-width="1.2"></circle>
+<text x="240.0" y="71.0" text-anchor="middle" font-size="11" font-weight="bold">Ziel</text>
+<text x="150.0" y="109.0" text-anchor="middle" font-size="11" font-weight="bold">Zentrum</text>
+<text x="105.0" y="79.0" text-anchor="middle" font-size="10">11"</text>
+<text x="195.0" y="79.0" text-anchor="middle" font-size="10">11"</text>
+</svg><figcaption>Beispielhafte Platzierung der Schätze auf einer Geländekarte.</figcaption></figure>
+<p><b>Schatzfund zerstören oder bergen:</b> Eine Einheit mit Einheitenstärke 5 oder mehr kann versuchen, einen Schatzfund zu zerstören, indem sie sich in der Unterphase „Restliche Bewegungen" in Basekontakt mit diesem bewegt. Sobald eine Einheit in Basekontakt mit einem Schatzfund ist, beginnt sie den Prozess, ihn zu zerstören, die enthaltenen Reichtümer zu verteilen oder die darin enthaltenen Nahrungs- oder Munitionsvorräte zu verderben. Solange eine Einheit damit beschäftigt ist, einen Schatzfund zu zerstören, kann sie nicht schießen und kann nur Zauber mit der Reichweite „Nahkampf" oder „Selbst" wirken.
+Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" immer noch in Basekontakt mit dem Schatzfund befindet, eine Einheitenstärke von 5 oder mehr hat, nicht in den Nahkampf verwickelt ist und nicht flieht, wurde der Schatzfund zerstört und wird vom Schlachtfeld entfernt.</p>
+<p><b>Siegpunkte:</b>Für jeden Schatzfund, den eine Einheit zerstört, erhält der kontrollierende Spieler einen Bonus von <b>50 Siegpunkte</b> pro Schatz.</p>
+<h2>Mission 2 – Strategische Landmarke</h2>
+<p>Eine markante Landschaftsmarke (Statue, arkaner Monolith, Wachturm o. Ä.) – ein Geländestück auf 100-mm-Rundbase, unpassierbar, blockiert keine Sichtlinie.</p>
+<p class="italic"><b>Aufstellung:</b> im Zentrum des Schlachtfelds, jedoch nicht innerhalb von 3" um ein Geländestück oder auf einem niedrigen linearen Hindernis.</p>
+<p><b>Ungewöhnliche Eigenschaft:</b> Nach der Platzierung, vor der Armeeaufstellung, würfelt ein Spieler auf folgender Tabelle. Die kontrollierende Einheit profitiert davon bis zum Ende des nächsten Zuges:</p>
+<table><tbody><tr><th>W6</th><th>Eigenschaft</th></tr><tr><td>1–2</td><td>Magie in der Luft: Die kontrollierende Einheit erhält Magieresistenz (2).</td></tr><tr><td>3–4</td><td>Rechtschaffener Eifer: Die kontrollierende Einheit erhält die Sonderregel Raserei.</td></tr><tr><td>5–6</td><td>„Wir gehen hier nicht weg“: Die kontrollierende Einheit erhält die Sonderregel Unnachgiebig.</td></tr></tbody></table>
+<p><b>Kontrolle:</b> wie bei Schätzen (Einheitenstärke 5+, innerhalb von 3", nicht fliehend/blöd). Wenn zwei Einheiten in Reichweite sind ist die Landmarke umkämpft</p>
+<p><b>Siegpunkte:</b> Am Ende des Spiels erhält der kontrollierende Spieler <b>150 Siegpunkte</b>.</p>
+<h2>Mission 3 – Versorgungswagen</h2>
+<p>Karawanen mit Nahrung und Ausrüstung müssen vor Angriffen geschützt werden. Beide Spieler haben einen Versorgungswagen als zusätzliche Einheit.</p>
+<p class="italic">Der Versorgungswagen ist ein schwerer Streitwagen (Nichtkämpfer – kann keine Angriffbewegung durchführen, verfolgen, überrennen oder nachrücken) </p>
+<div class="statbox"><p><b>Versorgungswagen</b> · Schwerer Streitwagen · Basegröße 60×100&nbsp;mm · Einheitengröße 1</p>
+<table class="profile-table"><tbody><tr><th></th><th>B</th><th>KG</th><th>BF</th><th>S</th><th>W</th><th>LP</th><th>I</th><th>A</th><th>MW</th></tr><tr><td>Versorgungswagen</td><td>-</td><td>-</td><td>-</td><td>4</td><td>5</td><td>4</td><td>-</td><td>-</td><td>-</td></tr><tr><td>Fahrer</td><td>4</td><td>2</td><td>3</td><td>3</td><td>-</td><td>1</td><td>3</td><td>1</td><td>6</td></tr><tr><td>Zugtier (x2)</td><td>8</td><td>-</td><td>-</td><td>3</td><td>-</td><td>1</td><td>2</td><td>1</td><td>4</td></tr></tbody></table>
+<p class="italic">Ausrüstung – Fahrer: Handwaffe. Zugtiere: Hufe, Hörner, Stoßzähne oder Ähnliches (Handwaffen). Rüstungswert: 5+. Sonderregeln: Einzelgänger, Geschlossene Reihen, In Sicherheit fliehen, Nichtkämpfer.</p></div>
+<p><b>Siegpunkte:</b></p><ul><li>Ist der Wagen am Spielende auf dem Feld und intakt: <b>50 Punkte</b>.</li><li>Steht der Wagen am Spielende vollständig in der gegnerischen Aufstellungszone: zusätzlich <b>50 Punkte</b>.</li><li>Die Zerstörung des Wagens gibt <b>50 Punkte</b>.</li></ul>
+
+<h1>8. Aufstellungszonen</h1>
+<p>Nach dem Auswürfeln von Gelände, Random Happenings und Mission wird mit einem W6 die Aufstellungszone bestimmt. Danach würfeln beide Spieler gegeneinander: Der Gewinner wählt seine Seite, dann stellen die Spieler abwechselnd ihre Einheiten auf.</p>
+<p class="italic"><b>Abweichende Aufstellung:</b> Auf Wunsch dürfen die Zonen 2, 3, 4 und 6 horizontal gespiegelt werden – je nach Geländeaufbau kann das die Partie deutlich verändern. Im Zweifel entscheidet ein W6.</p>
+<div class="zones">
+<div class="zone-block"><h3>1. Offene Feldschlacht</h3><svg viewBox="0 0 227 154" width="100%" style="max-width:227px">
+<defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#000"></path></marker></defs>
+<rect x="0" y="0" width="227" height="154" fill="#fbf9f5" stroke="#736b60" stroke-width="1"></rect>
+<polygon points="0.0,0.0 226.6,0.0 226.6,38.6 0.0,38.6" fill="#cdb38b"></polygon>
+<polygon points="0.0,154.5 226.6,154.5 226.6,115.9 0.0,115.9" fill="#cdb38b"></polygon>
+<rect x="0" y="0" width="227" height="154" fill="none" stroke="#736b60" stroke-width="1"></rect>
+<line x1="0" y1="77.2" x2="226.6" y2="77.2" stroke="#bfb9ae" stroke-width="0.7"></line>
+<line x1="113.3" y1="0" x2="113.3" y2="154.5" stroke="#bfb9ae" stroke-width="0.7"></line>
+<line x1="63.4" y1="38.6" x2="63.4" y2="77.2" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="50.4" y="51.9" width="26" height="12" fill="#fff"></rect><text x="63.4" y="61.4" text-anchor="middle" font-size="9">7,5"</text>
+<line x1="154.1" y1="77.2" x2="154.1" y2="115.9" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="141.1" y="90.6" width="26" height="12" fill="#fff"></rect><text x="154.1" y="100.1" text-anchor="middle" font-size="9">7,5"</text>
+</svg></div>
+<div class="zone-block"><h3>2. Aufeinandertreffen</h3><svg viewBox="0 0 227 154" width="100%" style="max-width:227px">
+<defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#000"></path></marker></defs>
+<rect x="0" y="0" width="227" height="154" fill="#fbf9f5" stroke="#736b60" stroke-width="1"></rect>
+<polygon points="0.0,77.2 113.3,77.2 113.3,0.0 0.0,0.0" fill="#cdb38b"></polygon>
+<polygon points="113.3,154.5 226.6,154.5 226.6,77.2 113.3,77.2" fill="#cdb38b"></polygon>
+<rect x="0" y="0" width="227" height="154" fill="none" stroke="#736b60" stroke-width="1"></rect>
+<line x1="0" y1="77.2" x2="226.6" y2="77.2" stroke="#bfb9ae" stroke-width="0.7"></line>
+<line x1="113.3" y1="0" x2="113.3" y2="154.5" stroke="#bfb9ae" stroke-width="0.7"></line>
+<circle cx="113.3" cy="77.2" r="38.6" fill="none" stroke="#333" stroke-width="1"></circle>
+<line x1="86.3" y1="104.3" x2="140.3" y2="50.2" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="100.3" y="71.2" width="26" height="12" fill="#fff"></rect><text x="113.3" y="80.8" text-anchor="middle" font-size="9">15"</text>
+</svg></div>
+<div class="zone-block"><h3>3. Entgegengesetzte Flanken</h3><svg viewBox="0 0 227 154" width="100%" style="max-width:227px">
+<defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#000"></path></marker></defs>
+<rect x="0" y="0" width="227" height="154" fill="#fbf9f5" stroke="#736b60" stroke-width="1"></rect>
+<polygon points="0.0,0.0 226.6,0.0 0.0,92.7" fill="#cdb38b"></polygon>
+<polygon points="226.6,154.5 0.0,154.5 226.6,61.8" fill="#cdb38b"></polygon>
+<rect x="0" y="0" width="227" height="154" fill="none" stroke="#736b60" stroke-width="1"></rect>
+<line x1="0" y1="77.2" x2="226.6" y2="77.2" stroke="#bfb9ae" stroke-width="0.7"></line>
+<line x1="113.3" y1="0" x2="113.3" y2="154.5" stroke="#bfb9ae" stroke-width="0.7"></line>
+<line x1="11.3" y1="0.0" x2="11.3" y2="82" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="-1.7" y="40.4" width="26" height="12" fill="#fff"></rect><text x="11.3" y="49.9" text-anchor="middle" font-size="9">18"</text>
+<line x1="215.3" y1="154.5" x2="215.3" y2="70" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="202.3" y="102.2" width="26" height="12" fill="#fff"></rect><text x="215.3" y="111.7" text-anchor="middle" font-size="9">18"</text>
+</svg></div>
+<div class="zone-block"><h3>4. Unerwartete Begegnung</h3><svg viewBox="0 0 227 154" width="100%" style="max-width:227px">
+<defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#000"></path></marker></defs>
+<rect x="0" y="0" width="227" height="154" fill="#fbf9f5" stroke="#736b60" stroke-width="1"></rect>
+<polygon points="0.0,0.0 170.0,0.0 170.0,38.6 0.0,38.6" fill="#cdb38b"></polygon>
+<polygon points="56.7,154.5 226.6,154.5 226.6,115.9 56.7,115.9" fill="#cdb38b"></polygon>
+<rect x="0" y="0" width="227" height="154" fill="none" stroke="#736b60" stroke-width="1"></rect>
+<line x1="0" y1="77.2" x2="226.6" y2="77.2" stroke="#bfb9ae" stroke-width="0.7"></line>
+<line x1="113.3" y1="0" x2="113.3" y2="154.5" stroke="#bfb9ae" stroke-width="0.7"></line>
+<line x1="170.0" y1="19.3" x2="226.6" y2="19.3" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="185.3" y="13.3" width="26" height="12" fill="#fff"></rect><text x="198.3" y="22.8" text-anchor="middle" font-size="9">11"</text>
+<line x1="0.0" y1="135.2" x2="56.7" y2="135.2" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="15.3" y="129.2" width="26" height="12" fill="#fff"></rect><text x="28.3" y="138.7" text-anchor="middle" font-size="9">11"</text>
+<line x1="79.3" y1="38.6" x2="79.3" y2="77.2" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="66.3" y="51.9" width="26" height="12" fill="#fff"></rect><text x="79.3" y="61.4" text-anchor="middle" font-size="9">7,5"</text>
+<line x1="147.3" y1="77.2" x2="147.3" y2="115.9" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="134.3" y="90.6" width="26" height="12" fill="#fff"></rect><text x="147.3" y="100.1" text-anchor="middle" font-size="9">7,5"</text>
+</svg></div>
+<div class="zone-block"><h3>5. Gebirgspass</h3><svg viewBox="0 0 227 154" width="100%" style="max-width:227px">
+<defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#000"></path></marker></defs>
+<rect x="0" y="0" width="227" height="154" fill="#fbf9f5" stroke="#736b60" stroke-width="1"></rect>
+<polygon points="0.0,154.5 56.7,154.5 56.7,0.0 0.0,0.0" fill="#cdb38b"></polygon>
+<polygon points="170.0,154.5 226.6,154.5 226.6,0.0 170.0,0.0" fill="#cdb38b"></polygon>
+<rect x="0" y="0" width="227" height="154" fill="none" stroke="#736b60" stroke-width="1"></rect>
+<line x1="0" y1="77.2" x2="226.6" y2="77.2" stroke="#bfb9ae" stroke-width="0.7"></line>
+<line x1="113.3" y1="0" x2="113.3" y2="154.5" stroke="#bfb9ae" stroke-width="0.7"></line>
+<line x1="56.7" y1="77.2" x2="113.3" y2="77.2" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="72.0" y="71.2" width="26" height="12" fill="#fff"></rect><text x="85.0" y="80.8" text-anchor="middle" font-size="9">12"</text>
+<line x1="113.3" y1="77.2" x2="170.0" y2="77.2" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="128.6" y="71.2" width="26" height="12" fill="#fff"></rect><text x="141.6" y="80.8" text-anchor="middle" font-size="9">12"</text>
+</svg></div>
+<div class="zone-block"><h3>6. Überflügeln</h3><svg viewBox="0 0 227 154" width="100%" style="max-width:227px">
+<defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#000"></path></marker></defs>
+<rect x="0" y="0" width="227" height="154" fill="#fbf9f5" stroke="#736b60" stroke-width="1"></rect>
+<polygon points="0.0,154.5 0.0,0.0 113.3,0.0" fill="#cdb38b"></polygon>
+<polygon points="113.3,154.5 226.6,154.5 226.6,0.0" fill="#cdb38b"></polygon>
+<rect x="0" y="0" width="227" height="154" fill="none" stroke="#736b60" stroke-width="1"></rect>
+<line x1="0" y1="77.2" x2="226.6" y2="77.2" stroke="#bfb9ae" stroke-width="0.7"></line>
+<line x1="113.3" y1="0" x2="113.3" y2="154.5" stroke="#bfb9ae" stroke-width="0.7"></line>
+<line x1="113.3" y1="0.0" x2="226.6" y2="0.0" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="157.0" y="-6.0" width="26" height="12" fill="#fff"></rect><text x="170.0" y="3.5" text-anchor="middle" font-size="9">24"</text>
+<line x1="0.0" y1="150.5" x2="113.3" y2="150.5" stroke="#000" stroke-width="1.1" marker-start="url(#arr)" marker-end="url(#arr)"></line><rect x="43.7" y="144.5" width="26" height="12" fill="#fff"></rect><text x="56.7" y="153.0" text-anchor="middle" font-size="9">24"</text>
+</svg></div>
+</div>
+
+<h1>9. Siegpunkte</h1>
+<p>Am Ende von Runde 5 werden alle Siegpunkte zusammengerechnet. Wer mehr Punkte hat, gewinnt.</p><ul><li><b>Zerstörte Einheiten und Charaktere:</b> Punkte für vernichtete oder aus dem Spiel geflohene gegnerische Einheiten.</li><li><b>General getötet:</b> +50 Siegpunkte.</li><li><b>Missionspunkte:</b> siehe Kapitel 7.</li></ul>
+
+</div>
+</div>
+
+<!-- ===================== KARTENBAU ===================== -->
+<div class="tab-content" id="panel-baukasten" role="tabpanel" aria-labelledby="tab-baukasten" tabindex="0" hidden="">
+<div class="builder">
+
+<h2 class="section-title">Terrain-Baukasten</h2>
 <p class="subtitle">Gelände per Drag &amp; Drop platzieren · Aufstellungszonen frei malen · Battle-March-Stil</p>
-<p class="coord-explainer"><b>Koordinatensystem:</b> X = horizontale Achse (Breite der Matte, von links nach rechts) · Y = vertikale Achse (Tiefe der Matte, von unten nach oben). Der Ursprung (0, 0) liegt in der linken unteren Ecke der Matte. Alle Koordinaten – für Geländestücke wie für Aufstellungszonen – geben immer die <b>linke untere Ecke</b> des jeweiligen Objekts an, gemessen von diesem Ursprung.</p>
+<p class="coord-explainer"><b>Koordinatensystem:</b> X = horizontale Achse (Breite der Matte, von links nach rechts) · Y = vertikale Achse (Tiefe der Matte, von unten nach oben). Der Ursprung (0, 0) liegt in der linken unteren Ecke der Matte. Alle Koordinaten – für Geländestücke wie für Aufstellungszonen – geben immer die <b>linke untere Ecke</b> des jeweiligen Objekts an, gemessen von diesem Ursprung. <b>Tipp:</b> Am Handy ein Palettenstück antippen, um es platzieren zu lassen, oder es aufs Raster ziehen.</p>
 
 <div class="layout">
 
@@ -180,17 +510,17 @@
       <div class="info"><b>Ruine</b>7x7"</div></div><div class="chip"><div class="swatch" style="background:#d9c179"></div>
       <div class="info"><b>Feld</b>6x8"</div></div><div class="chip"><div class="swatch" style="background:#4c85b8"></div>
       <div class="info"><b>See</b>6x10"</div></div></div>
-    <div class="hint">Ziehe ein Stück auf das Raster. Platzierte Stücke lassen sich verschieben, per ⟳ drehen oder per × löschen.</div>
+    <div class="hint">Ziehe ein Stück auf das Raster (oder tippe es an). Platzierte Stücke lassen sich verschieben, per ⟳ drehen oder per × löschen.</div>
 
     <div class="custom-form">
       <h2 style="border:none;margin-bottom:4px;">Eigenes Gelände</h2>
-      <label>Name</label>
+      <label for="cName">Name</label>
       <input type="text" id="cName" placeholder="z. B. Turm">
-      <label>Breite (Zoll)</label>
+      <label for="cW">Breite (Zoll)</label>
       <input type="number" id="cW" value="6" min="1" max="48">
-      <label>Tiefe (Zoll)</label>
+      <label for="cD">Tiefe (Zoll)</label>
       <input type="number" id="cD" value="6" min="1" max="48">
-      <label>Farbe</label>
+      <label for="cColor">Farbe</label>
       <input type="color" id="cColor" value="#7a5a9a">
       <button id="addCustomBtn">Zur Palette hinzufügen</button>
     </div>
@@ -244,8 +574,56 @@
       <div class="board-row">
         <div class="board" id="board" style="--scale: 13px; width: 624px; height: 468px;">
           <canvas id="zoneCanvas" width="624" height="468" style="width: 624px; height: 468px; pointer-events: none; cursor: default;"></canvas>
-        <div class="no-terrain-circle" style="width: 208px; height: 208px; left: 208px; bottom: 130px;"><span class="strong">Kein Gelände &amp; keine Aufstellung</span><span>16" Durchmesser</span></div></div>
-        <div class="zone-legend" id="zoneLegend" style="height: 468px;"><div class="zone-legend-item" style="top: 65px;"><b><span class="swatchline" style="background:#b9c6d6"></span>SPIELER 2</b>X: 0" bis 48"<br>Y: 26" bis 36"</div><div class="zone-legend-item" style="top: 234px;"><b><span class="swatchline" style="background:#ded6c2"></span>NO MAN'S LAND</b>X: 0" bis 48"<br>Y: 10" bis 26"</div><div class="zone-legend-item" style="top: 403px;"><b><span class="swatchline" style="background:#e2c48c"></span>SPIELER 1</b>X: 0" bis 48"<br>Y: 0" bis 10"</div></div>
+        <div class="no-terrain-circle" style="width: 208px; height: 208px; left: 208px; bottom: 130px;"><span class="strong">Kein Gelände &amp; keine Aufstellung</span><span>16" Durchmesser</span></div><div class="piece tex-forest" data-id="31" style="width: 130px; height: 78px; left: 429px; bottom: 351px;">
+      <span class="name">Wald</span>
+      <span class="dims">10x6"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: auto; right: 0px;">(33, 27)</div>
+    </div><div class="piece tex-brick" data-id="32" style="width: 104px; height: 78px; left: 39px; bottom: 260px;">
+      <span class="name">Gebäude</span>
+      <span class="dims">8x6"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: 0px; right: auto;">(3, 20)</div>
+    </div><div class="piece tex-hill" data-id="33" style="width: 104px; height: 78px; left: 52px; bottom: 78px;">
+      <span class="name">Hügel</span>
+      <span class="dims">8x6"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: 0px; right: auto;">(4, 6)</div>
+    </div><div class="piece tex-brick ruine" data-id="34" style="width: 91px; height: 91px; left: 260px; bottom: 13px;">
+      <span class="name">Ruine</span>
+      <span class="dims">7x7"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: 0px; right: auto;">(20, 1)</div>
+    </div><div class="piece tex-field dark" data-id="35" style="width: 104px; height: 78px; left: 234px; bottom: 390px;">
+      <span class="name">Feld</span>
+      <span class="dims">8x6"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: 0px; right: auto;">(18, 30)</div>
+    </div><div class="piece tex-water" data-id="36" style="width: 78px; height: 130px; left: 546px; bottom: 130px;">
+      <span class="name">See</span>
+      <span class="dims">6x10"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: auto; right: 0px;">(42, 10)</div>
+    </div></div>
+        <div class="zone-legend" id="zoneLegend" style="height: 468px;"><div class="zone-legend-item" style="top: 65px;"><b><span class="swatchline" style="background:#e2c48c"></span>SPIELER 1</b>X: 0" bis 36"<br>Y: 26" bis 36"</div><div class="zone-legend-item" style="top: 234px;"><b><span class="swatchline" style="background:#ded6c2"></span>NO MAN'S LAND</b>X: 0" bis 48"<br>Y: 0" bis 36"</div><div class="zone-legend-item" style="top: 403px;"><b><span class="swatchline" style="background:#b9c6d6"></span>SPIELER 2</b>X: 12" bis 48"<br>Y: 0" bis 10"</div></div>
       </div>
     </div>
 
@@ -258,8 +636,11 @@
   </div>
 
 </div>
+</div>
+</div>
 
 <script>
+/* ================= Terrain-Baukasten ================= */
 (function () {
   const board = document.getElementById('board');
   const canvas = document.getElementById('zoneCanvas');
@@ -272,7 +653,7 @@
   let cfg = { w: 48, h: 36, circle: 16, scale: 13 };
   let pieces = [];
   let pieceSeq = 1;
-  let zoneGrid = [];        // zoneGrid[row][col], row 0 = bottom (y-up)
+  let zoneGrid = [];
   let zoneMode = false;
   let currentBrush = 'p1';
   let painting = false;
@@ -289,6 +670,20 @@
   ];
 
   function px(inches) { return inches * cfg.scale; }
+
+  /* --- responsive Skalierung: Board passt sich der Bildschirmbreite an --- */
+  function computeScale() {
+    const col = document.querySelector('.center-col');
+    if (!col) return;
+    const colW = col.clientWidth;
+    if (colW <= 0) return; // Tab versteckt -> aktuelle Skalierung behalten
+    let avail = colW - 38; // Rand + Innenabstand von .board-outer
+    const legendBeside = window.matchMedia('(min-width: 721px)').matches;
+    if (legendBeside) avail -= (168 + 12); // Seitenlegende + Abstand
+    let s = Math.floor(avail / cfg.w);
+    s = Math.max(5, Math.min(13, s));
+    if (s) cfg.scale = s;
+  }
 
   function setBoardSize() {
     board.style.setProperty('--scale', cfg.scale + 'px');
@@ -507,7 +902,7 @@
   function paintAt(e) {
     const cell = cellFromEvent(e);
     if (!cell) return;
-    if (inCircle(cell.c + 0.5, cell.r + 0.5)) return; // Sperrzone: keine Aufstellung, kein Gelände
+    if (inCircle(cell.c + 0.5, cell.r + 0.5)) return;
     if (zoneGrid[cell.r][cell.c] !== currentBrush) {
       zoneGrid[cell.r][cell.c] = currentBrush;
       drawZones();
@@ -670,25 +1065,18 @@
   }
 
   function randomizeMap() {
-    // Gelände leeren
     pieces = [];
     board.querySelectorAll('.piece').forEach(el => el.remove());
 
-    // zufällige Aufstellungszone
     const presetNames = Object.keys(PRESETS);
     const chosen = presetNames[Math.floor(Math.random() * presetNames.length)];
     zoneGrid = PRESETS[chosen](cfg.w, cfg.h);
 
-    // zufällig spiegeln (horizontal und/oder vertikal, unabhängig voneinander)
     if (Math.random() < 0.5) zoneGrid.forEach(row => row.reverse());
     if (Math.random() < 0.5) zoneGrid.reverse();
     zoneGrid = maskCircle(zoneGrid);
     drawZones();
 
-    // jedes Geländestück aus der Palette einmal zufällig platzieren
-    // größere Stücke zuerst einplanen; freie Positionen werden vollständig ermittelt,
-    // damit der 6"-Mindestabstand praktisch immer eingehalten wird. Mehrere zufällige
-    // Versuche, damit ein einzelner ungünstiger Verlauf nicht zum Kompromiss führt.
     const MIN_GAP = 6;
 
     function attemptPlacement() {
@@ -793,6 +1181,8 @@
 
   function startCreateDrag(e, type) {
     e.preventDefault();
+    const sx = e.clientX, sy = e.clientY;
+    let moved = false;
     const ghost = document.createElement('div');
     ghost.className = 'piece ' + type.tex + (type.dark ? ' dark' : '') + ' dragging';
     if (!type.tex) ghost.style.background = type.color;
@@ -807,6 +1197,7 @@
     document.body.appendChild(ghost);
 
     function onMove(ev) {
+      if (Math.abs(ev.clientX - sx) > 6 || Math.abs(ev.clientY - sy) > 6) moved = true;
       ghost.style.left = ev.clientX - px(type.w) / 2 + 'px';
       ghost.style.top = ev.clientY - px(type.d) / 2 + 'px';
     }
@@ -815,10 +1206,15 @@
       document.removeEventListener('pointerup', onUp);
       ghost.remove();
       const rect = boardRect();
-      if (ev.clientX >= rect.left && ev.clientX <= rect.right && ev.clientY >= rect.top && ev.clientY <= rect.bottom) {
+      const overBoard = ev.clientX >= rect.left && ev.clientX <= rect.right && ev.clientY >= rect.top && ev.clientY <= rect.bottom;
+      if (overBoard) {
         const xIn = (ev.clientX - rect.left) / cfg.scale - type.w / 2;
         const yIn = (rect.bottom - ev.clientY) / cfg.scale - type.d / 2;
         addPiece(type, xIn, yIn);
+      } else if (!moved) {
+        // Antippen: Stück am Rand platzieren (leicht versetzt), Nutzer schiebt es weiter
+        const off = pieces.length % 6;
+        addPiece(type, 2 + off, 2 + off);
       }
     }
     document.addEventListener('pointermove', onMove);
@@ -885,6 +1281,7 @@
     cfg.w = parseInt(document.getElementById('setW').value) || 48;
     cfg.h = parseInt(document.getElementById('setH').value) || 36;
     cfg.circle = parseInt(document.getElementById('setCircle').value) || 0;
+    computeScale();
     pieces.forEach(p => { [p.x, p.y] = clampPos(p.x, p.y, p.w, p.d); });
     rebuildAll(true);
   });
@@ -899,9 +1296,56 @@
     paletteList.appendChild(makeChip(type));
   });
 
+  /* --- responsives Neuzeichnen bei Größenänderung / Tab-Wechsel --- */
+  function refreshLayout() {
+    computeScale();
+    rebuildAll(false);
+  }
+  let _rz;
+  window.addEventListener('resize', () => {
+    clearTimeout(_rz);
+    _rz = setTimeout(() => {
+      const col = document.querySelector('.center-col');
+      if (col && col.clientWidth > 0) refreshLayout();
+    }, 150);
+  });
+  window.__refreshBuilder = refreshLayout;
+
   buildPalette();
+  computeScale();
   rebuildAll(true);
   setZoneMode(false);
+})();
+
+/* ================= Tab-Navigation ================= */
+(function () {
+  const tabs = Array.from(document.querySelectorAll('.tab-btn'));
+  const panels = {
+    leitfaden: document.getElementById('panel-leitfaden'),
+    baukasten: document.getElementById('panel-baukasten')
+  };
+  function activate(name, focusTab) {
+    tabs.forEach(t => {
+      const sel = t.dataset.tab === name;
+      t.setAttribute('aria-selected', sel ? 'true' : 'false');
+      t.tabIndex = sel ? 0 : -1;
+      if (sel && focusTab) t.focus();
+    });
+    Object.keys(panels).forEach(k => { panels[k].hidden = (k !== name); });
+    if (name === 'baukasten' && window.__refreshBuilder) window.__refreshBuilder();
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => activate(t.dataset.tab));
+    t.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const dir = e.key === 'ArrowRight' ? 1 : -1;
+        const next = tabs[(i + dir + tabs.length) % tabs.length];
+        activate(next.dataset.tab, true);
+      }
+    });
+  });
+  activate('leitfaden');
 })();
 </script>
 
