@@ -179,7 +179,7 @@ button:hover{ background:var(--maroon-dark); }
 .piece .btns{ position:absolute; top:-11px; right:-8px; display:flex; gap:3px; z-index:5; }
 .piece .btns button{ width:18px; height:18px; border-radius:50%; border:1px solid #2b2620; background:#fff; color:#1a1a1a; font-size:.66rem; line-height:1; padding:0; }
 .piece .btns button:hover{ background:#eee; }
-.piece .coord-tag{
+.coord-tag{
   position:absolute; bottom:-18px; left:0; font-size:.6rem; font-weight:bold; color:var(--maroon);
   background:var(--beige); border:1px solid var(--maroon); border-radius:3px; padding:0 3px; white-space:nowrap; z-index:4;
 }
@@ -235,6 +235,25 @@ button:hover{ background:var(--maroon-dark); }
 
   .board-outer{ width:100%; }
 }
+
+/* ---------- Akkordeon ---------- */
+
+.acc{ border:1.4px solid var(--maroon); border-radius:4px; margin:.7rem 0; overflow:hidden; background:#fff; scroll-margin-top:72px; }
+.acc-head{ width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; font-family:inherit; text-align:left; cursor:pointer; background:var(--tan); color:var(--maroon); border:none; border-radius:0; padding:11px 14px; font-size:1.02rem; font-weight:bold; }
+.acc-head:hover{ background:#e6d6b6; }
+.acc-head:focus-visible{ outline:3px solid #c98a2f; outline-offset:-3px; }
+.acc-icon{ transition:transform .18s ease; font-size:.8rem; flex-shrink:0; }
+.acc.open .acc-icon{ transform:rotate(90deg); }
+.acc-body{ padding:4px 14px 12px; }
+.acc-body[hidden]{ display:none; }
+.acc-body > .italic:first-child{ margin-top:.6rem; }
+
+.mission-toggle{ display:inline-flex; align-items:center; gap:6px; font-size:.8rem; color:#4a3f2f; background:#fff; border:1px solid #9a8f7a; border-radius:4px; padding:6px 10px; cursor:pointer; }
+.mission-toggle input{ accent-color:var(--maroon); width:15px; height:15px; cursor:pointer; }
+.no-terrain-circle.text-top{ justify-content:flex-start; padding-top:16%; }
+.treasure{ position:absolute; border-radius:50%; border:1.6px solid #6b4a1a; background:radial-gradient(circle at 35% 30%, #f6db82, #d4a52a 65%, #a3781a); box-shadow:0 1px 2px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.25); z-index:5; pointer-events:none; }
+.guide .magic-table td:nth-child(2){ text-align:center; white-space:nowrap; }
+.guide .magic-table tr.cat td{ background:var(--maroon); color:#fff; font-weight:bold; letter-spacing:.03em; }
 </style>
 </head>
 <body>
@@ -283,13 +302,13 @@ button:hover{ background:var(--maroon-dark); }
 <h2>Aufstellungszonen</h2>
 <p>Die Aufstellungszone ist 10 Zoll tief. Alternativ nutze den Kartenbau-Reiter oben auf dieser Seite</p>
 
-
-
 <h1>3. Random Happenings</h1>
 <p>Zu Beginn wird mit einem W3 festgelegt, welche der drei folgenden Tabellen verwendet wird. Danach entscheidet ein W6 über das genaue Ereignis.</p>
-<h2>Tabelle 1 – Störendes Wetter</h2>
+<div class="acc" data-rh="1">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="rh-1-body"><span class="acc-title">Tabelle 1 – Störendes Wetter</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="rh-1-body" role="region" hidden>
 <p class="italic">Wird zu Beginn des Spiels einmalig gewürfelt und gilt für die gesamte Spieldauer.</p>
-<table><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
+<table class="rh-table"><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
 <tr><td>1</td><td>Heftiger Platzregen: Alle Einheiten erhalten −1 auf ihren Bewegungswert (Minimum 1); Schnelle Bewegung und Fliegen (2) sind nicht nutzbar.</td></tr>
 <tr><td>2</td><td>Steife Brise: Reichweite aller Fernkampfwaffen mit Stärke 5 oder weniger sinkt um 6" (Minimum 3").</td></tr>
 <tr><td>3</td><td>Sengende Hitze: Zu Beginn jeder Unterphase „Beginn des Zuges“ würfelt jede Einheit einen W6; bei einer 1 (schwere Rüstung/Plattenrüstung/Rossharnisch: bei 1–2) müssen W3 Modelle einen Widerstandstest bestehen oder verlieren einen Lebenspunkt.</td></tr>
@@ -297,9 +316,13 @@ button:hover{ background:var(--maroon-dark); }
 <tr><td>5</td><td>Staubteufel: Eine 3-Zoll-Schablone bewegt sich zufällig über das Feld und verursacht Treffer bei Berührung; betroffene Einheiten erhalten bis zum nächsten Zugbeginn −1 auf ihre Ballistische Fertigkeit (Minimum 1).</td></tr>
 <tr><td>6</td><td>Eisiger Wind: Zu Beginn jeder Unterphase „Beginn des Zuges“ würfelt jede Einheit einen W6; bei einer 1 muss sie einen Moraltest bestehen oder darf in diesem Zug nicht angreifen oder zaubern. Pflichtbewegungen (z. B. Fliehen) sind davon nicht betroffen.</td></tr>
 </tbody></table>
-<h2>Tabelle 2 – Wildnisgelände</h2>
+</div>
+</div>
+<div class="acc" data-rh="2">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="rh-2-body"><span class="acc-title">Tabelle 2 – Wildnisgelände</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="rh-2-body" role="region" hidden>
 <p class="italic">Wird ausgelöst, wenn eine Einheit ihre Bewegung in natürlichem Gelände (Wälder, Felsen, Sümpfe usw.) beendet oder dort aufgestellt wird.</p>
-<table><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
+<table class="rh-table"><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
 <tr><td>1</td><td>Dornengestrüpp: Einheiten, die sich hindurchbewegen, angreifen, fliehen oder verfolgen, tun dies in Unordnung.</td></tr>
 <tr><td>2</td><td>Verteidigungsposition: Eine Einheit, die dieses Geländestück besetzt, ignoriert Sichtlinien-Einschränkungen beim Verteidigen.</td></tr>
 <tr><td>3</td><td>Giftige Sporen: Jedes Modell im Geländestück muss einen Widerstandstest bestehen oder verliert einen Lebenspunkt.</td></tr>
@@ -310,9 +333,13 @@ button:hover{ background:var(--maroon-dark); }
 <div class="statbox"><p><b>Aufgebrachter Troll</b> · Monströse Infanterie · Basegröße 40×40&nbsp;mm · Einheitengröße 1</p>
 <table class="profile-table"><tbody><tr><th>B</th><th>KG</th><th>BF</th><th>S</th><th>W</th><th>LP</th><th>I</th><th>A</th><th>MW</th></tr><tr><td>6</td><td>3</td><td>1</td><td>5</td><td>4</td><td>3</td><td>10</td><td>3</td><td>5</td></tr></tbody></table>
 <p class="italic">Ausrüstung: Handwaffe, Trollkotze, Schwielige Haut (Leichte Rüstung). Sonderregeln: Angst, Brennbar, Plänkler, Regeneration (5+), Rüstungsfluch (1). Trollkotze (Nahkampf, S3, DS−2): zusätzliche automatisch treffende Attacke, die zuletzt ausgeführt wird.</p></div>
-<h2>Tabelle 3 – Unwägbarkeiten des Krieges</h2>
+</div>
+</div>
+<div class="acc" data-rh="3">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="rh-3-body"><span class="acc-title">Tabelle 3 – Unwägbarkeiten des Krieges</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="rh-3-body" role="region" hidden>
 <p class="italic">Zu Beginn jeder Unterphase „Beginn des Zuges“ (ab dem zweiten Zug) wird ein W6 gewürfelt; ist das Ergebnis gleich oder niedriger als die Zugnummer, würfelt der Gegner auf dieser Tabelle (bereits gewürfelte Ergebnisse werden neu gewürfelt).</p>
-<table><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
+<table class="rh-table"><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
 <tr><td>1</td><td>Ätherische Instabilität: Würfelt ein Spieler bei einem Zauberwurf einen natürlichen Pasch aus 1er, 2er oder 3er, erleidet er eine Verhexung.</td></tr>
 <tr><td>2</td><td>Verlegte Ressourcen: Ein verirrter Versorgungswagen taucht am Schlachtfeldrand auf; beide Spieler würfeln gegeneinander, der Gewinner erhält ihn (siehe Kapitel 4), der Verlierer muss ihn angreifen und zerstören.</td></tr>
 <tr><td>3</td><td>Schwindende Munition: Eine Einheit, die in ihrem Zug mit einer Fernkampfwaffe geschossen hat, darf im folgenden Zug nicht erneut damit schießen.</td></tr>
@@ -324,9 +351,13 @@ button:hover{ background:var(--maroon-dark); }
 <table class="profile-table"><tbody><tr><th>B</th><th>KG</th><th>BF</th><th>S</th><th>W</th><th>LP</th><th>I</th><th>A</th><th>MW</th></tr><tr><td>4</td><td>3</td><td>3</td><td>3</td><td>3</td><td>1</td><td>3</td><td>1</td><td>7</td></tr></tbody></table>
 <p class="italic">Ausrüstung: Handwaffen und Schilde oder Handwaffen und Kurzbögen. Sonderregeln: Durch Deckung bewegen, Söldner. Tritt an einem beliebigen Punkt der Schlachtfeldkante ein (nicht in einer Aufstellungszone). Wert für Siegpunkte: 50 Punkte.</p></div>
 
+</div>
+</div>
 <h1>4. Missionen</h1>
 <p>Zu Beginn wird mit einem W3 eine der folgenden drei Missionen bestimmt.</p>
-<h2>Mission 1 – Schätze</h2>
+<div class="acc" data-mission="1">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="mission-1-body"><span class="acc-title">Mission 1 – Schätze</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="mission-1-body" role="region" hidden>
 <p>Schätze sind Geländedekorationen, die Beute, Vorräte, Nahrung, Waffen, verwundete Kameraden oder wichtige Informationen darstellen.</p>
 <p class="italic"><b>Aufstellung:</b> Schätze werden gemäß der jeweiligen Geländekarte platziert, jedoch nicht innerhalb von 3" um ein Geländestück oder auf einem niedrigen linearen Hindernis. Nötigenfalls wird das Gelände um die geringstmögliche Distanz verschoben.</p>
 <figure class="zone-block"><svg viewBox="0 0 300 170" width="100%" style="max-width:300px">
@@ -347,14 +378,22 @@ button:hover{ background:var(--maroon-dark); }
 <p><b>Schatzfund zerstören oder bergen:</b> Eine Einheit mit Einheitenstärke 5 oder mehr kann versuchen, einen Schatzfund zu zerstören, indem sie sich in der Unterphase „Restliche Bewegungen" in Basekontakt mit diesem bewegt. Sobald eine Einheit in Basekontakt mit einem Schatzfund ist, beginnt sie den Prozess, ihn zu zerstören, die enthaltenen Reichtümer zu verteilen oder die darin enthaltenen Nahrungs- oder Munitionsvorräte zu verderben. Solange eine Einheit damit beschäftigt ist, einen Schatzfund zu zerstören, kann sie nicht schießen und kann nur Zauber mit der Reichweite „Nahkampf" oder „Selbst" wirken.
 Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" immer noch in Basekontakt mit dem Schatzfund befindet, eine Einheitenstärke von 5 oder mehr hat, nicht in den Nahkampf verwickelt ist und nicht flieht, wurde der Schatzfund zerstört und wird vom Schlachtfeld entfernt.</p>
 <p><b>Siegpunkte:</b>Für jeden Schatzfund, den eine Einheit zerstört, erhält der kontrollierende Spieler einen Bonus von <b>50 Siegpunkte</b> pro Schatz.</p>
-<h2>Mission 2 – Strategische Landmarke</h2>
+</div>
+</div>
+<div class="acc" data-mission="2">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="mission-2-body"><span class="acc-title">Mission 2 – Strategische Landmarke</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="mission-2-body" role="region" hidden>
 <p>Eine markante Landschaftsmarke (Statue, arkaner Monolith, Wachturm o. Ä.) – ein Geländestück auf 100-mm-Rundbase, unpassierbar, blockiert keine Sichtlinie.</p>
 <p class="italic"><b>Aufstellung:</b> im Zentrum des Schlachtfelds, jedoch nicht innerhalb von 3" um ein Geländestück oder auf einem niedrigen linearen Hindernis.</p>
 <p><b>Ungewöhnliche Eigenschaft:</b> Nach der Platzierung, vor der Armeeaufstellung, würfelt ein Spieler auf folgender Tabelle. Die kontrollierende Einheit profitiert davon bis zum Ende des nächsten Zuges:</p>
 <table><tbody><tr><th>W6</th><th>Eigenschaft</th></tr><tr><td>1–2</td><td>Magie in der Luft: Die kontrollierende Einheit erhält Magieresistenz (2).</td></tr><tr><td>3–4</td><td>Rechtschaffener Eifer: Die kontrollierende Einheit erhält die Sonderregel Raserei.</td></tr><tr><td>5–6</td><td>„Wir gehen hier nicht weg“: Die kontrollierende Einheit erhält die Sonderregel Unnachgiebig.</td></tr></tbody></table>
 <p><b>Kontrolle:</b>wie bei Schätzen (Einheitenstärke 5+, innerhalb von 3", nicht fliehend/blöd). Sind zwei Einheiten in Reichweite, kontrolliert die Einheit mit Banner; führen beide (oder keine) ein Banner, entscheidet die höhere Einheitenstärke. Bei Gleichstand ist die Landmarke umkämpft.</p>
 <p><b>Siegpunkte:</b> Am Ende des Spiels erhält der kontrollierende Spieler <b>150 Siegpunkte</b>.</p>
-<h2>Mission 3 – Versorgungswagen</h2>
+</div>
+</div>
+<div class="acc" data-mission="3">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="mission-3-body"><span class="acc-title">Mission 3 – Versorgungswagen</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="mission-3-body" role="region" hidden>
 <p>Karawanen mit Nahrung und Ausrüstung müssen vor Angriffen geschützt werden. Beide Spieler haben einen Versorgungswagen als zusätzliche Einheit.</p>
 <p class="italic">Der Versorgungswagen ist ein schwerer Streitwagen (Nichtkämpfer – kann keine Angriffbewegung durchführen, verfolgen, überrennen oder nachrücken) </p>
 <div class="statbox"><p><b>Versorgungswagen</b> · Schwerer Streitwagen · Basegröße 60×100&nbsp;mm · Einheitengröße 1</p>
@@ -362,6 +401,8 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 <p class="italic">Ausrüstung – Fahrer: Handwaffe. Zugtiere: Hufe, Hörner, Stoßzähne oder Ähnliches (Handwaffen). Rüstungswert: 5+. Sonderregeln: Einzelgänger, Geschlossene Reihen, In Sicherheit fliehen, Nichtkämpfer.</p></div>
 <p><b>Siegpunkte:</b></p><ul><li>Ist der Wagen am Spielende auf dem Feld und intakt: <b>50 Punkte</b>.</li><li>Steht der Wagen am Spielende vollständig in der gegnerischen Aufstellungszone oder ist in der gegnerischen Aufstellungszone vom Schalchtfeld gefahren: zusätzlich <b>50 Punkte</b>.</li><li>Die Zerstörung des Wagens gibt <b>50 Punkte</b>.</li></ul>
 
+</div>
+</div>
 <h1>5. Siegpunkte</h1>
 <p>Am Ende von Runde 5 werden alle Siegpunkte zusammengerechnet. Wer mehr Punkte hat, gewinnt.</p><ul><li><b>Zerstörte Einheiten und Charaktere:</b> Punkte für vernichtete oder aus dem Spiel geflohene gegnerische Einheiten.</li><li><b>General getötet:</b> +50 Siegpunkte.</li><li><b>Missionspunkte:</b> siehe Kapitel 4.</li></ul>
 
@@ -371,11 +412,6 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 <!-- ===================== ARMEE & MAGIE ===================== -->
 <div class="tab-content" id="panel-armee" role="tabpanel" aria-labelledby="tab-armee" tabindex="0" hidden="">
 <div class="guide">
-
-<div class="toc"><h2>Inhalt</h2><ul>
-<li>1. Armeeaufbau</li>
-<li>2. Magische Gegenstände</li>
-</ul></div>
 
 <h1>1. Armeeaufbau</h1><ul>
 <li>Gespielt wird mit 500 Punkten</li>
@@ -392,34 +428,36 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 </tbody></table>
 
 <h1>2. Magische Gegenstände</h1>
-<p>Diese Gegenstände ergänzen die allgemeinen Magischen Gegenstände aus dem Regelbuch von Warhammer: The Old World. Sie stellen die bescheideneren Artefakte dar, die Befehlshaber von Kundschaftertrupps und Reiterkompanien führen, und dürfen von Modellen aller Aufmarschlisten genommen werden, die für Gefechtsmarsch-Spiele geschrieben wurden.</p>
-<p class="italic">Sie dürfen nur in Aufmarschlisten für Gefechtsmarsch-Spiele verwendet werden – nicht in regulären Spielen. Ein Gegenstand mit Sternchen (*) gilt als besonders häufig (wie im Regelbuch beschrieben).</p>
-<h2>Magische Waffen</h2>
-<div class="item"><p class="name-cost">Plänklerklinge – 25 Punkte</p><p class="italic">Der Träger schlägt unerwartet und mit tödlicher Effizienz zu.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S</td><td>-1</td><td>Magische Attacken, Zusatzattacken (+1)</td></tr></tbody></table><p>Wenn der Träger im Flanken- oder Rückenbereich einer feindlichen Einheit kämpft, darf er misslungene Verwundungswürfe wiederholen.</p></div>
-<div class="item"><p class="name-cost">Dornspeierstab – 20 Punkte</p><p class="italic">Ein knorriger Holzstab, der seinem Träger erlaubt, aus der Ferne zu attackieren.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Fernkampf</td><td>24" 4</td><td>-</td><td>Gewichtig, Magische Attacken, Rüstungsfluch (1)</td></tr><tr><td>Nahkampf</td><td>Nahkampf S+1</td><td>-</td><td>Magische Attacken, Rüstungsfluch (1)</td></tr></tbody></table><p>Zwei Profile – je nachdem, ob im Fernkampf oder Nahkampf eingesetzt.</p></div>
-<div class="item"><p class="name-cost">Pionierbeil – 15 Punkte</p><p class="italic">Glüht von der Hitze der Schmiede und durchschlägt Rüstung wie dichtes Unterholz.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S+1</td><td>-1</td><td>Durch Deckung bewegen, Flammenattacken, Magische Attacken</td></tr></tbody></table><p>Nur für Infanterie. Einmal pro Spiel kann der Träger in seiner Unterphase „Beginn des Zuges“ den Pfad offenbaren: Bis Zugende erhalten Träger und Einheit die Sonderregel Durch Deckung bewegen.</p></div>
-<div class="item"><p class="name-cost">Diestros Klinge – 10 Punkte</p><p class="italic">Schlägt schneller zu, als das Auge folgen kann.</p><table class="profile-table"><tbody><tr><th>R</th><th>S</th><th>DS</th><th>Sonderregeln</th></tr><tr><td>Nahkampf</td><td>Nahkampf S</td><td>-1</td><td>Magische Attacken</td></tr></tbody></table><p>Der Träger erhält +1 auf seinen Initiativewert.</p></div>
-<h2>Magische Rüstung</h2>
-<div class="item"><p class="name-cost">Helm des Mutes – 25 Punkte</p><p class="italic">Verleiht eine Aura der Selbstbeherrschung, die jeden unter seinem Befehl mit Mut erfüllt.</p><p>Kann mit anderer Rüstung kombiniert werden. Der Träger (oder der, dem er angeschlossen ist) verbessert seinen Rüstungswert um 1 und darf einmal pro Spiel einen misslungenen Aufriebtest wiederholen.</p></div>
-<div class="item"><p class="name-cost">Wattiertes Kettenhemd – 20 Punkte</p><p class="italic">Schwere Rüstung, die selbst den schärfsten Klingen kaum etwas entgegenzusetzen hat.</p><p>Schwere Rüstung. Verbessert den Rüstungswert um 1 gegenüber dem üblichen Modifikator (bis maximal 2+).</p></div>
-<div class="item"><p class="name-cost">Schild mit Eisenrand – 15 Punkte</p><p class="italic">Trotz Größe und Gewicht lässt sich dieser ausbalancierte Schild leicht als improvisierte Waffe einsetzen.</p><p>Zählt als Schild. Der Träger erhält +1 auf seinen Attackenwert; diese Zusatzattacke muss mit einer gewöhnlichen Handwaffe ausgeführt werden.</p></div>
-<div class="item"><p class="name-cost">Schattenmantel – 10 Punkte</p><p class="italic">Der Träger dieser dunklen Brigantine scheint in der Menge der Krieger zu verschwinden.</p><p>Nur für Infanterie. Der Träger kann nicht Ziel feindlicher Fernkampfattacken oder Zauber sein, solange er sich innerhalb von 3" um eine befreundete Einheit befindet – außer er ist das nächstgelegene Ziel.</p></div>
-<h2>Talismane</h2>
-<div class="item"><p class="name-cost">Talisman der Autorität – 30 Punkte</p><p class="italic">Ein Blick des Trägers genügt, damit ein Feind seine Waffen senkt und strammsteht.</p><p>Beschränkt. Feindliche Modelle, die im Nahkampf gegen den Träger attackieren wollen, müssen zuerst einen Moralwerttest bestehen – sonst dürfen sie nicht attackieren.</p></div>
-<div class="item"><p class="name-cost">Behütender Talisman – 15 Punkte</p><p class="italic">Die Luft um den Talisman schimmert und raubt feindlichen Attacken ihre Kraft.</p><p>Gibt dem Träger eine 6+-Rettung gegen alle erlittenen Verwundungen.</p></div>
-<h2>Magische Standarten</h2>
-<div class="item"><p class="name-cost">Banner der Berühmtheit – 15 Punkte</p><p class="italic">Schon der Anblick dieses Banners kann den Feind mit Furcht erfüllen.</p><p>Beschränkt. Beim Berechnen des Kampfergebnisses gibt die tragende Einheit zusätzlich +1 Kampfergebnispunkt.</p></div>
-<div class="item"><p class="name-cost">Banner der Tapferen – 10 Punkte</p><p class="italic">Von Veteranen unzähliger Schlachten emporgehalten – erfüllt die Einheit mit Stolz und Mut.</p><p>Die tragende Einheit erhält die Sonderregel Veteranen.</p></div>
-<h2>Verzauberte Gegenstände</h2>
-<div class="item"><p class="name-cost">Fernglas des Kundschafters – 20 Punkte</p><p class="italic">Erfahrene Kundschafter-Befehlshaber schätzen die Landschaft immer vorausschauend ab.</p><p>Trägt der General das Fernglas, addiert er +2 auf seinen Wurf, wer den ersten Zug erhält.</p></div>
-<div class="item"><p class="name-cost">Numas’ allsehendes Auge – 15 Punkte</p><p class="italic">Eine aus einer staubigen Gruft geborgene Glaskugel – entdeckt Feinde selbst im dichtesten Unterholz.</p><p>Der Träger ignoriert Deckungsmodifikatoren und ignoriert beim Schießen Wälder für die Sichtlinie.</p></div>
-<div class="item"><p class="name-cost">Karte der Wildnis* – 10 Punkte</p><p class="italic">Wer alte Karten studiert, kennt die Gefahren der Wildnis besser.</p><p>Löst der Träger (oder seine Einheit) einen Wurf auf der Tabelle Wildnisgelände (siehe Reiter „Leitfaden“ – Random Happenings) aus, darf dieser Wurf wiederholt werden.</p></div>
-<div class="item"><p class="name-cost">Verzauberter Almanach – 5 Punkte</p><p class="italic">Die vergilbten Seiten offenbaren gelegentlich nützliche Informationen.</p><p>Ein Charaktermodell mit dem Almanach darf seinen Wurf auf der Tabelle Unwägbarkeiten des Krieges (siehe Reiter „Leitfaden“ – Random Happenings) wiederholen.</p></div>
-<h2>Arkane Artefakte</h2>
-<div class="item"><p class="name-cost">Schriftrolle feuriger Beschwörung* – 15 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Feuerball (Lehre der Kampfmagie) zu wirken.</p></div>
-<div class="item"><p class="name-cost">Schriftrolle tödlichen Flüsterns* – 10 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Totenkabale (Lehre der Nekromantie) zu wirken.</p></div>
-<div class="item"><p class="name-cost">Wyrdsteinsplitter – 5 Punkte</p><p class="italic"></p><p>Beschränkt. Unmittelbar bevor der Träger einen Zauber- oder Bannwurf ausführt, darf er ansagen, den Splitter einzusetzen: +1 auf diesen Wurf.</p></div>
-<div class="item"><p class="name-cost">Schriftrolle der Verschleierung* – 5 Punkte</p><p class="italic"></p><p>Beschränkt. Statt einen bekannten Zauber zu wirken, darf der Träger diese Schriftrolle lesen, um den Zauber Überwältigendes Blendwerk (Lehre der Illusion) zu wirken.</p></div>
+<p>Diese Gegenstände ergänzen die allgemeinen Magischen Gegenstände (Warhammer: The Old World) und dürfen von Modellen aller Gefechtsmarsch-Aufmarschlisten genommen werden – jedoch nur in Gefechtsmarsch-Spielen, nicht in regulären Spielen. Ein Gegenstand mit Sternchen (*) gilt als besonders häufig.</p>
+<table class="magic-table"><tbody>
+<tr><th>Gegenstand</th><th>Punkte</th><th>Regeln</th></tr>
+<tr class="cat"><td colspan="3">Magische Waffen</td></tr>
+<tr><td>Plänklerklinge</td><td>25</td><td>Nahkampf, DS -1. Magische Attacken, Zusatzattacken (+1). Im Flanken- oder Rückenbereich darf der Träger misslungene Verwundungswürfe wiederholen.</td></tr>
+<tr><td>Dornspeierstab</td><td>20</td><td>Zwei Profile – Fernkampf: 24", S4, Gewichtig, Magische Attacken, Rüstungsfluch (1). Nahkampf: S+1, Magische Attacken, Rüstungsfluch (1).</td></tr>
+<tr><td>Pionierbeil</td><td>15</td><td>Nahkampf, S+1, DS -1. Durch Deckung bewegen, Flammenattacken, Magische Attacken. Nur Infanterie. Einmal pro Spiel zu „Beginn des Zuges“: Träger und Einheit erhalten bis Zugende Durch Deckung bewegen.</td></tr>
+<tr><td>Diestros Klinge</td><td>10</td><td>Nahkampf, DS -1. Magische Attacken. +1 auf den Initiativewert.</td></tr>
+<tr class="cat"><td colspan="3">Magische Rüstung</td></tr>
+<tr><td>Helm des Mutes</td><td>25</td><td>Mit anderer Rüstung kombinierbar. +1 Rüstungswert; einmal pro Spiel einen misslungenen Aufriebtest wiederholen.</td></tr>
+<tr><td>Wattiertes Kettenhemd</td><td>20</td><td>Schwere Rüstung. +1 Rüstungswert gegenüber dem üblichen Modifikator (max. 2+).</td></tr>
+<tr><td>Schild mit Eisenrand</td><td>15</td><td>Zählt als Schild. +1 Attackenwert; diese Zusatzattacke muss mit einer gewöhnlichen Handwaffe ausgeführt werden.</td></tr>
+<tr><td>Schattenmantel</td><td>10</td><td>Nur Infanterie. Kann nicht Ziel feindlicher Fernkampfattacken oder Zauber sein, solange er sich innerhalb von 3" um eine befreundete Einheit befindet – außer er ist das nächstgelegene Ziel.</td></tr>
+<tr class="cat"><td colspan="3">Talismane</td></tr>
+<tr><td>Talisman der Autorität</td><td>30</td><td>Beschränkt. Feindliche Modelle müssen vor einem Nahkampfangriff gegen den Träger einen Moralwerttest bestehen – sonst dürfen sie nicht attackieren.</td></tr>
+<tr><td>Behütender Talisman</td><td>15</td><td>6+-Rettung gegen alle erlittenen Verwundungen.</td></tr>
+<tr class="cat"><td colspan="3">Magische Standarten</td></tr>
+<tr><td>Banner der Berühmtheit</td><td>15</td><td>Beschränkt. Die tragende Einheit erhält beim Kampfergebnis +1 Kampfergebnispunkt.</td></tr>
+<tr><td>Banner der Tapferen</td><td>10</td><td>Die tragende Einheit erhält die Sonderregel Veteranen.</td></tr>
+<tr class="cat"><td colspan="3">Verzauberte Gegenstände</td></tr>
+<tr><td>Fernglas des Kundschafters</td><td>20</td><td>Trägt der General das Fernglas, addiert er +2 auf seinen Wurf um den ersten Zug.</td></tr>
+<tr><td>Numas’ allsehendes Auge</td><td>15</td><td>Der Träger ignoriert Deckungsmodifikatoren und ignoriert beim Schießen Wälder für die Sichtlinie.</td></tr>
+<tr><td>Karte der Wildnis*</td><td>10</td><td>Löst der Träger (oder seine Einheit) einen Wurf auf der Tabelle Wildnisgelände aus (Leitfaden – Random Happenings), darf dieser wiederholt werden.</td></tr>
+<tr><td>Verzauberter Almanach</td><td>5</td><td>Der Träger darf seinen Wurf auf der Tabelle Unwägbarkeiten des Krieges wiederholen (Leitfaden – Random Happenings).</td></tr>
+<tr class="cat"><td colspan="3">Arkane Artefakte</td></tr>
+<tr><td>Schriftrolle feuriger Beschwörung*</td><td>15</td><td>Beschränkt. Statt eines bekannten Zaubers wirkt der Träger Feuerball (Lehre der Kampfmagie).</td></tr>
+<tr><td>Schriftrolle tödlichen Flüsterns*</td><td>10</td><td>Beschränkt. Statt eines bekannten Zaubers wirkt der Träger Totenkabale (Lehre der Nekromantie).</td></tr>
+<tr><td>Wyrdsteinsplitter</td><td>5</td><td>Beschränkt. Direkt vor einem Zauber- oder Bannwurf ansagbar: +1 auf diesen Wurf.</td></tr>
+<tr><td>Schriftrolle der Verschleierung*</td><td>5</td><td>Beschränkt. Statt eines bekannten Zaubers wirkt der Träger Überwältigendes Blendwerk (Lehre der Illusion).</td></tr>
+</tbody></table>
 
 </div>
 </div>
@@ -430,7 +468,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 
 <h2 class="section-title">Terrain-Baukasten</h2>
 <p class="subtitle">Gelände per Drag &amp; Drop platzieren · Aufstellungszonen frei malen · Battle-March-Stil</p>
-<p class="coord-explainer"><b>Koordinatensystem:</b> X = horizontale Achse (Breite der Matte, von links nach rechts) · Y = vertikale Achse (Tiefe der Matte, von unten nach oben). Der Ursprung (0, 0) liegt in der linken unteren Ecke der Matte. Alle Koordinaten – für Geländestücke wie für Aufstellungszonen – geben immer die <b>linke untere Ecke</b> des jeweiligen Objekts an, gemessen von diesem Ursprung. <b>Tipp:</b> Am Handy ein Palettenstück antippen, um es platzieren zu lassen, oder es aufs Raster ziehen.</p>
+<p class="coord-explainer"><b>Koordinatensystem:</b> X = horizontale Achse (Breite der Matte, von links nach rechts) · Y = vertikale Achse (Tiefe der Matte, von unten nach oben). Der Ursprung (0, 0) liegt in der linken unteren Ecke der Matte. Koordinaten für Geländestücke und Schätze geben die Position vom Ursprung an (Gelände: <b>linke untere Ecke</b>, Schatz: <b>Mittelpunkt</b>). Bei den Aufstellungszonen werden statt Koordinaten <b>Abstände</b> angezeigt (Tiefe und Abstand zur gegnerischen Zone). <b>Tipp:</b> Am Handy ein Palettenstück antippen, um es platzieren zu lassen, oder es aufs Raster ziehen.</p>
 
 <div class="layout">
 
@@ -486,7 +524,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         <span><span class="dot" style="background:var(--p2)"></span>Spieler 2</span>
         <span><span class="dot" style="background:var(--nml)"></span>No Man's Land</span>
       </div>
-      <div class="hint" style="margin-top:8px;">Zonen-Modus einschalten, Pinsel wählen, dann auf dem Raster klicken/ziehen, um Zellen (1 Zoll) einzufärben. Presets füllen die Karte automatisch mit einem der sechs Layouts aus dem Leitfaden – danach lässt sich frei weiter anpassen. Auf der Karte steht bei jeder Zone die Zoll-Koordinate ihrer Umgrenzung (linke untere / rechte obere Ecke); bei unregelmäßigen (z. B. diagonalen) Formen ist das die umschließende Box, nicht der exakte Umriss.</div>
+      <div class="hint" style="margin-top:8px;">Zonen-Modus einschalten, Pinsel wählen, dann auf dem Raster klicken/ziehen, um Zellen (1 Zoll) einzufärben. Presets füllen die Karte automatisch mit einem der sechs Layouts aus dem Leitfaden – danach lässt sich frei weiter anpassen. Bei jeder Zone stehen jetzt Abstände: die <b>Tiefe</b> der Zone und der <b>Abstand zur gegnerischen Zone</b>. Bei unregelmäßigen (z. B. diagonalen) Formen werden diese Werte aus der umschließenden Box abgeschätzt.</div>
     </div>
 
     <div class="toolbar">
@@ -495,6 +533,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       <button id="mirrorHBtn" title="Spiegelt Gelände und Zonen links/rechts">⇋ Horizontal spiegeln</button>
       <button id="mirrorVBtn" title="Spiegelt Gelände und Zonen oben/unten">⇵ Vertikal spiegeln</button>
       <button id="randomBtn" title="Würfelt Zone, Spiegelung und Geländeplatzierung">🎲 Zufällige Karte</button>
+      <label class="mission-toggle" title="Platziert beim Würfeln drei 40-mm-Schätze im No Man's Land (≥3″ Abstand zum Gelände)"><input type="checkbox" id="treasureToggle"> Schätze (Mission)</label>
       <div class="settings">
         <label>Breite" <input type="number" id="setW" value="48" min="12" max="96"></label>
         <label>Tiefe" <input type="number" id="setH" value="36" min="12" max="96"></label>
@@ -703,6 +742,20 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     return result;
   }
 
+  function zoneDistances(b) {
+    const depth = (z) => z ? Math.min(z.x1 - z.x0, z.y1 - z.y0) : null;
+    let gap = null;
+    const p1 = b.p1, p2 = b.p2;
+    if (p1 && p2) {
+      if (p1.y1 <= p2.y0) gap = p2.y0 - p1.y1;
+      else if (p2.y1 <= p1.y0) gap = p1.y0 - p2.y1;
+      else if (p1.x1 <= p2.x0) gap = p2.x0 - p1.x1;
+      else if (p2.x1 <= p1.x0) gap = p1.x0 - p2.x1;
+      else gap = 0;
+    }
+    return { d1: depth(p1), d2: depth(p2), dnml: depth(b.nml), gap: gap };
+  }
+
   function drawZones() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let r = 0; r < cfg.h; r++) {
@@ -738,6 +791,8 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 
   function renderZoneLegend(bounds) {
     zoneLegend.innerHTML = '';
+    const dist = zoneDistances(bounds);
+    const gapTxt = dist.gap == null ? '' : (dist.gap > 0 ? dist.gap + '" bis zur gegn. Zone' : 'grenzt an gegn. Zone');
     const items = [];
     Object.keys(bounds).forEach(key => {
       const b = bounds[key];
@@ -768,7 +823,14 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       const item = document.createElement('div');
       item.className = 'zone-legend-item';
       item.style.top = center + 'px';
-      item.innerHTML = `<b><span class="swatchline" style="background:${ZONE_COLORS[key]}"></span>${ZONE_NAMES[key]}</b>X: ${b.x0}" bis ${b.x1}"<br>Y: ${b.y0}" bis ${b.y1}"`;
+      let info;
+      if (key === 'nml') {
+        info = 'Breite: ' + (dist.dnml != null ? dist.dnml : '?') + '"';
+      } else {
+        const dz = key === 'p1' ? dist.d1 : dist.d2;
+        info = 'Tiefe: ' + (dz != null ? dz : '?') + '"' + (gapTxt ? '<br>' + gapTxt : '');
+      }
+      item.innerHTML = `<b><span class="swatchline" style="background:${ZONE_COLORS[key]}"></span>${ZONE_NAMES[key]}</b>${info}`;
       zoneLegend.appendChild(item);
     });
   }
@@ -949,6 +1011,61 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     return Math.hypot(dx, dy) >= minGap;
   }
 
+  const TREASURE_D = 40 / 25.4;
+  const TREASURE_R = TREASURE_D / 2;
+  const TREASURE_GAP = 3;
+  const TREASURE_SPACING = 12;
+  let treasures = [];
+
+  function computeTreasures() {
+    const cx = cfg.w / 2, cy = cfg.h / 2, S = TREASURE_SPACING;
+    const inv = Math.SQRT1_2;
+    const axes = [[1, 0], [0, 1], [inv, inv], [inv, -inv]];
+    const inB = (x, y) => x >= 0 && x <= cfg.w && y >= 0 && y <= cfg.h;
+    const isNml = (x, y) => {
+      const c = Math.floor(x), r = Math.floor(y);
+      if (r < 0 || r >= cfg.h || c < 0 || c >= cfg.w) return false;
+      return zoneGrid[r] && zoneGrid[r][c] === 'nml';
+    };
+    for (const [ux, uy] of axes) {
+      const ax = cx - ux * S, ay = cy - uy * S, bx = cx + ux * S, by = cy + uy * S;
+      if (inB(ax, ay) && inB(bx, by) && isNml(ax, ay) && isNml(bx, by)) {
+        return [{ x: cx, y: cy }, { x: ax, y: ay }, { x: bx, y: by }];
+      }
+    }
+    return [{ x: cx, y: cy }, { x: cx - S, y: cy }, { x: cx + S, y: cy }];
+  }
+
+  function rectClearOfTreasures(x, y, w, d) {
+    for (const t of treasures) {
+      const nx = Math.max(x, Math.min(t.x, x + w));
+      const ny = Math.max(y, Math.min(t.y, y + d));
+      if (Math.hypot(nx - t.x, ny - t.y) < TREASURE_GAP + TREASURE_R) return false;
+    }
+    return true;
+  }
+
+  function renderTreasures() {
+    board.querySelectorAll('.treasure').forEach(el => el.remove());
+    treasures.forEach((t, i) => {
+      const el = document.createElement('div');
+      el.className = 'treasure';
+      el.style.width = px(TREASURE_D) + 'px';
+      el.style.height = px(TREASURE_D) + 'px';
+      el.style.left = px(t.x - TREASURE_R) + 'px';
+      el.style.bottom = px(t.y - TREASURE_R) + 'px';
+      const rx = Math.round(t.x * 10) / 10, ry = Math.round(t.y * 10) / 10;
+      el.title = 'Schatz ' + (i + 1) + ' (40 mm) \u2013 Mitte (' + rx + ', ' + ry + ')';
+      el.innerHTML = '<div class="coord-tag">(' + rx + ', ' + ry + ')</div>';
+      const tag = el.querySelector('.coord-tag');
+      if (t.x > cfg.w / 2) { tag.style.left = 'auto'; tag.style.right = '0'; }
+      else { tag.style.left = '0'; tag.style.right = 'auto'; }
+      board.appendChild(el);
+    });
+    const circle = board.querySelector('.no-terrain-circle');
+    if (circle) circle.classList.toggle('text-top', treasures.length > 0);
+  }
+
   function randomizeMap() {
     pieces = [];
     board.querySelectorAll('.piece').forEach(el => el.remove());
@@ -961,6 +1078,8 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     if (Math.random() < 0.5) zoneGrid.reverse();
     zoneGrid = maskCircle(zoneGrid);
     drawZones();
+
+    treasures = document.getElementById('treasureToggle').checked ? computeTreasures() : [];
 
     const MIN_GAP = 6;
 
@@ -975,6 +1094,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         for (let x = 0; x <= cfg.w - w; x++) {
           for (let y = 0; y <= cfg.h - d; y++) {
             if (!rectClearOfCircle(x, y, w, d)) continue;
+            if (treasures.length && !rectClearOfTreasures(x, y, w, d)) continue;
             if (requireGap) {
               let ok = true;
               for (const r of placedRects) {
@@ -1015,6 +1135,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     }
 
     best.results.forEach(r => { if (r) placePieceExact(r.type, r.x, r.y, r.w, r.d); });
+    renderTreasures();
   }
 
   function removePiece(id) {
@@ -1115,11 +1236,14 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     renderCircle();
     board.querySelectorAll('.piece').forEach(el => el.remove());
     pieces.forEach(p => board.appendChild(createPieceEl(p)));
+    renderTreasures();
   }
 
   document.getElementById('resetBtn').addEventListener('click', () => {
     pieces = [];
     board.querySelectorAll('.piece').forEach(el => el.remove());
+    treasures = [];
+    renderTreasures();
     exportBox.classList.remove('show');
   });
 
@@ -1141,22 +1265,37 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     randomizeMap();
   });
 
+  document.getElementById('treasureToggle').addEventListener('change', (e) => {
+    if (e.target.checked) {
+      randomizeMap();
+    } else {
+      treasures = [];
+      renderTreasures();
+    }
+  });
+
   document.getElementById('exportBtn').addEventListener('click', () => {
     const lines = [];
-    lines.push('-- Aufstellungszonen (linke untere / rechte obere Ecke der Umgrenzung) --');
+    lines.push('-- Aufstellungszonen (Abstände) --');
     const bounds = computeZoneBounds();
-    const names = { p1: 'Spieler 1', p2: 'Spieler 2', nml: "No Man's Land" };
-    ['p1', 'p2', 'nml'].forEach(key => {
-      const b = bounds[key];
-      if (!b) { lines.push(`${names[key]}: (nicht vorhanden)`); return; }
-      lines.push(`${names[key]}: (${b.x0}, ${b.y0}) bis (${b.x1}, ${b.y1})  [${b.x1 - b.x0}x${b.y1 - b.y0}", ${b.count} Zoll-Zellen]`);
-    });
+    const dist = zoneDistances(bounds);
+    const gapPart = dist.gap == null ? '' : (dist.gap > 0 ? dist.gap + '" bis zur gegnerischen Zone' : 'grenzt an die gegnerische Zone');
+    lines.push(bounds.p1 ? ('Spieler 1: Tiefe ' + dist.d1 + '"' + (gapPart ? ', ' + gapPart : '')) : 'Spieler 1: (nicht vorhanden)');
+    lines.push(bounds.p2 ? ('Spieler 2: Tiefe ' + dist.d2 + '"' + (gapPart ? ', ' + gapPart : '')) : 'Spieler 2: (nicht vorhanden)');
+    lines.push(bounds.nml ? ("No Man's Land: Breite " + dist.dnml + '"') : "No Man's Land: (nicht vorhanden)");
     lines.push('');
     lines.push('-- Geländestücke (linke untere Ecke) --');
     if (pieces.length === 0) {
       lines.push('(noch keine Geländestücke platziert)');
     } else {
       pieces.forEach(p => lines.push(`${p.name} (${p.w}x${p.d}"): (${p.x}, ${p.y})`));
+    }
+    lines.push('');
+    lines.push('-- Schätze (40 mm Base, Mittelpunkt) --');
+    if (treasures.length === 0) {
+      lines.push('(keine – Mission Schätze nicht aktiv)');
+    } else {
+      treasures.forEach((t, i) => lines.push('Schatz ' + (i + 1) + ': (' + (Math.round(t.x * 10) / 10) + ', ' + (Math.round(t.y * 10) / 10) + ')'));
     }
     exportText.textContent = lines.join('\n');
     exportBox.classList.add('show');
@@ -1235,6 +1374,20 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 })();
 </script>
 
-
-
+<script>
+/* ================= Akkordeon ================= */
+(function () {
+  function setAcc(acc, open) {
+    acc.querySelector('.acc-head').setAttribute('aria-expanded', open ? 'true' : 'false');
+    acc.querySelector('.acc-body').hidden = !open;
+    acc.classList.toggle('open', open);
+  }
+  document.querySelectorAll('.acc .acc-head').forEach(head => {
+    head.addEventListener('click', () => {
+      const acc = head.closest('.acc');
+      setAcc(acc, acc.querySelector('.acc-body').hidden);
+    });
+  });
+})();
+</script>
 </body></html>
