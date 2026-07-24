@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0043)file:///C:/Users/phili/Downloads/index.html -->
+<!-- saved from url=(0045)file:///C:/Users/phili/Downloads/index_2.html -->
 <html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -198,10 +198,6 @@ button:hover{ background:var(--maroon-dark); }
 .tex-field{ background-color:#d9c179; background-image:repeating-linear-gradient(to right, rgba(138,116,47,.5) 0 1.5px, transparent 1.5px calc(1.3 * var(--scale))); }
 .tex-water{ background-color:#4c85b8; background-image:repeating-linear-gradient(to bottom, rgba(219,233,245,.55) 0 2px, transparent 2px calc(1.6 * var(--scale))); }
 
-.export-box{ margin-top:16px; background:#fff; border:1.5px solid var(--maroon); border-radius:4px; padding:10px 12px; font-size:.78rem; display:none; }
-.export-box.show{ display:block; }
-.export-box pre{ white-space:pre-wrap; margin:6px 0 0; font-family:"Courier New", monospace; font-size:.75rem; }
-.export-box h3{ margin:0; color:var(--maroon); font-size:.88rem; }
 
 .footer-note{ text-align:center; font-size:.72rem; color:#5a4f3f; font-style:italic; margin-top:16px; }
 .coord-explainer{
@@ -264,13 +260,13 @@ button:hover{ background:var(--maroon-dark); }
 </div>
 
 <div class="tabbar" role="tablist" aria-label="Battle March Werkzeuge">
-  <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
+  <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="false" tabindex="-1">Leitfaden</button>
   <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="false" tabindex="-1">Armee &amp; Magie</button>
-  <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="false" tabindex="-1">Kartenbau</button>
+  <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="true" tabindex="0">Kartenbau</button>
 </div>
 
 <!-- ===================== LEITFADEN ===================== -->
-<div class="tab-content" id="panel-leitfaden" role="tabpanel" aria-labelledby="tab-leitfaden" tabindex="0">
+<div class="tab-content" id="panel-leitfaden" role="tabpanel" aria-labelledby="tab-leitfaden" tabindex="0" hidden="">
 <div class="guide">
 
 <h1>1. Spielablauf</h1>
@@ -278,7 +274,7 @@ button:hover{ background:var(--maroon-dark); }
 <li>Geländeaufstellung und Aufstellungszone</li>
 
 <li>W3 – Mission</li>
-<li>W3 – Art der Random Happenings</li>
+<li>W3 – Zufallsereignisse</li>
 <li>W6 gegeneinander – Sieger wählt die Tischseite</li>
 <li>W6 gegeneinander – Sieger bestimmt, wer zuerst eine Einheit aufstellt</li>
 <li>W6 gegeneinander – Sieger bestimmt, wer zuerst am Zug ist</li>
@@ -302,11 +298,11 @@ button:hover{ background:var(--maroon-dark); }
 <h2>Aufstellungszonen</h2>
 <p>Die Aufstellungszone ist 10 Zoll tief. Alternativ nutze den Kartenbau-Reiter oben auf dieser Seite</p>
 
-<h1>3. Random Happenings</h1>
+<h1>3. Zufallsereignisse</h1>
 <p>Zu Beginn wird mit einem W3 festgelegt, welche der drei folgenden Tabellen verwendet wird. Danach entscheidet ein W6 über das genaue Ereignis.</p>
 <div class="acc" data-rh="1">
 <button type="button" class="acc-head" aria-expanded="false" aria-controls="rh-1-body"><span class="acc-title">Tabelle 1 – Störendes Wetter</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="rh-1-body" role="region" hidden>
+<div class="acc-body" id="rh-1-body" role="region" hidden="">
 <p class="italic">Wird zu Beginn des Spiels einmalig gewürfelt und gilt für die gesamte Spieldauer.</p>
 <table class="rh-table"><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
 <tr><td>1</td><td>Heftiger Platzregen: Alle Einheiten erhalten −1 auf ihren Bewegungswert (Minimum 1); Schnelle Bewegung und Fliegen (2) sind nicht nutzbar.</td></tr>
@@ -320,7 +316,7 @@ button:hover{ background:var(--maroon-dark); }
 </div>
 <div class="acc" data-rh="2">
 <button type="button" class="acc-head" aria-expanded="false" aria-controls="rh-2-body"><span class="acc-title">Tabelle 2 – Wildnisgelände</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="rh-2-body" role="region" hidden>
+<div class="acc-body" id="rh-2-body" role="region" hidden="">
 <p class="italic">Wird ausgelöst, wenn eine Einheit ihre Bewegung in natürlichem Gelände (Wälder, Felsen, Sümpfe usw.) beendet oder dort aufgestellt wird.</p>
 <table class="rh-table"><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
 <tr><td>1</td><td>Dornengestrüpp: Einheiten, die sich hindurchbewegen, angreifen, fliehen oder verfolgen, tun dies in Unordnung.</td></tr>
@@ -337,7 +333,7 @@ button:hover{ background:var(--maroon-dark); }
 </div>
 <div class="acc" data-rh="3">
 <button type="button" class="acc-head" aria-expanded="false" aria-controls="rh-3-body"><span class="acc-title">Tabelle 3 – Unwägbarkeiten des Krieges</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="rh-3-body" role="region" hidden>
+<div class="acc-body" id="rh-3-body" role="region" hidden="">
 <p class="italic">Zu Beginn jeder Unterphase „Beginn des Zuges“ (ab dem zweiten Zug) wird ein W6 gewürfelt; ist das Ergebnis gleich oder niedriger als die Zugnummer, würfelt der Gegner auf dieser Tabelle (bereits gewürfelte Ergebnisse werden neu gewürfelt).</p>
 <table class="rh-table"><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
 <tr><td>1</td><td>Ätherische Instabilität: Würfelt ein Spieler bei einem Zauberwurf einen natürlichen Pasch aus 1er, 2er oder 3er, erleidet er eine Verhexung.</td></tr>
@@ -357,7 +353,7 @@ button:hover{ background:var(--maroon-dark); }
 <p>Zu Beginn wird mit einem W3 eine der folgenden drei Missionen bestimmt.</p>
 <div class="acc" data-mission="1">
 <button type="button" class="acc-head" aria-expanded="false" aria-controls="mission-1-body"><span class="acc-title">Mission 1 – Schätze</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="mission-1-body" role="region" hidden>
+<div class="acc-body" id="mission-1-body" role="region" hidden="">
 <p>Schätze sind Geländedekorationen, die Beute, Vorräte, Nahrung, Waffen, verwundete Kameraden oder wichtige Informationen darstellen.</p>
 <p class="italic"><b>Aufstellung:</b> Schätze werden gemäß der jeweiligen Geländekarte platziert, jedoch nicht innerhalb von 3" um ein Geländestück oder auf einem niedrigen linearen Hindernis. Nötigenfalls wird das Gelände um die geringstmögliche Distanz verschoben.</p>
 <figure class="zone-block"><svg viewBox="0 0 300 170" width="100%" style="max-width:300px">
@@ -382,7 +378,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 </div>
 <div class="acc" data-mission="2">
 <button type="button" class="acc-head" aria-expanded="false" aria-controls="mission-2-body"><span class="acc-title">Mission 2 – Strategische Landmarke</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="mission-2-body" role="region" hidden>
+<div class="acc-body" id="mission-2-body" role="region" hidden="">
 <p>Eine markante Landschaftsmarke (Statue, arkaner Monolith, Wachturm o. Ä.) – ein Geländestück auf 100-mm-Rundbase, unpassierbar, blockiert keine Sichtlinie.</p>
 <p class="italic"><b>Aufstellung:</b> im Zentrum des Schlachtfelds, jedoch nicht innerhalb von 3" um ein Geländestück oder auf einem niedrigen linearen Hindernis.</p>
 <p><b>Ungewöhnliche Eigenschaft:</b> Nach der Platzierung, vor der Armeeaufstellung, würfelt ein Spieler auf folgender Tabelle. Die kontrollierende Einheit profitiert davon bis zum Ende des nächsten Zuges:</p>
@@ -393,7 +389,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 </div>
 <div class="acc" data-mission="3">
 <button type="button" class="acc-head" aria-expanded="false" aria-controls="mission-3-body"><span class="acc-title">Mission 3 – Versorgungswagen</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="mission-3-body" role="region" hidden>
+<div class="acc-body" id="mission-3-body" role="region" hidden="">
 <p>Karawanen mit Nahrung und Ausrüstung müssen vor Angriffen geschützt werden. Beide Spieler haben einen Versorgungswagen als zusätzliche Einheit.</p>
 <p class="italic">Der Versorgungswagen ist ein schwerer Streitwagen (Nichtkämpfer – kann keine Angriffbewegung durchführen, verfolgen, überrennen oder nachrücken) </p>
 <div class="statbox"><p><b>Versorgungswagen</b> · Schwerer Streitwagen · Basegröße 60×100&nbsp;mm · Einheitengröße 1</p>
@@ -450,8 +446,8 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 <tr class="cat"><td colspan="3">Verzauberte Gegenstände</td></tr>
 <tr><td>Fernglas des Kundschafters</td><td>20</td><td>Trägt der General das Fernglas, addiert er +2 auf seinen Wurf um den ersten Zug.</td></tr>
 <tr><td>Numas’ allsehendes Auge</td><td>15</td><td>Der Träger ignoriert Deckungsmodifikatoren und ignoriert beim Schießen Wälder für die Sichtlinie.</td></tr>
-<tr><td>Karte der Wildnis*</td><td>10</td><td>Löst der Träger (oder seine Einheit) einen Wurf auf der Tabelle Wildnisgelände aus (Leitfaden – Random Happenings), darf dieser wiederholt werden.</td></tr>
-<tr><td>Verzauberter Almanach</td><td>5</td><td>Der Träger darf seinen Wurf auf der Tabelle Unwägbarkeiten des Krieges wiederholen (Leitfaden – Random Happenings).</td></tr>
+<tr><td>Karte der Wildnis*</td><td>10</td><td>Löst der Träger (oder seine Einheit) einen Wurf auf der Tabelle Wildnisgelände aus (Leitfaden – Zufallsereignisse), darf dieser wiederholt werden.</td></tr>
+<tr><td>Verzauberter Almanach</td><td>5</td><td>Der Träger darf seinen Wurf auf der Tabelle Unwägbarkeiten des Krieges wiederholen (Leitfaden – Zufallsereignisse).</td></tr>
 <tr class="cat"><td colspan="3">Arkane Artefakte</td></tr>
 <tr><td>Schriftrolle feuriger Beschwörung*</td><td>15</td><td>Beschränkt. Statt eines bekannten Zaubers wirkt der Träger Feuerball (Lehre der Kampfmagie).</td></tr>
 <tr><td>Schriftrolle tödlichen Flüsterns*</td><td>10</td><td>Beschränkt. Statt eines bekannten Zaubers wirkt der Träger Totenkabale (Lehre der Nekromantie).</td></tr>
@@ -463,7 +459,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 </div>
 
 <!-- ===================== KARTENBAU ===================== -->
-<div class="tab-content" id="panel-baukasten" role="tabpanel" aria-labelledby="tab-baukasten" tabindex="0" hidden="">
+<div class="tab-content" id="panel-baukasten" role="tabpanel" aria-labelledby="tab-baukasten" tabindex="0">
 <div class="builder">
 
 <h2 class="section-title">Terrain-Baukasten</h2>
@@ -529,11 +525,11 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 
     <div class="toolbar">
       <button id="resetBtn">Gelände leeren</button>
-      <button id="exportBtn">Koordinaten anzeigen</button>
+      <button id="downloadBtn" title="Aktuelle Karte als PNG-Bild herunterladen">⬇ Karte herunterladen</button>
       <button id="mirrorHBtn" title="Spiegelt Gelände und Zonen links/rechts">⇋ Horizontal spiegeln</button>
       <button id="mirrorVBtn" title="Spiegelt Gelände und Zonen oben/unten">⇵ Vertikal spiegeln</button>
       <button id="randomBtn" title="Würfelt Zone, Spiegelung und Geländeplatzierung">🎲 Zufällige Karte</button>
-      <label class="mission-toggle" title="Platziert beim Würfeln drei 40-mm-Schätze im No Man's Land (≥3″ Abstand zum Gelände)"><input type="checkbox" id="treasureToggle"> Schätze (Mission)</label>
+      <label class="mission-toggle" title="Platziert beim Würfeln drei 40-mm-Schätze im No Man&#39;s Land (≥3″ Abstand zum Gelände)"><input type="checkbox" id="treasureToggle"> Schätze (Mission)</label>
       <div class="settings">
         <label>Breite" <input type="number" id="setW" value="48" min="12" max="96"></label>
         <label>Tiefe" <input type="number" id="setH" value="36" min="12" max="96"></label>
@@ -546,14 +542,57 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       <div class="board-row">
         <div class="board" id="board" style="--scale: 13px; width: 624px; height: 468px;">
           <canvas id="zoneCanvas" width="624" height="468" style="width: 624px; height: 468px; pointer-events: none; cursor: default;"></canvas>
-        <div class="no-terrain-circle" style="width: 208px; height: 208px; left: 208px; bottom: 130px;"><span class="strong">Kein Gelände &amp; keine Aufstellung</span><span>16" Durchmesser</span></div></div>
-        <div class="zone-legend" id="zoneLegend" style="height: 468px;"><div class="zone-legend-item" style="top: 65px;"><b><span class="swatchline" style="background:#b9c6d6"></span>SPIELER 2</b>X: 0" bis 48"<br>Y: 26" bis 36"</div><div class="zone-legend-item" style="top: 234px;"><b><span class="swatchline" style="background:#ded6c2"></span>NO MAN'S LAND</b>X: 0" bis 48"<br>Y: 10" bis 26"</div><div class="zone-legend-item" style="top: 403px;"><b><span class="swatchline" style="background:#e2c48c"></span>SPIELER 1</b>X: 0" bis 48"<br>Y: 0" bis 10"</div></div>
+        <div class="no-terrain-circle text-top" style="width: 208px; height: 208px; left: 208px; bottom: 130px;"><span class="strong">Kein Gelände &amp; keine Aufstellung</span><span>16" Durchmesser</span></div><div class="piece tex-forest" data-id="1" style="width: 130px; height: 78px; left: 91px; bottom: 39px;">
+      <span class="name">Wald</span>
+      <span class="dims">10x6"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
       </div>
-    </div>
-
-    <div class="export-box" id="exportBox">
-      <h3>Positionen (linke untere Ecke, von der linken unteren Ecke der Matte)</h3>
-      <pre id="exportText"></pre>
+      <div class="coord-tag" style="left: 0px; right: auto;">(7, 3)</div>
+    </div><div class="piece tex-brick" data-id="2" style="width: 104px; height: 78px; left: 481px; bottom: 208px;">
+      <span class="name">Gebäude</span>
+      <span class="dims">8x6"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: auto; right: 0px;">(37, 16)</div>
+    </div><div class="piece tex-hill" data-id="3" style="width: 78px; height: 104px; left: 507px; bottom: 364px;">
+      <span class="name">Hügel</span>
+      <span class="dims">6x8"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: auto; right: 0px;">(39, 28)</div>
+    </div><div class="piece tex-brick ruine" data-id="4" style="width: 91px; height: 91px; left: 104px; bottom: 364px;">
+      <span class="name">Ruine</span>
+      <span class="dims">7x7"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: 0px; right: auto;">(8, 28)</div>
+    </div><div class="piece tex-field dark" data-id="5" style="width: 78px; height: 104px; left: 533px; bottom: 0px;">
+      <span class="name">Feld</span>
+      <span class="dims">6x8"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: auto; right: 0px;">(41, 0)</div>
+    </div><div class="piece tex-water" data-id="6" style="width: 78px; height: 130px; left: 377px; bottom: 0px;">
+      <span class="name">See</span>
+      <span class="dims">6x10"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: auto; right: 0px;">(29, 0)</div>
+    </div><div class="treasure" title="Schatz 1 (40 mm) – Mitte (24, 18)" style="width: 20.4724px; height: 20.4724px; left: 301.764px; bottom: 223.764px;"><div class="coord-tag" style="left: 0px; right: auto;">(24, 18)</div></div><div class="treasure" title="Schatz 2 (40 mm) – Mitte (24, 6)" style="width: 20.4724px; height: 20.4724px; left: 301.764px; bottom: 67.7638px;"><div class="coord-tag" style="left: 0px; right: auto;">(24, 6)</div></div><div class="treasure" title="Schatz 3 (40 mm) – Mitte (24, 30)" style="width: 20.4724px; height: 20.4724px; left: 301.764px; bottom: 379.764px;"><div class="coord-tag" style="left: 0px; right: auto;">(24, 30)</div></div></div>
+        <div class="zone-legend" id="zoneLegend" style="height: 468px;"><div class="zone-legend-item" style="top: 227.5px;"><b><span class="swatchline" style="background:#e2c48c"></span>SPIELER 1</b>Tiefe: 24"<br>grenzt an gegn. Zone</div><div class="zone-legend-item" style="top: 273.5px;"><b><span class="swatchline" style="background:#ded6c2"></span>NO MAN'S LAND</b>Breite: 36"</div><div class="zone-legend-item" style="top: 319.5px;"><b><span class="swatchline" style="background:#b9c6d6"></span>SPIELER 2</b>Tiefe: 24"<br>grenzt an gegn. Zone</div></div>
+      </div>
     </div>
 
     <p class="footer-note">Ursprung (0,0) = linke untere Ecke der Matte</p>
@@ -571,8 +610,6 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
   const ctx = canvas.getContext('2d');
   const zoneLegend = document.getElementById('zoneLegend');
   const paletteList = document.getElementById('paletteList');
-  const exportBox = document.getElementById('exportBox');
-  const exportText = document.getElementById('exportText');
 
   let cfg = { w: 48, h: 36, circle: 16, scale: 13 };
   let pieces = [];
@@ -1244,7 +1281,6 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     board.querySelectorAll('.piece').forEach(el => el.remove());
     treasures = [];
     renderTreasures();
-    exportBox.classList.remove('show');
   });
 
   document.getElementById('mirrorHBtn').addEventListener('click', () => {
@@ -1274,32 +1310,112 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     }
   });
 
-  document.getElementById('exportBtn').addEventListener('click', () => {
-    const lines = [];
-    lines.push('-- Aufstellungszonen (Abstände) --');
-    const bounds = computeZoneBounds();
-    const dist = zoneDistances(bounds);
-    const gapPart = dist.gap == null ? '' : (dist.gap > 0 ? dist.gap + '" bis zur gegnerischen Zone' : 'grenzt an die gegnerische Zone');
-    lines.push(bounds.p1 ? ('Spieler 1: Tiefe ' + dist.d1 + '"' + (gapPart ? ', ' + gapPart : '')) : 'Spieler 1: (nicht vorhanden)');
-    lines.push(bounds.p2 ? ('Spieler 2: Tiefe ' + dist.d2 + '"' + (gapPart ? ', ' + gapPart : '')) : 'Spieler 2: (nicht vorhanden)');
-    lines.push(bounds.nml ? ("No Man's Land: Breite " + dist.dnml + '"') : "No Man's Land: (nicht vorhanden)");
-    lines.push('');
-    lines.push('-- Geländestücke (linke untere Ecke) --');
-    if (pieces.length === 0) {
-      lines.push('(noch keine Geländestücke platziert)');
-    } else {
-      pieces.forEach(p => lines.push(`${p.name} (${p.w}x${p.d}"): (${p.x}, ${p.y})`));
+  function downloadMap() {
+    const S = 26;                       // Export-Auflösung: px pro Zoll
+    const ML = 40, MR = 16, MT = 16, MB = 30;   // Ränder für Achsen
+    const bW = cfg.w * S, bH = cfg.h * S;
+    const cv = document.createElement('canvas');
+    cv.width = bW + ML + MR;
+    cv.height = bH + MT + MB;
+    const g = cv.getContext('2d');
+    const ox = ML, oy = MT;
+    const cx = (xi) => ox + xi * S;
+    const cy = (yi) => oy + (cfg.h - yi) * S;   // Ursprung unten links -> y invertiert
+
+    // Hintergründe
+    g.fillStyle = '#ded2b8'; g.fillRect(0, 0, cv.width, cv.height);
+    g.fillStyle = '#f4ecd8'; g.fillRect(ox, oy, bW, bH);
+
+    // Zonen
+    const ZC = { p1: '#e2c48c', p2: '#b9c6d6', nml: '#ded6c2' };
+    for (let r = 0; r < cfg.h; r++) {
+      for (let col = 0; col < cfg.w; col++) {
+        const v = zoneGrid[r] && zoneGrid[r][col];
+        if (!ZC[v]) continue;
+        g.fillStyle = ZC[v];
+        g.fillRect(cx(col), cy(r + 1), S, S);
+      }
     }
-    lines.push('');
-    lines.push('-- Schätze (40 mm Base, Mittelpunkt) --');
-    if (treasures.length === 0) {
-      lines.push('(keine – Mission Schätze nicht aktiv)');
-    } else {
-      treasures.forEach((t, i) => lines.push('Schatz ' + (i + 1) + ': (' + (Math.round(t.x * 10) / 10) + ', ' + (Math.round(t.y * 10) / 10) + ')'));
+
+    // Gitter
+    g.lineWidth = 1;
+    for (let i = 0; i <= cfg.w; i++) {
+      g.strokeStyle = (i % 6 === 0) ? 'rgba(138,131,120,.55)' : 'rgba(138,131,120,.22)';
+      g.beginPath(); g.moveTo(cx(i), oy); g.lineTo(cx(i), oy + bH); g.stroke();
     }
-    exportText.textContent = lines.join('\n');
-    exportBox.classList.add('show');
-  });
+    for (let j = 0; j <= cfg.h; j++) {
+      g.strokeStyle = (j % 6 === 0) ? 'rgba(138,131,120,.55)' : 'rgba(138,131,120,.22)';
+      g.beginPath(); g.moveTo(ox, cy(j)); g.lineTo(ox + bW, cy(j)); g.stroke();
+    }
+
+    // Rahmen
+    g.strokeStyle = '#7a1f1f'; g.lineWidth = 2; g.strokeRect(ox, oy, bW, bH);
+
+    // Kein-Gelände-Kreis
+    if (cfg.circle > 0) {
+      g.beginPath();
+      g.arc(cx(cfg.w / 2), cy(cfg.h / 2), (cfg.circle / 2) * S, 0, Math.PI * 2);
+      g.fillStyle = 'rgba(233,217,217,.35)'; g.fill();
+      g.strokeStyle = '#7a1f1f'; g.lineWidth = 1.6; g.stroke();
+    }
+
+    // kleiner Koordinaten-Kasten
+    function tag(text, centerXi, bottomYi) {
+      g.font = 'bold ' + Math.max(9, Math.round(S * 0.42)) + 'px Georgia, serif';
+      const th = Math.max(14, Math.round(S * 0.62));
+      const tw = Math.ceil(g.measureText(text).width) + 8;
+      let tx = cx(centerXi) - tw / 2;
+      let ty = cy(bottomYi) + 2;
+      if (ty + th > oy + bH) ty = cy(bottomYi) - th - 2;
+      if (tx < ox + 1) tx = ox + 1;
+      if (tx + tw > ox + bW) tx = ox + bW - tw - 1;
+      g.fillStyle = '#f4ecd8'; g.fillRect(tx, ty, tw, th);
+      g.strokeStyle = '#7a1f1f'; g.lineWidth = 1; g.strokeRect(tx, ty, tw, th);
+      g.fillStyle = '#7a1f1f'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(text, tx + tw / 2, ty + th / 2 + 0.5);
+    }
+
+    // Geländestücke
+    pieces.forEach(p => {
+      const x = cx(p.x), y = cy(p.y + p.d), w = p.w * S, h = p.d * S;
+      g.fillStyle = p.color; g.fillRect(x, y, w, h);
+      g.strokeStyle = '#2b2620'; g.lineWidth = 1.4; g.strokeRect(x, y, w, h);
+      g.fillStyle = p.dark ? '#1a1a1a' : '#ffffff';
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.font = 'bold ' + Math.max(10, Math.round(S * 0.5)) + 'px Georgia, serif';
+      g.fillText(p.name, x + w / 2, y + h / 2 - S * 0.3);
+      g.font = 'italic ' + Math.max(8, Math.round(S * 0.4)) + 'px Georgia, serif';
+      g.fillText(p.w + 'x' + p.d + '"', x + w / 2, y + h / 2 + S * 0.3);
+    });
+    pieces.forEach(p => tag('(' + p.x + ', ' + p.y + ')', p.x + p.w / 2, p.y));
+
+    // Schätze
+    treasures.forEach(t => {
+      g.beginPath();
+      g.arc(cx(t.x), cy(t.y), TREASURE_R * S, 0, Math.PI * 2);
+      g.fillStyle = '#d4a52a'; g.fill();
+      g.strokeStyle = '#6b4a1a'; g.lineWidth = 1.6; g.stroke();
+    });
+    treasures.forEach(t => tag('(' + (Math.round(t.x * 10) / 10) + ', ' + (Math.round(t.y * 10) / 10) + ')', t.x, t.y - TREASURE_R));
+
+    // Achsenbeschriftung (alle 6 Zoll)
+    g.fillStyle = '#4a3f2f';
+    g.font = Math.max(9, Math.round(S * 0.42)) + 'px Georgia, serif';
+    g.textAlign = 'center'; g.textBaseline = 'top';
+    for (let i = 0; i <= cfg.w; i += 6) g.fillText(i + '"', cx(i), oy + bH + 6);
+    g.textAlign = 'right'; g.textBaseline = 'middle';
+    for (let j = 0; j <= cfg.h; j += 6) g.fillText(j + '"', ox - 6, cy(j));
+
+    // Download auslösen
+    const a = document.createElement('a');
+    a.download = 'battle-march-karte.png';
+    a.href = cv.toDataURL('image/png');
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  document.getElementById('downloadBtn').addEventListener('click', downloadMap);
 
   document.getElementById('applySettingsBtn').addEventListener('click', () => {
     cfg.w = parseInt(document.getElementById('setW').value) || 48;
