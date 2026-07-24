@@ -462,9 +462,9 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 <div class="tab-content" id="panel-baukasten" role="tabpanel" aria-labelledby="tab-baukasten" tabindex="0">
 <div class="builder">
 
-<h2 class="section-title">Terrain-Baukasten</h2>
-<p class="subtitle">Gelände per Drag &amp; Drop platzieren · Aufstellungszonen frei malen · Battle-March-Stil</p>
-<p class="coord-explainer"><b>Koordinatensystem:</b> X = horizontale Achse (Breite der Matte, von links nach rechts) · Y = vertikale Achse (Tiefe der Matte, von unten nach oben). Der Ursprung (0, 0) liegt in der linken unteren Ecke der Matte. Koordinaten für Geländestücke und Schätze geben die Position vom Ursprung an (Gelände: <b>linke untere Ecke</b>, Schatz: <b>Mittelpunkt</b>). Bei den Aufstellungszonen werden statt Koordinaten <b>Abstände</b> angezeigt (Tiefe und Abstand zur gegnerischen Zone). <b>Tipp:</b> Am Handy ein Palettenstück antippen, um es platzieren zu lassen, oder es aufs Raster ziehen.</p>
+
+
+
 
 <div class="layout">
 
@@ -542,8 +542,56 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       <div class="board-row">
         <div class="board" id="board" style="--scale: 13px; width: 624px; height: 468px;">
           <canvas id="zoneCanvas" width="624" height="468" style="width: 624px; height: 468px; pointer-events: none; cursor: default;"></canvas>
-        <div class="no-terrain-circle" style="width: 208px; height: 208px; left: 208px; bottom: 130px;"><span class="strong">Kein Gelände &amp; keine Aufstellung</span><span>16" Durchmesser</span></div></div>
-        <div class="zone-legend" id="zoneLegend" style="height: 468px;"><div class="zone-legend-item" style="top: 65px;"><b><span class="swatchline" style="background:#b9c6d6"></span>SPIELER 2</b>Tiefe: 10"<br>16" bis zur gegn. Zone</div><div class="zone-legend-item" style="top: 234px;"><b><span class="swatchline" style="background:#ded6c2"></span>NO MAN'S LAND</b>Breite: 16"</div><div class="zone-legend-item" style="top: 403px;"><b><span class="swatchline" style="background:#e2c48c"></span>SPIELER 1</b>Tiefe: 10"<br>16" bis zur gegn. Zone</div></div>
+        <div class="no-terrain-circle" style="width: 208px; height: 208px; left: 208px; bottom: 130px;"><span class="strong">Kein Gelände &amp; keine Aufstellung</span><span>16" Durchmesser</span></div><div class="piece tex-forest" data-id="7" style="width: 130px; height: 78px; left: 52px; bottom: 286px;">
+      <span class="name">Wald</span>
+      <span class="dims">10x6"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: 0px; right: auto;">(4, 22)</div>
+    </div><div class="piece tex-brick" data-id="8" style="width: 78px; height: 104px; left: 455px; bottom: 260px;">
+      <span class="name">Gebäude</span>
+      <span class="dims">6x8"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: auto; right: 0px;">(35, 20)</div>
+    </div><div class="piece tex-hill" data-id="9" style="width: 78px; height: 104px; left: 299px; bottom: 364px;">
+      <span class="name">Hügel</span>
+      <span class="dims">6x8"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: auto; right: 0px;">(23, 28)</div>
+    </div><div class="piece tex-brick ruine" data-id="10" style="width: 91px; height: 91px; left: 182px; bottom: 0px;">
+      <span class="name">Ruine</span>
+      <span class="dims">7x7"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: 0px; right: auto;">(14, 0)</div>
+    </div><div class="piece tex-field dark" data-id="11" style="width: 78px; height: 104px; left: 26px; bottom: 0px;">
+      <span class="name">Feld</span>
+      <span class="dims">6x8"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: 0px; right: auto;">(2, 0)</div>
+    </div><div class="piece tex-water" data-id="12" style="width: 130px; height: 78px; left: 390px; bottom: 65px;">
+      <span class="name">See</span>
+      <span class="dims">10x6"</span>
+      <div class="btns">
+        <button class="rotateBtn" title="Drehen">⟳</button>
+        <button class="delBtn" title="Löschen">×</button>
+      </div>
+      <div class="coord-tag" style="left: auto; right: 0px;">(30, 5)</div>
+    </div></div>
+        <div class="zone-legend" id="zoneLegend" style="height: 468px;"><div class="zone-legend-item" style="top: 136.5px;"><b><span class="swatchline" style="background:#b9c6d6"></span>SPIELER 2</b>Tiefe: 21"<br>grenzt an gegn. Zone</div><div class="zone-legend-item" style="top: 234px;"><b><span class="swatchline" style="background:#ded6c2"></span>NO MAN'S LAND</b>Breite: 36"</div><div class="zone-legend-item" style="top: 331.5px;"><b><span class="swatchline" style="background:#e2c48c"></span>SPIELER 1</b>Tiefe: 21"<br>grenzt an gegn. Zone</div></div>
       </div>
     </div>
 
