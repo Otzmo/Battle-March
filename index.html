@@ -545,8 +545,8 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 <div class="points-ticks"><span>400</span><span>750</span></div>
 </div>
 <ul>
-<li>Gespielt wird mit <b><span id="pointsVal">600</span></b> Punkten</li>
 <li>Minimum 2 Einheiten ohne Charaktere</li>
+<li>Die maximale Einheitenstärke ist 20</li>
 <li>Ein General muss bestimmt werden</li>
 <li>Alle Charaktere dürfen Magische Gegenstände aus diesem Dokument nehmen (auch Zwerge und Dämonen), Zwergenrunen und dämonische Geschenke sind nicht erlaubt. Champions oder Standartenträger dürfen keine nehmen.</li>
 <li>Die 1+ Beschränkung entfallen, die 0–X-pro-1000-Punkte-Beschränkung wird eine 0-1 Beschränkung</li>
@@ -1602,7 +1602,6 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
   const calc = {
     pointsSub:  p => p,
     pointsHead: p => p,
-    pointsVal:  p => p,
     kernMin:    p => up(p, 0.25),
     kernMax:    p => up(p, 0.35),
     charMax:    p => up(p, 0.50),
