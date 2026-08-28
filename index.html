@@ -250,23 +250,27 @@ button:hover{ background:var(--maroon-dark); }
 .treasure{ position:absolute; border-radius:50%; border:1.6px solid #6b4a1a; background:radial-gradient(circle at 35% 30%, #f6db82, #d4a52a 65%, #a3781a); box-shadow:0 1px 2px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.25); z-index:5; pointer-events:none; }
 .guide .magic-table td:nth-child(2){ text-align:center; white-space:nowrap; }
 .guide .magic-table tr.cat td{ background:var(--maroon); color:#fff; font-weight:bold; letter-spacing:.03em; }
+.points-slider{ background:#fff; border:1.5px solid var(--maroon); border-left:5px solid var(--maroon); border-radius:4px; padding:12px 16px; margin:.4rem 0 1.2rem; }
+.points-slider label{ display:block; color:var(--maroon); font-size:1rem; margin-bottom:8px; }
+.points-slider input[type=range]{ width:100%; accent-color:var(--maroon); cursor:pointer; }
+.points-ticks{ display:flex; justify-content:space-between; font-size:.72rem; color:#5a4f3f; margin-top:2px; }
 </style>
 </head>
 <body>
 
 <div class="page-header">
   <h1>Battle March</h1>
-  <p class="page-subtitle">Leitfaden für Gefechtsmarsch-Spiele · 500 Punkte</p>
+  <p class="page-subtitle">Leitfaden für Gefechtsmarsch-Spiele · <span id="pointsSub">600</span> Punkte</p>
 </div>
 
 <div class="tabbar" role="tablist" aria-label="Battle March Werkzeuge">
-  <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
-  <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="false" tabindex="-1">Armee &amp; Magie</button>
+  <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="false" tabindex="-1">Leitfaden</button>
+  <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="true" tabindex="0">Armee &amp; Magie</button>
   <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="false" tabindex="-1">Kartenbau</button>
 </div>
 
 <!-- ===================== LEITFADEN ===================== -->
-<div class="tab-content" id="panel-leitfaden" role="tabpanel" aria-labelledby="tab-leitfaden" tabindex="0">
+<div class="tab-content" id="panel-leitfaden" role="tabpanel" aria-labelledby="tab-leitfaden" tabindex="0" hidden="">
 <div class="guide">
 
 <h1>1. Spielablauf</h1>
@@ -362,9 +366,9 @@ nicht betroffen.</td></tr>
 </tbody></table>
 </div>
 </div>
-<div class="acc" data-rh="2">
-<button type="button" class="acc-head" aria-expanded="false" aria-controls="rh-2-body"><span class="acc-title">Tabelle 2 – Wildnisgelände</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="rh-2-body" role="region" hidden="">
+<div class="acc open" data-rh="2">
+<button type="button" class="acc-head" aria-expanded="true" aria-controls="rh-2-body"><span class="acc-title">Tabelle 2 – Wildnisgelände</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="rh-2-body" role="region">
 <p class="italic">Wird ausgelöst, wenn eine Einheit ihre Bewegung in natürlichem Gelände (Wälder, Felsen, Sümpfe usw.) beendet oder dort aufgestellt wird.</p>
 <table class="rh-table"><tbody><tr><th>W6</th><th>Ergebnis</th></tr>
 <tr><td>1</td><td>Dornengestrüpp: Dicke Dornen reißen an Haut und
@@ -531,21 +535,27 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 </div>
 
 <!-- ===================== ARMEE & MAGIE ===================== -->
-<div class="tab-content" id="panel-armee" role="tabpanel" aria-labelledby="tab-armee" tabindex="0" hidden="">
+<div class="tab-content" id="panel-armee" role="tabpanel" aria-labelledby="tab-armee" tabindex="0">
 <div class="guide">
 
-<h1>1. Armeeaufbau</h1><ul>
-<li>Gespielt wird mit 500 Punkten</li>
+<h1>1. Armeeaufbau</h1>
+<div class="points-slider">
+<label for="pointsRange">Punktelimit: <b><span id="pointsHead">600</span> Punkte</b></label>
+<input type="range" id="pointsRange" min="400" max="750" step="50" value="600" aria-label="Punktelimit">
+<div class="points-ticks"><span>400</span><span>750</span></div>
+</div>
+<ul>
+<li>Gespielt wird mit <b><span id="pointsVal">600</span></b> Punkten</li>
 <li>Minimum 2 Einheiten ohne Charaktere</li>
 <li>Ein General muss bestimmt werden</li>
 <li>Alle Charaktere dürfen Magische Gegenstände aus diesem Dokument nehmen (auch Zwerge und Dämonen), Zwergenrunen und dämonische Geschenke sind nicht erlaubt. Champions oder Standartenträger dürfen keine nehmen.</li>
 <li>Die 1+ Beschränkung entfallen, die 0–X-pro-1000-Punkte-Beschränkung wird eine 0-1 Beschränkung</li>
 </ul>
 <table><tbody><tr><th>Kategorie</th><th>Minimum</th><th>Maximum</th></tr>
-<tr><td>Kerneinheiten</td><td>125 Punkte</td><td>175 Punkte pro Einheit</td></tr>
-<tr><td>Charaktere</td><td>–</td><td>250 Punkte, 125 Punkte pro Einheit</td></tr>
-<tr><td>Elite-Einheiten</td><td>–</td><td>250 Punkte, 150 Punkte pro Einheit</td></tr>
-<tr><td>Seltene Einheiten</td><td>–</td><td>125 Punkte, 125 Punkte pro Einheit</td></tr>
+<tr><td>Kerneinheiten</td><td><span id="kernMin">150</span> Punkte</td><td><span id="kernMax">210</span> Punkte pro Einheit</td></tr>
+<tr><td>Charaktere</td><td>–</td><td><span id="charMax">300</span> Punkte, <span id="charPer">150</span> Punkte pro Modell</td></tr>
+<tr><td>Elite-Einheiten</td><td>–</td><td><span id="eliteMax">300</span> Punkte, <span id="elitePer">180</span> Punkte pro Einheit</td></tr>
+<tr><td>Seltene Einheiten</td><td>–</td><td><span id="selMax">150</span> Punkte, <span id="selPer">150</span> Punkte pro Einheit</td></tr>
 </tbody></table>
 
 <h1>2. Magische Gegenstände</h1>
@@ -1581,6 +1591,36 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       setAcc(acc, acc.querySelector('.acc-body').hidden);
     });
   });
+})();
+</script>
+<script>
+/* ================= Punktelimit-Schieber (Armee & Magie) ================= */
+(function () {
+  const range = document.getElementById('pointsRange');
+  if (!range) return;
+  const up = (p, f) => Math.ceil(p * f);
+  const calc = {
+    pointsSub:  p => p,
+    pointsHead: p => p,
+    pointsVal:  p => p,
+    kernMin:    p => up(p, 0.25),
+    kernMax:    p => up(p, 0.35),
+    charMax:    p => up(p, 0.50),
+    charPer:    p => up(p, 0.25),
+    eliteMax:   p => up(p, 0.50),
+    elitePer:   p => up(p, 0.30),
+    selMax:     p => up(p, 0.25),
+    selPer:     p => up(p, 0.25)
+  };
+  function update() {
+    const p = parseInt(range.value, 10);
+    for (const id in calc) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = calc[id](p);
+    }
+  }
+  range.addEventListener('input', update);
+  update();
 })();
 </script>
 </body></html>
