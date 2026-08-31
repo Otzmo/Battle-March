@@ -257,6 +257,10 @@ button:hover{ background:var(--maroon-dark); }
 .points-slider label{ display:block; color:var(--maroon); font-size:1rem; margin-bottom:8px; }
 .points-slider input[type=range]{ width:100%; accent-color:var(--maroon); cursor:pointer; }
 .points-ticks{ display:flex; justify-content:space-between; font-size:.72rem; color:#5a4f3f; margin-top:2px; }
+.version-box{ background:#fff; border:1.5px solid var(--maroon); border-left:5px solid var(--maroon); border-radius:4px; padding:9px 14px; margin:.4rem 0 1.2rem; font-size:.85rem; color:#4a3f2f; }
+.version-box b{ color:var(--maroon); }
+.guide .gc-table td:first-child{ font-weight:bold; }
+.guide .gc-table th{ background:var(--maroon); color:#fff; }
 </style>
 </head>
 <body>
@@ -270,6 +274,7 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="false" tabindex="-1">Leitfaden</button>
   <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="true" tabindex="0">Armee &amp; Magie</button>
   <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="false" tabindex="-1">Kartenbau</button>
+  <button class="tab-btn" role="tab" id="tab-germancomp" data-tab="germancomp" aria-controls="panel-germancomp" aria-selected="false" tabindex="-1">GermanComp</button>
 </div>
 
 <!-- ===================== LEITFADEN ===================== -->
@@ -582,6 +587,268 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 </div>
 </div>
 </div>
+
+<!-- ===================== GERMANCOMP ===================== -->
+<div class="tab-content" id="panel-germancomp" role="tabpanel" aria-labelledby="tab-germancomp" tabindex="0" hidden="">
+<div class="guide">
+
+<div class="version-box"><b>REV 2026-08-30 · Version 1.5.3 (LVO)</b><br>
+GermanComp ist ein Restriktions-, Balance- und Turniersystem der LD3-Community. Die folgenden Angaben geben die Abschnitte I–III des GermanComp-Booklets wieder.</div>
+
+<h1>I. Restriction Pack (ab 1000 Punkten)</h1>
+<p>Keine Verbündeten, Mercenaries sind erlaubt. Sondercharaktere sind erlaubt. Ab über 2000 Punkten: max. 1000 Punkte Charaktere. Pro Unit Data Sheet:</p>
+<table class="gc-table"><tbody>
+<tr><th>Unit Category</th><th>Character Profile</th><th>Core</th><th>Special</th><th>Rare</th><th>Mercenaries</th></tr>
+<tr><td>2000 pts</td><td>0-2 up to 600 pts</td><td>0-4 up to 400 pts</td><td>0-3 up to 500 pts</td><td>0-2 up to 400 pts</td><td>0-3 up to 400 pts</td></tr>
+<tr><td>Max. allowance per unit</td><td>0-1 per 750</td><td>0-1 per 500</td><td>0-1 per 625</td><td>0-1 per 750</td><td>0-1 per 625</td></tr>
+<tr><td>Max. points per unit</td><td>30%</td><td>20%</td><td>25%</td><td>20%</td><td>20%</td></tr>
+</tbody></table>
+<ul>
+<li>If a unit can be taken in multiple categories, it may be taken in a total sum of the widest category allowance. Take the stricter restriction of both Army Composition restrictions and above. For example, you can play 4 units Deepwood Scouts, but only 3 Great Cannons on 2000 pts.</li>
+<li>Max. US40 per unit. Units may have formations of max. 12 Columns wide / Rows deep. Max. 3 Characters may join a unit.</li>
+<li>0-8 (0-2/500): Wizard Levels. Each Bound spell and each magic Item that increases the number of spells known count as 0,5 Wizard Levels.</li>
+<li>0-4 (0-1/500): Magic Missiles. If you generate too many randomly, first discard for a non-MM signature, then re-roll if you cannot discard enough.</li>
+<li>0-4 (0-1/500): War machines or Models with War Machine Weaponry (except Bolt Throwers and Anvil of Doom).</li>
+<li>0-4 (0-1/500): Fly (X) Units. Units &lt;= 70 pts count as 0,5 units. Any unit with a Regeneration save that is a Behemoth (even without Fly) counts as 0,5 additional units for this restriction. Any unit with Fly (X) above 340 pts counts as 0,5 additional units, above 540 pts as 1 additional instead.</li>
+</ul>
+<h2>Cathay Comp</h2>
+<ul>
+<li>Set points in Shug Lord to 280, Shug Gen. to 175, both have -1 Wound characteristic.</li>
+<li>Ogre Loader counts as one add. War Machine unit. Move the Thunderous Impact special rule on Bastion Rockets, delete from Cannon Fire.</li>
+<li>Jade Lancers: Reduce magic item allowance to 35 <b>if in core</b>.</li>
+</ul>
+<p class="italic">If Vampires do not use 1.5.3.1 Renegades, apply heal Grave Guard as heavy Cav and 0-2 of Mortis, Master Necromancer. Mortis Engine, Sceptre De Noirot both count as Wizard Level for the restriction. With 1.5.3.1 Renegades Vampires, these restrictions do not apply.</p>
+
+<h1>II. „Gamechanger“ Pack</h1>
+<ul>
+<li><b>Cannons:</b> If during a Cannon Fire Shooting Sequence, the target point marker is moved <b>behind</b> an Impassable &amp; Losblock, Ruin, Woods or Hill Terrain Feature <b>or behind a Monster</b>, the Sequence stops <b>before</b> leaving the obstacle. The point before leaving the Feature or Model is the new Strike Point. This means you can shoot onto/into Hills/Ruins/Woods as it is open ground, but you cannot shoot over/behind them.</li>
+<li>No model is allowed to move more than 2*M (3* march column/marching) during movements based on M characteristic.</li>
+<li>Models can use one-handed magic weapons for Parry special rule and may use mundane instead of very common magic weapons (*).</li>
+<li>Regimental Units can conduct supporting reactions for their Detachments.</li>
+<li>Infantry can use Furious Charge even if they charged less than 3 inches. Monstrous Infantry have Furious Charge and can use Press of Battle.</li>
+<li>The +1A from Frenzy always applies, not only when having charged, but is lost as usual (when losing a combat).</li>
+<li>Charges against front arcs of units using Thrusting Spears are disordered. +1 S in the front arc when charged in the first round of combat.</li>
+<li>Additional Hand Weapons make use of Special Rules Hand Weapons have on that model (Ensorcelled etc.).</li>
+<li>High Magic: Change the duration of Shield of Saphery to “until the next start of turn sub-phase”. Fury of Khaine -1 Complexity.</li>
+</ul>
+
+<h1>III. Faction Pack</h1>
+<p class="italic">For Legacy Factions, use Renegades (squarebased.com), current drafts.</p>
+<ul>
+<li><b>Serrated Maw</b> has AP1 and AB1 instead of AB2.</li>
+<li><b>Combat Training:</b> All Infantry units with base costs of 4 or higher: Free command, if the only formation rule they have is Close Order. If these units may take Shields, those are free. Peasants (incl. Cathay) are excluded from this.</li>
+</ul>
+<div class="acc" data-gc="1">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-1-body"><span class="acc-title">Beastmen Brayherds</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-1-body" role="region" hidden="">
+<ul>
+<li><b>Blood Herd:</b> Minotaurs have Combat Training and may use Parry. Minotaur Champions, Gore and Doombulls: Counter Charge, +25 pts items &amp; mutation allowance. Remove 0-1p1000 from Shamans.</li>
+<li><b>Warped Gors:</b> Add Bestial Charge, Chaos Armour (5+ Ward Save).</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="2">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-2-body"><span class="acc-title">Bretonnia</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-2-body" role="region" hidden="">
+<ul>
+<li>Grail Reliquae has US6.</li>
+<li>Questing Knights have the Extra Attacks (1) special rule (not mounts). Paragon may take 35 pts magic items.</li>
+<li>Grail Knights and Characters on Horse with Grail Vow that are equipped with only mundane weapons have a +1 bonus to their Asv.</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="3">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-3-body"><span class="acc-title">Dark Elves (Dark Elves =/= Mounts, to use with 1.5.2.2 Draft)</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-3-body" role="region" hidden="">
+<ul>
+<li>All Dark Elves gain Murderous (for all combat weapons) and AB(1).</li>
+<li>Champs in core may take 35, in special 50 pts magic items.</li>
+<li>Set points for Spears in Warriors to 0.</li>
+<li>Set points in Corsairs to 8 and add Armoured Hide (1).</li>
+<li>Dark Riders: Add Reserve Move.</li>
+<li>Executioners &amp; Sisters of Slaughter: Add Furious Charge.</li>
+<li>Black Guard &amp; Sisters of Slaughter: Set Strength to 4.</li>
+<li>Set points for Full Plate Armour in Cold One Knights to 0.</li>
+<li>Cold One Chariot: Set Armour Save to “3+”.</li>
+<li>Doomfire Warlocks may choose their spells.</li>
+<li>Set points in Bolt Throwers to 70.</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="4">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-4-body"><span class="acc-title">Dwarfs</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-4-body" role="region" hidden="">
+<ul>
+<li>Models on Shieldbearers have US4.</li>
+<li>All Runic weapons have the Gromril weapons special rule.</li>
+<li>All Dwarfs have Horde and have 2+ Armour Save as limit for Parry.</li>
+<li>Miners can be taken in Core in all Armies. Add Furious Charge.</li>
+<li>Slayer Host: Get Royal Clan special rules. Free Ward + Scout upgrades. 0-6 Doomseekers. Slayers 10, Brotherhood 14 per model.</li>
+<li>Doomseekers: Can deploy multiple at the same time.</li>
+<li>Anvil of Doom: US10, Armour Runes apply to the War Machine too. +3 to cast. Rune of H&amp;H applies First to the Fray special rule.</li>
+<li>Ungrim Ironfist: Add Killing Blow. Slayer of Dragons/Daemons special rule also works against monstrous creatures.</li>
+<li>May use Monsterhunter Tapestry as Banner Master rune.</li>
+<li>May use Arch Lightning Rod and Staff of Quietude as Talismanic Master runes (only Runelord, Shrinekeeper and Anvil).</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="5">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-5-body"><span class="acc-title">Daemons of Chaos (to use with Hotfix June 1 Draft)</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-5-body" role="region" hidden="">
+<ul>
+<li>Daemon Prince &amp; Heralds have access to magic items; units have access to magic banners from the Rulebook.</li>
+<li>Daemons of Khorne have Extra Attacks (1) and Impetuous special rules.</li>
+<li>Bloodletters are T4.</li>
+<li>Daemonettes: add Furious Charge.</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="6">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-6-body"><span class="acc-title">Cathay</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-6-body" role="region" hidden="">
+<ul>
+<li>Crane Gunner Teams: US2.</li>
+<li>Set Celestial Dragon Guard in Jade Warriors to +1 pts.</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="7">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-7-body"><span class="acc-title">Empire</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-7-body" role="region" hidden="">
+<ul>
+<li>Set points in GM to 120 and Chapter Master to 65, both +1 Ld.</li>
+<li>High Priest / Archlector may attempt to cast two different prayers per turn. All priests may ride Demigryphs.</li>
+<li>Wizards and Witch Hunters may ride Barded Warhorse.</li>
+<li>Set point cost in State Troops to 4, Veterans to 6. Weapon Upgrades in Veterans and Missile Troops to 0. Missile Troops gain Volley Fire.</li>
+<li><b>Knightly Orders Army:</b> Set points for chapter upgrades to 0. Knights, Inner Circle, Demigryphs have Combat Training (setting the cost for command to 0). Pistoliers gain the KO benefits and lose Impetuous. Demigryphs get the benefits of Inner Circle KO benefits. May take Road Wardens in Rare.</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="8">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-8-body"><span class="acc-title">High Elves (High Elves =/= Mounts)</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-8-body" role="region" hidden="">
+<ul>
+<li>All High Elves have Ithilmar Weapons (all combat weapons mundane/HE).</li>
+<li>Set all Army Compositions to 25% Core.</li>
+<li>Blessings of Asuryan: 3++ vs. Flaming Attacks, Witness of Destiny: 5++ vs. Non-Magical Attacks.</li>
+<li>Lore of Saphery: Change Hand of Khaine to D3+1 hits. Vaul’s Unmaking can be cast in combat and into combat.</li>
+<li>Storm Weavers have Naval Discipline and Lileath’s Blessing.</li>
+<li>Champs in core may take at least 35, special 50 pts magic items.</li>
+<li>Silver Helms: Add Counter Charge.</li>
+<li>Ellyrian Reavers: Add Reserve Move, 0-1p1000 core in SGG.</li>
+<li>Phoenix Guard, Dragon Princes: Strength 4.</li>
+<li>Swordmasters, Ships Company: Add Furious Charge.</li>
+<li>Phoenixes: Serrated Maw. Frostheart: Witness of Destiny.</li>
+<li>Flamespyre Phoenix: Extra Attack (1), Terror.</li>
+<li>Merwyrm: Set Toughness to 7.</li>
+<li>Sea Garrison: 0-1p1000 pts Tiranoc Chariots in Special. Commander: Change Wounds to “3”. Nobles &amp; Commanders may have Anointed of Asuryan (and then Phoenix Mounts).</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="9">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-9-body"><span class="acc-title">Khemri</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-9-body" role="region" hidden="">
+<ul>
+<li>Necrolith Colossus: Set Toughness to 7.</li>
+<li>Warsphinx: Set points for all Upgrades to 0.</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="10">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-10-body"><span class="acc-title">Vampire Counts (to use with 1.5.3.1 Draft)</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-10-body" role="region" hidden="">
+<ul>
+<li>Zombies keep T3 without Corpse Carts (no T-bonus by Corpse Cart).</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="11">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-11-body"><span class="acc-title">Lizardmen (to use with 1.5.2.2 Draft)</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-11-body" role="region" hidden="">
+<ul>
+<li>For each Saurus Hero, one Saurus Hero and 0-1 Saurus Warriors or Cold One Riders may take 0-1 Blessed Spawning (see table below).</li>
+<li>Saurus Warriors: Add Furious Charge.</li>
+<li>Set points in Kroxigors to 40, add Stubborn.</li>
+<li><b>Ark of Sotek</b> – Slithering Serpents: Enemies treat Open Ground within 6” of this model as Difficult terrain and Woods and Water as Dangerous Terrain. Spawn of Sotek: Units with the Predatory Fighters special rule within 6” of this model have the Blessed Spawning of Sotek special rule.</li>
+<li>Razordon: 60 pts, Multi-Barrelled (1), Quick Shot, S4 AP1/AB1.</li>
+</ul>
+<table><tbody><tr><th>Blessed Spawning</th><th>Effekt</th><th>Blessed Spawning</th><th>Effekt</th></tr><tr><td>Sotek</td><td>Frenzy</td><td>Quetzl</td><td>AH (1), MR (1)</td></tr><tr><td>Tepok</td><td>MR (2), Magical Attacks</td><td>Chotec</td><td>+1M (incl mounts)</td></tr><tr><td>Tzunki</td><td>Infantry only. Aquatic, +1 I, +1 WS.</td><td>Tlazcotl</td><td>ItP, Stubborn</td></tr><tr><td>Huanchi</td><td colspan="3">Treat Woods as Open Ground for Movement (incl Mounts)</td></tr></tbody></table>
+</div>
+</div>
+<div class="acc" data-gc="12">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-12-body"><span class="acc-title">Ogres (to use with 1.5.2.2 Draft)</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-12-body" role="region" hidden="">
+<ul>
+<li>Set points for heavy Armour to 0, add. HW to 0 and Ironfists to 1.</li>
+<li>Set points in Yhetees to 40 and Leadbelchers to 37.</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="13">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-13-body"><span class="acc-title">Orcs &amp; Goblins</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-13-body" role="region" hidden="">
+<ul>
+<li>Set points in Arachnarok Spider to 260 and Toughness to 7.</li>
+<li>Set points in Pump Wagon to 28, All Snotlings lose Impetuous.</li>
+<li>All Goblins (not Night) lose Impetuous and have Combat Training.</li>
+<li>Nomadic Waaagh: All Strength Modifiers apply to Impact Hits.</li>
+<li>All Trolls have Stubborn.</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="14">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-14-body"><span class="acc-title">Renegade Crowns and Mercenaries</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-14-body" role="region" hidden="">
+<ul>
+<li>May use up to 50% for Mercenaries, they can use General and BSB.</li>
+<li>Characters with Noble Disdain may choose a virtue (Bretonnia).</li>
+<li>Noble Outlaws may take a Griffon or Pegasus (Empire) as mount.</li>
+<li>When being charged and using spears, units with the Phalanx special rule can conduct supporting attacks in two additional ranks instead of one rank to the front and one rank to the flank.</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="15">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-15-body"><span class="acc-title">Skaven (to use with 1.5.2.2 Draft)</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-15-body" role="region" hidden="">
+<ul>
+<li>May take 0-1 Demon Prince of Nurgle without Wings from the Warrior of Chaos Book, which may not take any demonic gifts and takes items from the Core Rulebook or the Skaven Army list.</li>
+<li>Jezzails: Ignore long Range modifier, Poisoned Attacks, US2.</li>
+<li>Plague Monks, Stormvermin: Add Furious Charge.</li>
+<li>Rat Ogres: add Regeneration 5+.</li>
+<li>Models with Fellblade don’t roll for it while they are engaged in Combat.</li>
+<li>Set points in Abomination to 180.</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="16">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-16-body"><span class="acc-title">Warriors of Chaos</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-16-body" role="region" hidden="">
+<ul>
+<li>Set Wound characteristic in Chaos Spawn to “4”.</li>
+<li>Chaos Trolls may have Marks. Trolls and Ogres have Stubborn.</li>
+</ul>
+</div>
+</div>
+<div class="acc" data-gc="17">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-17-body"><span class="acc-title">Wood Elves</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-17-body" role="region" hidden="">
+<ul>
+<li>All units treat Woods as open ground for Movement &amp; Disruption.</li>
+<li>Asrai Longbow: Add Poisoned Attacks.</li>
+<li>Hagbane Tips: Trigger poison on hit roll of 5+ instead of 6.</li>
+<li>All Tree Spirits improve their Strength by 1.</li>
+<li>Champs in core may take 35, in special 50 pts magic items.</li>
+<li>Set points in Eternal Guard to 10, Guardians of Talsyn to 15.</li>
+<li>Wildwood Rangers: Add Furious Charge.</li>
+<li>Sisters of the Thorn may choose their spells.</li>
+<li>All Treemen: Set Toughness to 7, Strangleroots: Add Quick Shot.</li>
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+
 
 <script>
 /* ================= Terrain-Baukasten ================= */
@@ -1507,7 +1774,8 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
   const panels = {
     leitfaden: document.getElementById('panel-leitfaden'),
     armee: document.getElementById('panel-armee'),
-    baukasten: document.getElementById('panel-baukasten')
+    baukasten: document.getElementById('panel-baukasten'),
+    germancomp: document.getElementById('panel-germancomp')
   };
   function activate(name, focusTab) {
     tabs.forEach(t => {
