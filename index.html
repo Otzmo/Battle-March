@@ -261,6 +261,11 @@ button:hover{ background:var(--maroon-dark); }
 .version-box b{ color:var(--maroon); }
 .guide .gc-table td:first-child{ font-weight:bold; }
 .guide .gc-table th{ background:var(--maroon); color:#fff; }
+.guide .gc-pct{ color:#7a6f5a; font-size:.85em; }
+.version-box .version-link{ margin:8px 0 0; }
+.version-box a{ display:inline-block; color:var(--maroon); font-weight:bold; text-decoration:none; border:1.4px solid var(--maroon); border-radius:4px; padding:6px 11px; font-size:.85rem; }
+.version-box a:hover{ background:var(--maroon); color:#fff; }
+.version-box a:focus-visible{ outline:3px solid #c98a2f; outline-offset:2px; }
 </style>
 </head>
 <body>
@@ -593,43 +598,89 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 <div class="guide">
 
 <div class="version-box"><b>REV 2026-08-30 · Version 1.5.3 (LVO)</b><br>
-GermanComp ist ein Restriktions-, Balance- und Turniersystem der LD3-Community. Die folgenden Angaben geben die Abschnitte I–III des GermanComp-Booklets wieder.</div>
+GermanComp is a complete restriction, balance and tournament system, developed by the LD3 Community. The following covers sections I–III of the GermanComp booklet.<p class="version-link"><a href="https://drive.google.com/file/d/172mG0ep6EgJClJiGijulksZSr1eDLZl5/view?usp=drive_link" target="_blank" rel="noopener noreferrer">↗ Open the full GermanComp booklet (PDF)</a></p></div>
 
-<h1>I. Restriction Pack (ab 1000 Punkten)</h1>
-<p>Keine Verbündeten, Mercenaries sind erlaubt. Sondercharaktere sind erlaubt. Ab über 2000 Punkten: max. 1000 Punkte Charaktere. Pro Unit Data Sheet:</p>
+<h1>I. Restriction Pack (For Games starting from 1000 pts)</h1>
+<div class="note"><b>For Games starting from 1000 pts.</b> For smaller games (up to 999 pts) the Battle March Pack applies instead.</div>
+<p>No allies, Mercenaries are allowed. Special characters are allowed. &gt; 2000 pts: Max. 1000 pts Characters. Per Unit Data Sheet:</p>
+<div class="points-slider">
+<label for="gcRange">Points limit: <b><span id="gcHead">2000</span> pts</b></label>
+<input type="range" id="gcRange" min="1000" max="3000" step="250" value="2000" aria-label="Points limit GermanComp">
+<div class="points-ticks"><span>1000</span><span>3000</span></div>
+</div>
+<h2>Limits at <span id="gcP1">2000</span> pts</h2>
 <table class="gc-table"><tbody>
-<tr><th>Unit Category</th><th>Character Profile</th><th>Core</th><th>Special</th><th>Rare</th><th>Mercenaries</th></tr>
-<tr><td>2000 pts</td><td>0-2 up to 600 pts</td><td>0-4 up to 400 pts</td><td>0-3 up to 500 pts</td><td>0-2 up to 400 pts</td><td>0-3 up to 400 pts</td></tr>
-<tr><td>Max. allowance per unit</td><td>0-1 per 750</td><td>0-1 per 500</td><td>0-1 per 625</td><td>0-1 per 750</td><td>0-1 per 625</td></tr>
-<tr><td>Max. points per unit</td><td>30%</td><td>20%</td><td>25%</td><td>20%</td><td>20%</td></tr>
+<tr><th>Unit Category</th><th>Max. allowance</th><th>Max. points per unit</th></tr>
+<tr><td>Character Profile</td><td><span id="gcCharN">0-2</span></td><td><span id="gcCharP">600</span> pts <span class="gc-pct">(30%)</span></td></tr>
+<tr><td>Core</td><td><span id="gcCoreN">0-4</span></td><td><span id="gcCoreP">400</span> pts <span class="gc-pct">(20%)</span></td></tr>
+<tr><td>Special</td><td><span id="gcSpecN">0-3</span></td><td><span id="gcSpecP">500</span> pts <span class="gc-pct">(25%)</span></td></tr>
+<tr><td>Rare</td><td><span id="gcRareN">0-2</span></td><td><span id="gcRareP">400</span> pts <span class="gc-pct">(20%)</span></td></tr>
+<tr><td>Mercenaries</td><td><span id="gcMercN">0-3</span></td><td><span id="gcMercP">400</span> pts <span class="gc-pct">(20%)</span></td></tr>
+<tr><td>Wizard Levels</td><td><span id="gcWiz">0-8</span></td><td>–</td></tr>
+<tr><td>Magic Missiles</td><td><span id="gcMM">0-4</span></td><td>–</td></tr>
+<tr><td>War Machines / War Machine Weaponry</td><td><span id="gcWM">0-4</span></td><td>–</td></tr>
+<tr><td>Fly (X) Units</td><td><span id="gcFly">0-4</span></td><td>–</td></tr>
 </tbody></table>
+<p class="italic">If a unit can be taken in multiple categories, it may be taken in a total sum of the widest category allowance. Take the stricter restriction of both Army Composition restrictions and above. For example, you can play 4 units Deepwood Scouts, but only 3 Great Cannons on 2000 pts.</p>
 <ul>
-<li>If a unit can be taken in multiple categories, it may be taken in a total sum of the widest category allowance. Take the stricter restriction of both Army Composition restrictions and above. For example, you can play 4 units Deepwood Scouts, but only 3 Great Cannons on 2000 pts.</li>
-<li>Max. US40 per unit. Units may have formations of max. 12 Columns wide / Rows deep. Max. 3 Characters may join a unit.</li>
-<li>0-8 (0-2/500): Wizard Levels. Each Bound spell and each magic Item that increases the number of spells known count as 0,5 Wizard Levels.</li>
-<li>0-4 (0-1/500): Magic Missiles. If you generate too many randomly, first discard for a non-MM signature, then re-roll if you cannot discard enough.</li>
-<li>0-4 (0-1/500): War machines or Models with War Machine Weaponry (except Bolt Throwers and Anvil of Doom).</li>
-<li>0-4 (0-1/500): Fly (X) Units. Units &lt;= 70 pts count as 0,5 units. Any unit with a Regeneration save that is a Behemoth (even without Fly) counts as 0,5 additional units for this restriction. Any unit with Fly (X) above 340 pts counts as 0,5 additional units, above 540 pts as 1 additional instead.</li>
+<li><b>Wizard Levels:</b> Each Bound spell and each magic Item that increases the number of spells known count as 0,5 Wizard Levels.</li>
+<li><b>Magic Missiles:</b> If you generate too many randomly, first discard for a non-MM signature, then re-roll if you cannot discard enough.</li>
+<li><b>War Machines:</b> Except Bolt Throwers and Anvil of Doom.</li>
+<li><b>Fly (X) Units:</b> Units &lt;= 70 pts count as 0,5 units.
+<ul>
+<li>Any unit with a Regeneration save that is a Behemoth (even without Fly) counts as 0,5 additional units for this restriction.</li>
+<li>Any unit with Fly (X) above 340 pts counts as 0,5 additional units, above 540 pts as 1 additional instead.</li>
+</ul></li>
 </ul>
-<h2>Cathay Comp</h2>
+
+<h2>Units &amp; Formations</h2>
+<ul>
+<li>Max. US40 per unit.</li>
+<li>Units may have formations of max. 12 Columns wide / Rows deep.</li>
+<li>Max. 3 Characters may join a unit.</li>
+</ul>
+
+<h2>Faction Exceptions</h2>
+<div class="acc" data-gc="cathay">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-cathay-body"><span class="acc-title">Cathay Comp</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-cathay-body" role="region" hidden="">
 <ul>
 <li>Set points in Shug Lord to 280, Shug Gen. to 175, both have -1 Wound characteristic.</li>
 <li>Ogre Loader counts as one add. War Machine unit. Move the Thunderous Impact special rule on Bastion Rockets, delete from Cannon Fire.</li>
 <li>Jade Lancers: Reduce magic item allowance to 35 <b>if in core</b>.</li>
 </ul>
-<p class="italic">If Vampires do not use 1.5.3.1 Renegades, apply heal Grave Guard as heavy Cav and 0-2 of Mortis, Master Necromancer. Mortis Engine, Sceptre De Noirot both count as Wizard Level for the restriction. With 1.5.3.1 Renegades Vampires, these restrictions do not apply.</p>
+</div>
+</div>
+<div class="acc" data-gc="vamp">
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="gc-vamp-body"><span class="acc-title">Vampire Counts – Note</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<div class="acc-body" id="gc-vamp-body" role="region" hidden="">
+<p>If Vampires do not use 1.5.3.1 Renegades, apply heal Grave Guard as heavy Cav and 0-2 of Mortis, Master Necromancer. Mortis Engine and Sceptre De Noirot both count as Wizard Level for the restriction. With 1.5.3.1 Renegades Vampires, these restrictions do not apply.</p>
+</div>
+</div>
 
-<h1>II. „Gamechanger“ Pack</h1>
+<h1>II. “Gamechanger” Pack</h1>
+
+<h2>Shooting</h2>
+<div class="statbox"><p><b>Cannons</b></p><p>If during a Cannon Fire Shooting Sequence, the target point marker is moved <b>behind</b> an Impassable &amp; Losblock, Ruin, Woods or Hill Terrain Feature <b>or behind a Monster</b>, the Sequence stops <b>before</b> leaving the obstacle. The point before leaving the Feature or Model is the new Strike Point.</p><p>This means you can shoot onto/into Hills/Ruins/Woods as it is open ground, but you cannot shoot over/behind them.</p></div>
+
+<h2>Movement</h2>
 <ul>
-<li><b>Cannons:</b> If during a Cannon Fire Shooting Sequence, the target point marker is moved <b>behind</b> an Impassable &amp; Losblock, Ruin, Woods or Hill Terrain Feature <b>or behind a Monster</b>, the Sequence stops <b>before</b> leaving the obstacle. The point before leaving the Feature or Model is the new Strike Point. This means you can shoot onto/into Hills/Ruins/Woods as it is open ground, but you cannot shoot over/behind them.</li>
-<li>No model is allowed to move more than 2*M (3* march column/marching) during movements based on M characteristic.</li>
-<li>Models can use one-handed magic weapons for Parry special rule and may use mundane instead of very common magic weapons (*).</li>
-<li>Regimental Units can conduct supporting reactions for their Detachments.</li>
-<li>Infantry can use Furious Charge even if they charged less than 3 inches. Monstrous Infantry have Furious Charge and can use Press of Battle.</li>
-<li>The +1A from Frenzy always applies, not only when having charged, but is lost as usual (when losing a combat).</li>
-<li>Charges against front arcs of units using Thrusting Spears are disordered. +1 S in the front arc when charged in the first round of combat.</li>
-<li>Additional Hand Weapons make use of Special Rules Hand Weapons have on that model (Ensorcelled etc.).</li>
-<li>High Magic: Change the duration of Shield of Saphery to “until the next start of turn sub-phase”. Fury of Khaine -1 Complexity.</li>
+<li><b>Movement:</b> No model is allowed to move more than 2*M (3* march column/marching) during movements based on M characteristic.</li>
+</ul>
+
+<h2>Close Combat</h2>
+<ul>
+<li><b>Parry:</b> Models can use one-handed magic weapons for Parry special rule and may use mundane instead of very common magic weapons (*).</li>
+<li><b>Detachments:</b> Regimental Units can conduct supporting reactions for their Detachments.</li>
+<li><b>Furious Charge:</b> Infantry can use Furious Charge even if they charged less than 3 inches. Monstrous Infantry have Furious Charge and can use Press of Battle.</li>
+<li><b>Frenzy:</b> The +1A from Frenzy always applies, not only when having charged, but is lost as usual (when losing a combat).</li>
+<li><b>Thrusting Spears:</b> Charges against front arcs of units using Thrusting Spears are disordered. +1 S in the front arc when charged in the first round of combat.</li>
+<li><b>Additional Hand Weapons:</b> Additional Hand Weapons make use of Special Rules Hand Weapons have on that model (Ensorcelled etc.).</li>
+</ul>
+
+<h2>Magic</h2>
+<ul>
+<li><b>High Magic:</b> Change the duration of Shield of Saphery to “until the next start of turn sub-phase”. Fury of Khaine -1 Complexity.</li>
 </ul>
 
 <h1>III. Faction Pack</h1>
@@ -772,7 +823,7 @@ GermanComp ist ein Restriktions-, Balance- und Turniersystem der LD3-Community. 
 <li><b>Ark of Sotek</b> – Slithering Serpents: Enemies treat Open Ground within 6” of this model as Difficult terrain and Woods and Water as Dangerous Terrain. Spawn of Sotek: Units with the Predatory Fighters special rule within 6” of this model have the Blessed Spawning of Sotek special rule.</li>
 <li>Razordon: 60 pts, Multi-Barrelled (1), Quick Shot, S4 AP1/AB1.</li>
 </ul>
-<table><tbody><tr><th>Blessed Spawning</th><th>Effekt</th><th>Blessed Spawning</th><th>Effekt</th></tr><tr><td>Sotek</td><td>Frenzy</td><td>Quetzl</td><td>AH (1), MR (1)</td></tr><tr><td>Tepok</td><td>MR (2), Magical Attacks</td><td>Chotec</td><td>+1M (incl mounts)</td></tr><tr><td>Tzunki</td><td>Infantry only. Aquatic, +1 I, +1 WS.</td><td>Tlazcotl</td><td>ItP, Stubborn</td></tr><tr><td>Huanchi</td><td colspan="3">Treat Woods as Open Ground for Movement (incl Mounts)</td></tr></tbody></table>
+<table><tbody><tr><th>Blessed Spawning</th><th>Effect</th><th>Blessed Spawning</th><th>Effect</th></tr><tr><td>Sotek</td><td>Frenzy</td><td>Quetzl</td><td>AH (1), MR (1)</td></tr><tr><td>Tepok</td><td>MR (2), Magical Attacks</td><td>Chotec</td><td>+1M (incl mounts)</td></tr><tr><td>Tzunki</td><td>Infantry only. Aquatic, +1 I, +1 WS.</td><td>Tlazcotl</td><td>ItP, Stubborn</td></tr><tr><td>Huanchi</td><td colspan="3">Treat Woods as Open Ground for Movement (incl Mounts)</td></tr></tbody></table>
 </div>
 </div>
 <div class="acc" data-gc="12">
@@ -1847,6 +1898,31 @@ GermanComp ist ein Restriktions-, Balance- und Turniersystem der LD3-Community. 
   }
   range.addEventListener('input', update);
   update();
+})();
+</script>
+<script>
+/* ================= GermanComp: Punktelimit & Suche ================= */
+(function () {
+  const range = document.getElementById('gcRange');
+  if (range) {
+    const dn = (p, f) => Math.floor(p * f);
+    const cnt = (p, per) => Math.max(1, Math.floor(p / per));
+    function upd() {
+      const p = parseInt(range.value, 10);
+      const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+      set('gcHead', p); set('gcP1', p);
+      set('gcCharN', '0-' + cnt(p, 750));  set('gcCharP', dn(p, 0.30));
+      set('gcCoreN', '0-' + cnt(p, 500));  set('gcCoreP', dn(p, 0.20));
+      set('gcSpecN', '0-' + cnt(p, 625));  set('gcSpecP', dn(p, 0.25));
+      set('gcRareN', '0-' + cnt(p, 750));  set('gcRareP', dn(p, 0.20));
+      set('gcMercN', '0-' + cnt(p, 625));  set('gcMercP', dn(p, 0.20));
+      const steps = Math.floor(p / 500);
+      set('gcWiz', '0-' + (steps * 2)); set('gcMM', '0-' + steps); set('gcWM', '0-' + steps); set('gcFly', '0-' + steps);
+    }
+    range.addEventListener('input', upd);
+    upd();
+  }
+
 })();
 </script>
 </body></html>
