@@ -1047,6 +1047,10 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     return Math.hypot(nx - cx, ny - cy) >= rad;
   }
 
+  function rectsOverlap(x1, y1, w1, d1, x2, y2, w2, d2) {
+    return x1 < x2 + w2 && x2 < x1 + w1 && y1 < y2 + d2 && y2 < y1 + d1;
+  }
+
   function rectsMinDistOK(x1, y1, w1, d1, x2, y2, w2, d2, minGap) {
     const dx = Math.max(0, Math.max(x2 - (x1 + w1), x1 - (x2 + w2)));
     const dy = Math.max(0, Math.max(y2 - (y1 + d1), y1 - (y2 + d2)));
@@ -1139,20 +1143,19 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         .filter(({ type }) => landmark ? (type.name !== 'Ruine' && type.name !== 'Turm') : type.name !== 'Turm')
         .sort((a, b) => b.area - a.area);
 
-      function findValidSpot(w, d, requireGap) {
+      // gap = geforderter Mindestabstand; 0 bedeutet: darf sich beruehren, aber nie ueberlappen
+      function findValidSpot(w, d, gap) {
         const candidates = [];
         for (let x = 0; x <= cfg.w - w; x++) {
           for (let y = 0; y <= cfg.h - d; y++) {
             if (!rectClearOfCircle(x, y, w, d)) continue;
-            if (lmRect && !rectsMinDistOK(x, y, w, d, lmRect.x, lmRect.y, lmRect.w, lmRect.d, MIN_GAP)) continue;
             if (treasures.length && !rectClearOfTreasures(x, y, w, d)) continue;
-            if (requireGap) {
-              let ok = true;
-              for (const r of placedRects) {
-                if (!rectsMinDistOK(x, y, w, d, r.x, r.y, r.w, r.d, MIN_GAP)) { ok = false; break; }
-              }
-              if (!ok) continue;
+            let ok = true;
+            for (const r of placedRects) {
+              if (rectsOverlap(x, y, w, d, r.x, r.y, r.w, r.d)) { ok = false; break; }
+              if (gap > 0 && !rectsMinDistOK(x, y, w, d, r.x, r.y, r.w, r.d, gap)) { ok = false; break; }
             }
+            if (!ok) continue;
             candidates.push({ x, y });
           }
         }
@@ -1172,9 +1175,13 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         bw = Math.ceil(bw); bd = Math.ceil(bd);
         if (bw > cfg.w || bd > cfg.h) { results[idx] = null; return; }
 
-        let found = findValidSpot(bw, bd, true);
-        if (!found) { allOk = false; found = findValidSpot(bw, bd, false); }
-        if (!found) found = { x: 0, y: 0 };
+        // Abstand stufenweise verringern - aber niemals ueberlappen lassen
+        let found = null;
+        for (let gap = MIN_GAP; gap >= 0 && !found; gap--) {
+          found = findValidSpot(bw, bd, gap);
+          if (!found && gap === MIN_GAP) allOk = false;
+        }
+        if (!found) { results[idx] = null; return; }   // lieber weglassen als ueberlappen
 
         placedRects.push({ x: found.x, y: found.y, w: bw, d: bd });
         results[idx] = { type, x: found.x, y: found.y, w, d, ang };
@@ -1209,6 +1216,17 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     rerenderPiece(piece);
   }
 
+  /* Wuerde das Stueck an (nx, ny) ein anderes ueberlappen? */
+  function overlapsOthers(piece, nx, ny) {
+    const [bw, bd] = pBox(piece);
+    for (const o of pieces) {
+      if (o.id === piece.id) continue;
+      const [ow, od] = pBox(o);
+      if (rectsOverlap(nx, ny, bw, bd, o.x, o.y, ow, od)) return true;
+    }
+    return false;
+  }
+
   function boardRect() { return board.getBoundingClientRect(); }
 
   function startMoveDrag(e, id) {
@@ -1227,8 +1245,8 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       const [bw, bd] = pBox(piece);
       nx = Math.max(0, Math.min(cfg.w - bw, nx));
       ny = Math.max(0, Math.min(cfg.h - bd, ny));
-      piece.x = Math.round(nx * 2) / 2;
-      piece.y = Math.round(ny * 2) / 2;
+      const tx = Math.round(nx * 2) / 2, ty = Math.round(ny * 2) / 2;
+      if (!overlapsOthers(piece, tx, ty)) { piece.x = tx; piece.y = ty; }
       rerenderPiece(piece);
     }
     function onUp() {
