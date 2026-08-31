@@ -199,6 +199,7 @@ button:hover{ background:var(--maroon-dark); }
     repeating-linear-gradient(to bottom, rgba(240,230,210,.35) 0 1px, transparent 1px calc(2 * var(--scale))),
     repeating-linear-gradient(to right, rgba(240,230,210,.3) 0 1px, transparent 1px calc(3 * var(--scale))); }
 .tex-brick.ruine{ background-color:#7d7568; }
+.tex-brick.turm{ background-color:#6f6459; }
 .tex-hill{ background-color:#a9834a; background-image:linear-gradient(to top, rgba(92,67,38,.35), transparent 70%); }
 .tex-field{ background-color:#d9c179; background-image:repeating-linear-gradient(to right, rgba(138,116,47,.5) 0 1.5px, transparent 1.5px calc(1.3 * var(--scale))); }
 .tex-water{ background-color:#4c85b8; background-image:repeating-linear-gradient(to bottom, rgba(219,233,245,.55) 0 2px, transparent 2px calc(1.6 * var(--scale))); }
@@ -249,8 +250,6 @@ button:hover{ background:var(--maroon-dark); }
 .acc-body[hidden]{ display:none; }
 .acc-body > .italic:first-child{ margin-top:.6rem; }
 
-.mission-toggle{ display:inline-flex; align-items:center; gap:6px; font-size:.8rem; color:#4a3f2f; background:#fff; border:1px solid #9a8f7a; border-radius:4px; padding:6px 10px; cursor:pointer; }
-.mission-toggle input{ accent-color:var(--maroon); width:15px; height:15px; cursor:pointer; }
 .no-terrain-circle.text-top{ justify-content:flex-start; padding-top:16%; }
 .treasure{ position:absolute; border-radius:50%; border:1.6px solid #6b4a1a; background:radial-gradient(circle at 35% 30%, #f6db82, #d4a52a 65%, #a3781a); box-shadow:0 1px 2px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.25); z-index:5; pointer-events:none; }
 .guide .magic-table td:nth-child(2){ text-align:center; white-space:nowrap; }
@@ -279,9 +278,9 @@ button:hover{ background:var(--maroon-dark); }
 
 <h1>1. Spielablauf</h1>
 <p>Vor dem Spiel wird der Reihe nach gewürfelt:</p><ul>
+<li>W3 – Mission</li>
 <li>Geländeaufstellung und Aufstellungszone</li>
 
-<li>W3 – Mission</li>
 <li>W6 gegeneinander – Sieger wählt die Tischseite</li>
 <li>W6 gegeneinander – Sieger bestimmt, wer zuerst eine Einheit aufstellt</li>
 <li>W6 gegeneinander – Sieger bestimmt, wer zuerst am Zug ist</li>
@@ -558,7 +557,8 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       <button id="mirrorHBtn" title="Spiegelt Gelände und Zonen links/rechts">⇋ Horizontal spiegeln</button>
       <button id="mirrorVBtn" title="Spiegelt Gelände und Zonen oben/unten">⇵ Vertikal spiegeln</button>
       <button id="randomBtn" title="Würfelt Zone, Spiegelung und Geländeplatzierung">🎲 Zufällige Karte</button>
-      <label class="mission-toggle" title="Platziert beim Würfeln drei 40-mm-Schätze im No Man&#39;s Land (≥3″ Abstand zum Gelände)"><input type="checkbox" id="treasureToggle"> Schätze (Mission)</label>
+      <button id="landmarkBtn" title="Würfelt eine Karte mit Turm als Landmarke in der Mitte (ohne Ruine)">🗼 Landmarke (Mission)</button>
+      <button id="treasureBtn" title="Würfelt eine Karte mit drei 40-mm-Schätzen im No Man's Land (≥3″ Abstand zum Gelände)">💰 Schätze (Mission)</button>
       <div class="settings">
         <label>Breite" <input type="number" id="setW" value="48" min="12" max="96"></label>
         <label>Tiefe" <input type="number" id="setH" value="36" min="12" max="96"></label>
@@ -609,6 +609,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     { name: 'Ruine',    w: 7,  d: 7,  tex: 'tex-brick ruine', color: '#7d7568' },
     { name: 'Feld',     w: 6,  d: 8,  tex: 'tex-field',  color: '#d9c179', dark: true },
     { name: 'See',      w: 6,  d: 10, tex: 'tex-water',  color: '#4c85b8' },
+    { name: 'Turm',     w: 8,  d: 8,  tex: 'tex-brick turm', color: '#6f6459' },
   ];
 
   function px(inches) { return inches * cfg.scale; }
@@ -1107,7 +1108,8 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     if (circle) circle.classList.toggle('text-top', treasures.length > 0);
   }
 
-  function randomizeMap() {
+  function randomizeMap(opts) {
+    const landmark = !!(opts && opts.landmark);
     pieces = [];
     board.querySelectorAll('.piece').forEach(el => el.remove());
 
@@ -1120,14 +1122,21 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     zoneGrid = maskCircle(zoneGrid);
     drawZones();
 
-    treasures = document.getElementById('treasureToggle').checked ? computeTreasures() : [];
+    treasures = (!landmark && !!(opts && opts.treasure)) ? computeTreasures() : [];
 
     const MIN_GAP = 6;
 
+    const towerType = defaultTypes.find(t => t.name === 'Turm');
+    const lmRect = landmark && towerType
+      ? { x: Math.round(cfg.w / 2 - towerType.w / 2), y: Math.round(cfg.h / 2 - towerType.d / 2), w: towerType.w, d: towerType.d }
+      : null;
+
     function attemptPlacement() {
       const placedRects = [];
+      if (lmRect) placedRects.push(lmRect);
       const order = defaultTypes
         .map((type, idx) => ({ type, idx, area: type.w * type.d }))
+        .filter(({ type }) => landmark ? (type.name !== 'Ruine' && type.name !== 'Turm') : type.name !== 'Turm')
         .sort((a, b) => b.area - a.area);
 
       function findValidSpot(w, d, requireGap) {
@@ -1135,6 +1144,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         for (let x = 0; x <= cfg.w - w; x++) {
           for (let y = 0; y <= cfg.h - d; y++) {
             if (!rectClearOfCircle(x, y, w, d)) continue;
+            if (lmRect && !rectsMinDistOK(x, y, w, d, lmRect.x, lmRect.y, lmRect.w, lmRect.d, MIN_GAP)) continue;
             if (treasures.length && !rectClearOfTreasures(x, y, w, d)) continue;
             if (requireGap) {
               let ok = true;
@@ -1180,6 +1190,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     }
 
     best.results.forEach(r => { if (r) placePieceExact(r.type, r.x, r.y, r.w, r.d, r.ang); });
+    if (lmRect && towerType) placePieceExact(towerType, lmRect.x, lmRect.y, towerType.w, towerType.d, 0);
     renderTreasures();
   }
 
@@ -1311,13 +1322,12 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     randomizeMap();
   });
 
-  document.getElementById('treasureToggle').addEventListener('change', (e) => {
-    if (e.target.checked) {
-      randomizeMap();
-    } else {
-      treasures = [];
-      renderTreasures();
-    }
+  document.getElementById('landmarkBtn').addEventListener('click', () => {
+    randomizeMap({ landmark: true });
+  });
+
+  document.getElementById('treasureBtn').addEventListener('click', () => {
+    randomizeMap({ treasure: true });
   });
 
   function downloadMap() {
