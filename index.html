@@ -929,6 +929,58 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     { name: 'See',      w: 6,  d: 10, tex: 'tex-water',  color: '#4c85b8' },
     { name: 'Turm',     w: 8,  d: 8,  tex: 'tex-brick turm', color: '#6f6459' },
   ];
+  const INITIAL_TYPE_COUNT = defaultTypes.length;
+
+  /* --- Zwischenspeicherung im Browser (localStorage) --- */
+  const STORAGE_KEY = 'battleMarchBuilderState';
+
+  function serializeState() {
+    return {
+      version: 1,
+      cfg: { w: cfg.w, h: cfg.h, circle: cfg.circle },
+      pieces, pieceSeq,
+      zoneGrid,
+      treasures,
+      customTypes: defaultTypes.slice(INITIAL_TYPE_COUNT)
+    };
+  }
+
+  let _saveTimer;
+  function saveState() {
+    clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(() => {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState())); }
+      catch (e) { /* Speicher voll oder nicht verfügbar (z. B. privates Fenster) */ }
+    }, 300);
+  }
+
+  function loadState() {
+    let raw;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { return false; }
+    if (!raw) return false;
+    let data;
+    try { data = JSON.parse(raw); } catch (e) { return false; }
+    if (!data || typeof data !== 'object') return false;
+    try {
+      if (data.cfg) {
+        if (Number.isFinite(data.cfg.w)) cfg.w = data.cfg.w;
+        if (Number.isFinite(data.cfg.h)) cfg.h = data.cfg.h;
+        if (Number.isFinite(data.cfg.circle)) cfg.circle = data.cfg.circle;
+      }
+      if (Array.isArray(data.customTypes)) {
+        data.customTypes.forEach(t => {
+          if (t && typeof t.name === 'string') {
+            defaultTypes.push({ name: t.name, w: t.w, d: t.d, tex: t.tex || '', color: t.color, dark: !!t.dark });
+          }
+        });
+      }
+      if (Array.isArray(data.pieces)) pieces = data.pieces;
+      if (Number.isFinite(data.pieceSeq)) pieceSeq = data.pieceSeq;
+      if (Array.isArray(data.zoneGrid)) zoneGrid = data.zoneGrid;
+      if (Array.isArray(data.treasures)) treasures = data.treasures;
+      return true;
+    } catch (e) { return false; }
+  }
 
   function px(inches) { return inches * cfg.scale; }
 
@@ -1059,6 +1111,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     if (!PRESETS[name]) return;
     zoneGrid = maskCircle(PRESETS[name](cfg.w, cfg.h));
     drawZones();
+    saveState();
   }
 
   const ZONE_NAMES = { p1: 'SPIELER 1', p2: 'SPIELER 2', nml: "NO MAN'S LAND" };
@@ -1197,6 +1250,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     if (zoneGrid[cell.r][cell.c] !== currentBrush) {
       zoneGrid[cell.r][cell.c] = currentBrush;
       drawZones();
+      saveState();
     }
   }
 
@@ -1239,6 +1293,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   document.getElementById('clearZonesBtn').addEventListener('click', () => {
     zoneGrid = emptyGrid();
     drawZones();
+    saveState();
   });
 
   function renderCircle() {
@@ -1347,6 +1402,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     const piece = { id: pieceSeq++, name: type.name, w: type.w, d: type.d, x, y, ang: 0, tex: type.tex, color: type.color, dark: type.dark };
     pieces.push(piece);
     board.appendChild(createPieceEl(piece));
+    saveState();
     return piece;
   }
 
@@ -1517,12 +1573,14 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     best.results.forEach(r => { if (r) placePieceExact(r.type, r.x, r.y, r.w, r.d, r.ang); });
     if (lmRect && towerType) placePieceExact(towerType, lmRect.x, lmRect.y, towerType.w, towerType.d, 0);
     renderTreasures();
+    saveState();
   }
 
   function removePiece(id) {
     pieces = pieces.filter(p => p.id !== id);
     const el = board.querySelector(`.piece[data-id="${id}"]`);
     if (el) el.remove();
+    saveState();
   }
 
   function rotatePiece(id) {
@@ -1532,6 +1590,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     const [bw, bd] = pBox(piece);
     [piece.x, piece.y] = clampPos(piece.x, piece.y, bw, bd);
     rerenderPiece(piece);
+    saveState();
   }
 
   /* Wuerde das Stueck an (nx, ny) ein anderes ueberlappen? */
@@ -1574,6 +1633,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       el.classList.remove('dragging');
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerup', onUp);
+      saveState();
     }
     el.addEventListener('pointermove', onMove);
     el.addEventListener('pointerup', onUp);
@@ -1638,6 +1698,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     board.querySelectorAll('.piece').forEach(el => el.remove());
     treasures = [];
     renderTreasures();
+    saveState();
   });
 
   document.getElementById('mirrorHBtn').addEventListener('click', () => {
@@ -1645,6 +1706,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     pieces.forEach(p => { p.x = cfg.w - p.x - pBox(p)[0]; if (p.ang === 45) p.ang = 135; else if (p.ang === 135) p.ang = 45; });
     drawZones();
     pieces.forEach(rerenderPiece);
+    saveState();
   });
 
   document.getElementById('mirrorVBtn').addEventListener('click', () => {
@@ -1652,6 +1714,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     pieces.forEach(p => { p.y = cfg.h - p.y - pBox(p)[1]; if (p.ang === 45) p.ang = 135; else if (p.ang === 135) p.ang = 45; });
     drawZones();
     pieces.forEach(rerenderPiece);
+    saveState();
   });
 
   document.getElementById('randomBtn').addEventListener('click', () => {
@@ -1786,6 +1849,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     computeScale();
     pieces.forEach(p => { [p.x, p.y] = clampPos(p.x, p.y, p.w, p.d); });
     rebuildAll(true);
+    saveState();
   });
 
   document.getElementById('addCustomBtn').addEventListener('click', () => {
@@ -1796,6 +1860,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     const type = { name, w, d, tex: '', color };
     defaultTypes.push(type);
     paletteList.appendChild(makeChip(type));
+    saveState();
   });
 
   /* --- responsives Neuzeichnen bei Größenänderung / Tab-Wechsel --- */
@@ -1813,9 +1878,13 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   });
   window.__refreshBuilder = refreshLayout;
 
+  const restored = loadState();
   buildPalette();
+  document.getElementById('setW').value = cfg.w;
+  document.getElementById('setH').value = cfg.h;
+  document.getElementById('setCircle').value = cfg.circle;
   computeScale();
-  rebuildAll(true);
+  rebuildAll(!restored);
   setZoneMode(false);
 })();
 
