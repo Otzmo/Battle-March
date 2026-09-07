@@ -1318,8 +1318,17 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   function makeChip(type) {
     const chip = document.createElement('div');
     chip.className = 'chip';
-    chip.innerHTML = `<div class="swatch" style="background:${type.color}"></div>
-      <div class="info"><b>${type.name}</b>${type.w}x${type.d}"</div>`;
+    const swatch = document.createElement('div');
+    swatch.className = 'swatch';
+    swatch.style.background = type.color;
+    const info = document.createElement('div');
+    info.className = 'info';
+    const b = document.createElement('b');
+    b.textContent = type.name;
+    info.appendChild(b);
+    info.appendChild(document.createTextNode(`${type.w}x${type.d}"`));
+    chip.appendChild(swatch);
+    chip.appendChild(info);
     chip.addEventListener('pointerdown', (e) => startCreateDrag(e, type));
     return chip;
   }
@@ -1341,7 +1350,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     el.dataset.id = piece.id;
     el.innerHTML = `
       <div class="shape"></div>
-      <span class="name">${piece.name}</span>
+      <span class="name"></span>
       <span class="dims">${piece.w}x${piece.d}"</span>
       <div class="btns">
         <button class="rotateBtn" title="Drehen">⟳</button>
@@ -1349,6 +1358,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       </div>
       <div class="coord-tag">(${piece.x}, ${piece.y})</div>
     `;
+    el.querySelector('.name').textContent = piece.name;
     styleShape(el, piece);
     el.querySelector('.rotateBtn').addEventListener('click', (e) => { e.stopPropagation(); rotatePiece(piece.id); });
     el.querySelector('.delBtn').addEventListener('click', (e) => { e.stopPropagation(); removePiece(piece.id); });
@@ -1653,7 +1663,14 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     ghost.style.top = e.clientY - px(type.d) / 2 + 'px';
     ghost.style.opacity = '0.85';
     ghost.style.pointerEvents = 'none';
-    ghost.innerHTML = `<span class="name">${type.name}</span><span class="dims">${type.w}x${type.d}"</span>`;
+    const ghostName = document.createElement('span');
+    ghostName.className = 'name';
+    ghostName.textContent = type.name;
+    const ghostDims = document.createElement('span');
+    ghostDims.className = 'dims';
+    ghostDims.textContent = `${type.w}x${type.d}"`;
+    ghost.appendChild(ghostName);
+    ghost.appendChild(ghostDims);
     document.body.appendChild(ghost);
 
     function onMove(ev) {
