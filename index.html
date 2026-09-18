@@ -926,7 +926,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <!-- ===================== BASE ===================== -->
 <div class="tab-content" id="panel-base" role="tabpanel" aria-labelledby="tab-base" tabindex="0" hidden="">
 <div class="basegen">
-  <h2 class="section-title">Basen-Generator</h2>
+  <h2 class="section-title">BASE-Generator</h2>
   <p class="subtitle">Maße in Millimetern eingeben und die eckige Base als STL für den 3D-Druck herunterladen</p>
 
   <div class="layout">
@@ -945,7 +945,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       </div>
       <div class="bg-field">
         <label for="bgThickness">Dicke (mm)</label>
-        <input type="number" id="bgThickness" value="2" min="0.5" max="20" step="0.1" inputmode="decimal">
+        <input type="number" id="bgThickness" value="4" min="0.5" max="20" step="0.1" inputmode="decimal">
         <div class="range">0,5 bis 20 mm</div>
       </div>
       <div class="hint">Flache, eckige Base ohne Oberflächenstruktur. Die Unterseite liegt im Nullpunkt, das Stück sitzt im Slicer also direkt auf der Druckplatte. Die Maße werden im Browser gemerkt.</div>
@@ -954,7 +954,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     <div class="panel view">
       <h2>Vorschau</h2>
       <canvas id="bgPreview" width="260" height="250"></canvas>
-      <div class="bg-dims" id="bgDims" aria-live="polite">30 × 30 × 2 mm</div>
+      <div class="bg-dims" id="bgDims" aria-live="polite">30 × 30 × 4 mm</div>
       <button type="button" class="bg-dl" id="bgDownload">STL herunterladen</button>
       <div class="bg-note" id="bgNote">Flache Base, keine Oberflächenstruktur</div>
     </div>
@@ -2082,12 +2082,12 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 })();
 </script>
 <script>
-/* ================= Basen-Generator ================= */
+/* ================= BASE-Generator ================= */
 (function () {
   const SPECS = {
     width:     { min: 5,   max: 200, def: 30, el: 'bgWidth',     label: 'Breite' },
     depth:     { min: 5,   max: 200, def: 30, el: 'bgDepth',     label: 'Tiefe'  },
-    thickness: { min: 0.5, max: 20,  def: 2,  el: 'bgThickness', label: 'Dicke'  }
+    thickness: { min: 0.5, max: 20,  def: 4,  el: 'bgThickness', label: 'Dicke'  }
   };
   const KEYS = Object.keys(SPECS);
   const STORAGE_KEY = 'battleMarchBaseState';
