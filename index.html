@@ -2128,19 +2128,19 @@ GermanComp is a complete restriction, balance and tournament system, developed b
      muss; wird es unterschritten, entfallen die Loecher ganz. */
   const MAGNET = { durchmesser: 10, tiefe: 1.5, raster: 30, wand: 1.5, boden: 0.6 };
 
-  /* Pflaster auf der Oberseite. ziel = angestrebte Steinbreite, hoehe = wie
-     weit ein Stein aus der Flaeche ragt (bleibt unter 2 mm), fuge = wie stark
-     der Stein gegenueber seiner Zelle geschrumpft wird; die Differenz ist die
-     Fuge zwischen zwei Steinen. */
-  const PFLASTER = { ziel: 4, hoehe: 1.2, fuge: 0.82, mindestZelle: 2 };
+  /* Pflaster auf der Oberseite. ziel = mittlere Steinbreite, hoehe = wie weit
+     ein Stein aus der Flaeche ragt (bleibt unter 2 mm), fuge = Abstand
+     zwischen zwei Steinen je Seite, streuung = wie stark die Groeszen um den
+     Mittelwert schwanken duerfen. */
+  const PFLASTER = { ziel: 4, hoehe: 1.2, fuge: 0.35, streuung: 0.3, mindestZelle: 1.6 };
 
   const HINTS = {
     plain: 'Scharfe Kanten, senkrechte Wände. Die Unterseite liegt im Nullpunkt, das Stück sitzt im Slicer also direkt auf der Druckplatte.',
     gw: 'Profil der Games-Workshop-Bases: Wände um 20,6° nach innen geneigt (' +
         String(GW.taperPerMm).replace('.', ',') + ' mm je Millimeter Höhe), Ecken mit ' + String(GW.radius).replace('.', ',') +
         ' mm Radius. Bei 4 mm Dicke ist die Oberseite je Seite 1,5 mm kleiner als die Unterseite; das eingegebene Maß ist die Unterseite. Die Neigung ist an einer 30-mm-Base vermessen, der Eckenradius ist geschätzt.',
-    stein: 'Pflaster: Steine von rund ' + String(PFLASTER.ziel).replace('.', ',') + ' mm Breite, ' +
-        String(PFLASTER.hoehe).replace('.', ',') + ' mm hoch aus der Fläche. Die angegebene Dicke zählt bis zur Fuge, das Pflaster kommt obendrauf.'
+    stein: 'Pflaster: Steine unterschiedlicher Größe um ' + String(PFLASTER.ziel).replace('.', ',') + ' mm, ' +
+        String(PFLASTER.hoehe).replace('.', ',') + ' mm hoch aus der Fläche, in versetzten Reihen über die ganze Oberseite. Jeder Klick auf die Checkbox mischt die Anordnung neu. Die angegebene Dicke zählt bis zur Fuge, das Pflaster kommt obendrauf.'
   };
 
   const inputs = {};
@@ -2157,6 +2157,20 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   const noteLabel = document.getElementById('bgNote');
   const hintLabel = document.getElementById('bgHint');
   const downloadBtn = document.getElementById('bgDownload');
+
+  /* Mulberry32: kleiner Zufallsgenerator mit Startwert. Gebraucht wird er,
+     weil Vorschau und STL dasselbe Pflaster zeigen muessen - Math.random
+     wuerde bei jedem Aufruf etwas anderes liefern. */
+  function zufall(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  let steinSeed = (Math.random() * 4294967296) >>> 0;
 
   const tidy = n => Math.round(n * 100) / 100;
   const fmt = n => String(tidy(n)).replace('.', ',');
@@ -2298,16 +2312,81 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return g;
   }
 
-  function pflaster(w, d, t, gw, an) {
-    const leer = { cells: [], cuts: { x: [], y: [] } };
+  /* Teilt eine Strecke in n Stuecke zufaelliger Laenge, die zusammen genau
+     die Strecke ergeben. Ohne die Normierung bliebe am Ende ein Rest. */
+  function teile(a, b, n, rnd) {
+    const g = [];
+    let summe = 0;
+    for (let i = 0; i < n; i++) { const v = 1 - PFLASTER.streuung + 2 * PFLASTER.streuung * rnd(); g.push(v); summe += v; }
+    const punkte = [a];
+    let lauf = 0;
+    g.forEach(v => { lauf += v; punkte.push(a + (b - a) * (lauf / summe)); });
+    punkte[punkte.length - 1] = b;
+    return punkte;
+  }
+
+  /* Pflaster in Reihen: jede Reihe hat eine eigene Hoehe und eine eigene
+     Anzahl Steine, die Stoesze liegen also versetzt wie bei echtem Pflaster.
+     Wo zwei Reihen aneinandergrenzen, treffen unterschiedlich viele Steine
+     aufeinander. Die Teilungspunkte beider Reihen kommen deshalb in "extra"
+     und werden spaeter in den Rand BEIDER angrenzenden Zellen eingesetzt -
+     sonst haette die eine Zelle dort einen Punkt, den die andere nicht kennt,
+     und das Netz waere offen. */
+  function pflaster(w, d, t, gw, an, seed) {
+    const leer = { cells: [], cuts: { x: [], y: [] }, extra: [] };
     if (!an) return leer;
     const ins = taper(w, d, t, gw);
-    const bw = w - 2 * ins, bd = d - 2 * ins;
-    const nx = Math.max(1, Math.round(bw / PFLASTER.ziel));
-    const ny = Math.max(1, Math.round(bd / PFLASTER.ziel));
-    const g = raster(ins, ins, w - ins, d - ins, nx, ny);
-    if (Math.min(g.cw, g.cd) < PFLASTER.mindestZelle) return leer;
-    return g;
+    const x0 = ins, y0 = ins, x1 = w - ins, y1 = d - ins;
+    const rnd = zufall(seed);
+
+    const reihen = Math.max(1, Math.round((y1 - y0) / PFLASTER.ziel));
+    const ys = teile(y0, y1, reihen, rnd);
+    const xsProReihe = ys.slice(0, -1).map(() => {
+      const ziel = PFLASTER.ziel * (1 - PFLASTER.streuung + 2 * PFLASTER.streuung * rnd());
+      return teile(x0, x1, Math.max(1, Math.round((x1 - x0) / ziel)), rnd);
+    });
+
+    const cells = [], extra = [];
+    for (let r = 0; r < reihen; r++) {
+      const xs = xsProReihe[r];
+      for (let i = 0; i < xs.length - 1; i++) {
+        cells.push({ x0: xs[i], x1: xs[i + 1], y0: ys[r], y1: ys[r + 1],
+                     cx: (xs[i] + xs[i + 1]) / 2, cy: (ys[r] + ys[r + 1]) / 2 });
+      }
+      // Stoesze dieser Reihe an ihrer oberen und unteren Fuge festhalten
+      if (r > 0) xs.slice(1, -1).forEach(x => extra.push([x, ys[r]]));
+      if (r < reihen - 1) xs.slice(1, -1).forEach(x => extra.push([x, ys[r + 1]]));
+    }
+    if (cells.some(c => Math.min(c.x1 - c.x0, c.y1 - c.y0) < PFLASTER.mindestZelle)) return leer;
+
+    return {
+      cells: cells, extra: extra,
+      // Am Auszenrand liegen nur die Stoesze der ersten und letzten Reihe
+      // sowie die Reihengrenzen selbst.
+      cuts: { x: xsProReihe[0].slice(1, -1).concat(xsProReihe[reihen - 1].slice(1, -1)),
+              y: ys.slice(1, -1) },
+      bounds: { x0: x0, y0: y0, x1: x1, y1: y1 }
+    };
+  }
+
+  // Setzt erzwungene Punkte in die Kanten ein, auf denen sie liegen.
+  function insertPoints(poly, extra) {
+    if (!extra.length) return poly;
+    const out = [];
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i], b = poly[(i + 1) % poly.length];
+      out.push(a);
+      const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
+      if (len2 < 1e-12) continue;
+      const drauf = [];
+      extra.forEach(p => {
+        const t = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2;
+        if (t <= 1e-6 || t >= 1 - 1e-6) return;
+        if (Math.hypot(p[0] - (a[0] + dx * t), p[1] - (a[1] + dy * t)) < 1e-6) drauf.push({ t: t, p: p });
+      });
+      drauf.sort((x, y) => x.t - y.t).forEach(o => out.push(o.p));
+    }
+    return out;
   }
 
   // Sutherland-Hodgman gegen eine Halbebene f(p) >= 0.
@@ -2380,11 +2459,15 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return kreis;
   }
 
-  // Stein: die Zelle zur Mitte hin geschrumpft. Punkt fuer Punkt dieselbe
-  // Reihenfolge wie der Zellrand, die Zuordnung steht also fest.
+  // Stein: die Zelle zur Mitte hin geschrumpft, je Achse so weit, dass
+  // rundherum die Fuge stehen bleibt. Punkt fuer Punkt dieselbe Reihenfolge
+  // wie der Zellrand, die Zuordnung steht also fest.
   function steinPoly(poly, cell) {
-    return poly.map(p => [cell.cx + (p[0] - cell.cx) * PFLASTER.fuge,
-                          cell.cy + (p[1] - cell.cy) * PFLASTER.fuge]);
+    const bw = cell.x1 - cell.x0, bd = cell.y1 - cell.y0;
+    const sx = Math.max(0.3, (bw - 2 * PFLASTER.fuge) / bw);
+    const sy = Math.max(0.3, (bd - 2 * PFLASTER.fuge) / bd);
+    return poly.map(p => [cell.cx + (p[0] - cell.cx) * sx,
+                          cell.cy + (p[1] - cell.cy) * sy]);
   }
 
   // Flaechennormale nach der Rechte-Hand-Regel, auf Laenge 1 gebracht.
@@ -2427,9 +2510,9 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     for (let i = 0; i < pts.length; i++) tris.push(facing(mitte, pts[i], pts[(i + 1) % pts.length], ref));
   }
 
-  function bauteile(w, d, t, gw, stein) {
+  function bauteile(w, d, t, gw, stein, seed) {
     const mag = magnets(w, d, t);
-    const pfl = pflaster(w, d, t, gw, stein);
+    const pfl = pflaster(w, d, t, gw, stein, seed);
     const rg = rings(w, d, t, gw, mag, pfl);
     const unten2d = rg.bottom.map(p => [p[0], p[1]]);
     const oben2d = rg.top.map(p => [p[0], p[1]]);
@@ -2441,8 +2524,10 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       return kreis ? { cell: c, rand: poly, innen: kreis } : null;
     });
     const steine = pfl.cells.map(c => {
-      const poly = cellPoly(oben2d, c, pfl.bounds);
-      return poly ? { cell: c, rand: poly, innen: steinPoly(poly, c) } : null;
+      const geklippt = clipCell(oben2d, c);
+      if (geklippt.length < 3) return null;
+      const poly = insertPoints(geklippt, pfl.extra);
+      return { cell: c, rand: poly, innen: steinPoly(poly, c) };
     });
 
     return {
@@ -2454,8 +2539,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     };
   }
 
-  function triangles(w, d, t, gw, stein) {
-    const b = bauteile(w, d, t, gw, stein);
+  function triangles(w, d, t, gw, stein, seed) {
+    const b = bauteile(w, d, t, gw, stein, seed);
     const B = b.rg.bottom, T = b.rg.top, tris = [];
 
     sideQuads(b.rg).forEach(q => { tris.push([q[0], q[1], q[2]], [q[0], q[2], q[3]]); });
@@ -2632,7 +2717,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     const komplett = w !== null && d !== null && t !== null;
     let b = null;
     if (komplett) {
-      b = bauteile(w, d, t, gw, stein);
+      b = bauteile(w, d, t, gw, stein, steinSeed);
       drawTop(b, t);
       drawBack(b);
     }
@@ -2652,7 +2737,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     if (!bad.length) {
       downloadBtn.disabled = false;
       noteLabel.textContent = (gw ? 'GW-Profil: geneigte Wände, gerundete Ecken' : 'Scharfkantiger Quader')
-        + (b && b.steine.length ? ' · ' + b.steine.length + (b.steine.length === 1 ? ' Pflasterstein' : ' Pflastersteine') + ' (' + b.pfl.nx + ' × ' + b.pfl.ny + ')' : '');
+        + (b && b.steine.length ? ' · ' + b.steine.length + (b.steine.length === 1 ? ' Pflasterstein' : ' Pflastersteine') : '');
       noteLabel.classList.remove('error');
       save(w, d, t, gw, stein);
     } else {
@@ -2676,7 +2761,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   }
 
   function save(w, d, t, gw, stein) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ w: w, d: d, t: t, gw: gw, st: stein })); }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ w: w, d: d, t: t, gw: gw, st: stein, seed: steinSeed })); }
     catch (e) { /* privater Modus: dann eben ohne Merken */ }
   }
   function load() {
@@ -2690,12 +2775,13 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     });
     gwBox.checked = s.gw === true;
     steinBox.checked = s.st === true;
+    if (typeof s.seed === 'number' && isFinite(s.seed)) steinSeed = s.seed >>> 0;
   }
 
-  function buildSTL(w, d, t, gw, stein, name) {
+  function buildSTL(w, d, t, gw, stein, seed, name) {
     const num = n => n.toFixed(4);
     let out = 'solid ' + name + '\n';
-    triangles(w, d, t, gw, stein).forEach(tri => {
+    triangles(w, d, t, gw, stein, seed).forEach(tri => {
       const nv = normal(tri[0], tri[1], tri[2]);
       out += '  facet normal ' + num(nv[0]) + ' ' + num(nv[1]) + ' ' + num(nv[2]) + '\n    outer loop\n';
       tri.forEach(p => { out += '      vertex ' + num(p[0]) + ' ' + num(p[1]) + ' ' + num(p[2]) + '\n'; });
@@ -2710,7 +2796,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     if (KEYS.some(k => f[k].state !== 'ok')) return;
     const w = f.width.value, d = f.depth.value, t = f.thickness.value;
     const gw = gwBox.checked, stein = steinBox.checked;
-    const blob = new Blob([buildSTL(w, d, t, gw, stein, 'base')], { type: 'model/stl' });
+    const blob = new Blob([buildSTL(w, d, t, gw, stein, steinSeed, 'base')], { type: 'model/stl' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -2726,7 +2812,10 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     inputs[k].addEventListener('change', () => clampField(k));
   });
   gwBox.addEventListener('change', render);
-  steinBox.addEventListener('change', render);
+  steinBox.addEventListener('change', () => {
+    steinSeed = (Math.random() * 4294967296) >>> 0;
+    render();
+  });
   downloadBtn.addEventListener('click', downloadSTL);
 
   window.__refreshBase = render;
