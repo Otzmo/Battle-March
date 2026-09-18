@@ -2100,16 +2100,18 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   const KEYS = Object.keys(SPECS);
   const STORAGE_KEY = 'battleMarchBaseState';
 
-  /* GW-Profil, abgenommen an einer vermessenen 30-mm-Base: scharfe Ecken,
-     Waende um 0,375 mm je Millimeter Hoehe nach innen geneigt - bei 4 mm
-     Dicke also 1,5 mm je Seite, das sind 20,6 Grad gegen die Senkrechte.
-     radius = Eckenradius (0 = scharf), segs = Segmente je gerundeter Ecke. */
-  const GW = { radius: 0, taperPerMm: 0.375, segs: 6 };
+  /* GW-Profil. Die Neigung ist an einer vermessenen 30-mm-Base abgenommen:
+     0,375 mm je Millimeter Hoehe, bei 4 mm Dicke also 1,5 mm je Seite -
+     20,6 Grad gegen die Senkrechte. Der Eckenradius ist geschaetzt, die
+     vermessene Vorlage hatte scharfe Ecken.
+     segs = Segmente je Ecke (mehr = runder, mehr Dreiecke). */
+  const GW = { radius: 0.5, taperPerMm: 0.375, segs: 6 };
 
   const HINTS = {
     plain: 'Scharfe Kanten, senkrechte Wände, keine Oberflächenstruktur. Die Unterseite liegt im Nullpunkt, das Stück sitzt im Slicer also direkt auf der Druckplatte.',
-    gw: 'Profil der Games-Workshop-Bases, abgenommen an einer vermessenen 30-mm-Base: scharfe Ecken, Wände um 20,6° nach innen geneigt (' +
-        String(GW.taperPerMm).replace('.', ',') + ' mm je Millimeter Höhe). Bei 4 mm Dicke ist die Oberseite je Seite 1,5 mm kleiner als die Unterseite. Das eingegebene Maß ist die Unterseite.'
+    gw: 'Profil der Games-Workshop-Bases: Wände um 20,6° nach innen geneigt (' +
+        String(GW.taperPerMm).replace('.', ',') + ' mm je Millimeter Höhe), Ecken mit ' + String(GW.radius).replace('.', ',') +
+        ' mm Radius. Bei 4 mm Dicke ist die Oberseite je Seite 1,5 mm kleiner als die Unterseite; das eingegebene Maß ist die Unterseite. Die Neigung ist an einer 30-mm-Base vermessen, der Eckenradius ist geschätzt.'
   };
 
   const inputs = {};
@@ -2171,14 +2173,15 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   function rings(w, d, t, gw) {
     // Radius und Verjuengung duerfen die Base nie auffressen.
     const small = Math.min(w, d);
-    const r = gw ? Math.min(GW.radius, small / 2 - 0.01) : 0;
     const ins = gw ? Math.min(GW.taperPerMm * t, small / 4) : 0;
+    /* Gleicher Radius oben wie unten. Ein echter Parallelversatz wuerde den
+       Radius um die Neigung verkleinern und die Ecken oben spitz machen -
+       an einer echten Base sind sie oben wie unten gerundet. Der Radius muss
+       in den kleineren oberen Ring passen, sonst schlaegt der Umriss um. */
+    const r = gw ? Math.max(Math.min(GW.radius, (small - 2 * ins) / 2 - 0.01), 0) : 0;
     const bottom = outline(w, d, r, GW.segs);
-    // Scharfe Ecken unten heiszt scharfe Ecken oben - beide Ringe brauchen
-    // gleich viele Punkte, sonst passen die Waende nicht zusammen.
-    const topR = r > 0.001 ? Math.max(r - ins, 0.05) : 0;
     const top = ins > 0
-      ? outline(w - 2 * ins, d - 2 * ins, topR, GW.segs).map(p => [p[0] + ins, p[1] + ins])
+      ? outline(w - 2 * ins, d - 2 * ins, r, GW.segs).map(p => [p[0] + ins, p[1] + ins])
       : bottom;
     return {
       bottom: bottom.map(p => [p[0], p[1], 0]),
@@ -2326,7 +2329,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
     if (!bad.length) {
       downloadBtn.disabled = false;
-      noteLabel.textContent = gw ? 'GW-Profil: geneigte Wände, 20,6°' : 'Scharfkantiger Quader';
+      noteLabel.textContent = gw ? 'GW-Profil: geneigte Wände, gerundete Ecken' : 'Scharfkantiger Quader';
       noteLabel.classList.remove('error');
       save(w, d, t, gw);
     } else {
