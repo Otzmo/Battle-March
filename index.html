@@ -284,6 +284,8 @@ button:hover{ background:var(--maroon-dark); }
 .bg-check input{ width:16px; height:16px; accent-color:var(--maroon); cursor:pointer; flex:none; }
 .bg-check label{ margin:0; color:var(--maroon); font-size:.95rem; cursor:pointer; }
 .bg-check input:focus-visible{ outline:3px solid #c98a2f; outline-offset:2px; }
+.bg-viewlabel{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#5a4f3f; align-self:flex-start; margin-top:2px; }
+.bg-magnets{ font-size:.8rem; color:#4a3f2f; text-align:center; }
 .bg-dims{ font-size:.95rem; color:#4a3f2f; text-align:center; font-variant-numeric:tabular-nums; }
 .bg-dl{ width:100%; font-family:inherit; font-size:1rem; font-weight:bold; cursor:pointer; padding:10px 12px; border:2px solid var(--maroon); border-radius:4px; background:var(--maroon); color:#fff; }
 .bg-dl:hover:not(:disabled){ background:var(--maroon-dark); }
@@ -961,8 +963,12 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
     <div class="panel view">
       <h2>Vorschau</h2>
-      <canvas id="bgPreview" width="260" height="250"></canvas>
+      <div class="bg-viewlabel">Ansicht von oben</div>
+      <canvas id="bgPreview" width="260" height="215"></canvas>
+      <div class="bg-viewlabel">Rückseite, von unten gesehen</div>
+      <canvas id="bgBack" width="260" height="175"></canvas>
       <div class="bg-dims" id="bgDims" aria-live="polite">30 × 30 × 4 mm</div>
+      <div class="bg-magnets" id="bgMagnets"></div>
       <button type="button" class="bg-dl" id="bgDownload">STL herunterladen</button>
       <div class="bg-note" id="bgNote">Flache Base, keine Oberflächenstruktur</div>
     </div>
@@ -2107,6 +2113,13 @@ GermanComp is a complete restriction, balance and tournament system, developed b
      segs = Segmente je Ecke (mehr = runder, mehr Dreiecke). */
   const GW = { radius: 0.5, taperPerMm: 0.375, segs: 6 };
 
+  /* Magnetloecher, von der Unterseite eingelassen. raster = Kantenlaenge, ab
+     der ein weiteres Loch dazukommt: 30 mm ergibt bei 30x30 eines, bei 30x60
+     zwei. wand / boden = Material, das rundherum bzw. darueber stehen bleiben
+     muss; wird es unterschritten, entfallen die Loecher ganz.
+     teilung = Unterteilungen je Zellrandkante. */
+  const MAGNET = { durchmesser: 10, tiefe: 1.5, raster: 30, wand: 1.5, boden: 0.6, teilung: 6 };
+
   const HINTS = {
     plain: 'Scharfe Kanten, senkrechte Wände, keine Oberflächenstruktur. Die Unterseite liegt im Nullpunkt, das Stück sitzt im Slicer also direkt auf der Druckplatte.',
     gw: 'Profil der Games-Workshop-Bases: Wände um 20,6° nach innen geneigt (' +
@@ -2119,8 +2132,11 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   const canvas = document.getElementById('bgPreview');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
+  const backCanvas = document.getElementById('bgBack');
+  const backCtx = backCanvas.getContext('2d');
   const gwBox = document.getElementById('bgGw');
   const dimsLabel = document.getElementById('bgDims');
+  const magnetLabel = document.getElementById('bgMagnets');
   const noteLabel = document.getElementById('bgNote');
   const hintLabel = document.getElementById('bgHint');
   const downloadBtn = document.getElementById('bgDownload');
@@ -2144,66 +2160,181 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return out;
   }
 
-  /* ---------------- Geometrie ----------------
-     Ein Umriss in der xy-Ebene wird nach oben gezogen. Beim GW-Profil ist
-     der obere Ring der gleiche Umriss, nach innen versetzt - daraus ergeben
-     sich die geneigten Waende von selbst. Der scharfkantige Quader ist der
-     Sonderfall Radius 0 ohne Versatz. */
+  /* ---------------- Umriss und Ringe ----------------
+     Der Umriss besteht aus acht Abschnitten: vier Eckbogen und vier Geraden.
+     Beschrieben wird er ueber eine Liste von Parametern (Abschnitt + Anteil),
+     aus der beide Ringe entstehen. Dadurch haben unterer und oberer Ring
+     zwangslaeufig gleich viele Punkte, und jeder Punkt oben gehoert zu genau
+     einem unten - sonst passten die Seitenwaende nicht zusammen.
 
-  // Gegen den Uhrzeigersinn von oben gesehen, damit die Deckflaeche nach oben weist.
-  function outline(w, d, r, segs) {
-    if (r <= 0.001) return [[w, 0], [w, d], [0, d], [0, 0]];
-    const H = Math.PI / 2;
-    const arcs = [
-      [w - r, r,     -H,     0],
-      [w - r, d - r,  0,     H],
-      [r,     d - r,  H,     Math.PI],
-      [r,     r,      Math.PI, Math.PI + H]
+     In die Parameterliste wandern auch die Stellen, an denen die Zellgrenzen
+     der Magnetloecher den Rand treffen. Ohne sie wuerde die Bodenflaeche dort
+     einen Punkt setzen, den die Seitenwand nicht kennt: ein T-Stosz, und das
+     Netz waere offen. */
+
+  function segments(w, d, r, ins) {
+    const W = w - 2 * ins, D = d - 2 * ins, o = ins, H = Math.PI / 2;
+    return [
+      { arc: [o + W - r, o + r, -H, 0] },                     // Ecke bei (w,0)
+      { line: [o + W, o + r, o + W, o + D - r] },             // rechts
+      { arc: [o + W - r, o + D - r, 0, H] },                  // Ecke bei (w,d)
+      { line: [o + W - r, o + D, o + r, o + D] },             // hinten
+      { arc: [o + r, o + D - r, H, Math.PI] },                // Ecke bei (0,d)
+      { line: [o, o + D - r, o, o + r] },                     // links
+      { arc: [o + r, o + r, Math.PI, Math.PI + H] },          // Ecke bei (0,0)
+      { line: [o + r, o, o + W - r, o] }                      // vorne
     ];
-    const pts = [];
-    arcs.forEach(a => {
-      for (let i = 0; i <= segs; i++) {
-        const ang = a[2] + (a[3] - a[2]) * (i / segs);
-        pts.push([a[0] + Math.cos(ang) * r, a[1] + Math.sin(ang) * r]);
-      }
-    });
-    return pts;
   }
 
-  function rings(w, d, t, gw) {
-    // Radius und Verjuengung duerfen die Base nie auffressen.
+  function pointAt(seg, t, r) {
+    if (seg.arc) {
+      const c = seg.arc;
+      if (r <= 0.001) return [c[0], c[1]];
+      const a = c[2] + (c[3] - c[2]) * t;
+      return [c[0] + Math.cos(a) * r, c[1] + Math.sin(a) * r];
+    }
+    const l = seg.line;
+    return [l[0] + (l[2] - l[0]) * t, l[1] + (l[3] - l[1]) * t];
+  }
+
+  const RAND_SCHRITT = 5;   // angestrebte Kantenlaenge am Rand in mm
+
+  function outlineParams(w, d, r, cutsX, cutsY) {
+    const p = [];
+    const rund = r > 0.001;
+    const arc = s => {
+      if (!rund) { p.push({ s: s, t: 0 }); return; }
+      for (let i = 0; i < GW.segs; i++) p.push({ s: s, t: i / GW.segs });
+    };
+    // a, b = Lage der Endpunkte auf der Achse, entlang der die Gerade laeuft
+    const line = (s, a, b, cuts) => {
+      const span = b - a;
+      const n = Math.max(1, Math.ceil(Math.abs(span) / RAND_SCHRITT));
+      // Bei scharfen Ecken ist der Anfang der Geraden derselbe Punkt wie die
+      // Ecke davor - er darf kein zweites Mal in die Liste.
+      const ts = rund ? [0] : [];
+      for (let i = 1; i < n; i++) ts.push(i / n);
+      cuts.forEach(v => { const t = (v - a) / span; if (t > 1e-6 && t < 1 - 1e-6) ts.push(t); });
+      ts.sort((x, y) => x - y);
+      ts.forEach((t, i) => { if (i === 0 || t - ts[i - 1] > 1e-6) p.push({ s: s, t: t }); });
+    };
+    arc(0); line(1, r, d - r, cutsY);
+    arc(2); line(3, w - r, r, cutsX);
+    arc(4); line(5, d - r, r, cutsY);
+    arc(6); line(7, r, w - r, cutsX);
+    return p;
+  }
+
+  function rings(w, d, t, gw, lay) {
     const small = Math.min(w, d);
     const ins = gw ? Math.min(GW.taperPerMm * t, small / 4) : 0;
     /* Gleicher Radius oben wie unten. Ein echter Parallelversatz wuerde den
-       Radius um die Neigung verkleinern und die Ecken oben spitz machen -
-       an einer echten Base sind sie oben wie unten gerundet. Der Radius muss
-       in den kleineren oberen Ring passen, sonst schlaegt der Umriss um. */
+       Radius um die Neigung verkleinern und die Ecken oben spitz machen - an
+       einer echten Base sind sie oben wie unten gerundet. Der Radius muss in
+       den kleineren oberen Ring passen, sonst schlaegt der Umriss um. */
     const r = gw ? Math.max(Math.min(GW.radius, (small - 2 * ins) / 2 - 0.01), 0) : 0;
-    const bottom = outline(w, d, r, GW.segs);
-    const top = ins > 0
-      ? outline(w - 2 * ins, d - 2 * ins, r, GW.segs).map(p => [p[0] + ins, p[1] + ins])
-      : bottom;
+    const params = outlineParams(w, d, r, lay ? lay.cutsX : [], lay ? lay.cutsY : []);
+    const unten = segments(w, d, r, 0), oben = segments(w, d, r, ins);
     return {
-      bottom: bottom.map(p => [p[0], p[1], 0]),
-      top: top.map(p => [p[0], p[1], t])
+      bottom: params.map(q => { const p = pointAt(unten[q.s], q.t, r); return [p[0], p[1], 0]; }),
+      top:    params.map(q => { const p = pointAt(oben[q.s], q.t, r); return [p[0], p[1], t]; })
     };
   }
 
   function sideQuads(rg) {
     const B = rg.bottom, T = rg.top, n = B.length, out = [];
-    for (let i = 0; i < n; i++) {
-      const j = (i + 1) % n;
-      out.push([B[i], B[j], T[j], T[i]]);
+    for (let i = 0; i < n; i++) out.push([B[i], B[(i + 1) % n], T[(i + 1) % n], T[i]]);
+    return out;
+  }
+
+  /* ---------------- Magnetloecher ----------------
+     Die Grundflaeche wird in ein Raster von Zellen geteilt, eine je Loch; das
+     Loch sitzt in der Zellmitte. */
+  function magnets(w, d, t) {
+    const nx = Math.max(1, Math.round(w / MAGNET.raster));
+    const ny = Math.max(1, Math.round(d / MAGNET.raster));
+    const cw = w / nx, cd = d / ny;
+    const leer = grund => ({ cells: [], cutsX: [], cutsY: [], grund: grund });
+    if (t < MAGNET.tiefe + MAGNET.boden) return leer('Base zu dünn für Magnetlöcher');
+    if (Math.min(cw, cd) < MAGNET.durchmesser + 2 * MAGNET.wand) return leer('Base zu klein für Magnetlöcher');
+    const cells = [], cutsX = [], cutsY = [];
+    for (let i = 1; i < nx; i++) cutsX.push(i * cw);
+    for (let j = 1; j < ny; j++) cutsY.push(j * cd);
+    for (let i = 0; i < nx; i++) {
+      for (let j = 0; j < ny; j++) {
+        cells.push({ x0: i * cw, x1: (i + 1) * cw, y0: j * cd, y1: (j + 1) * cd,
+                     cx: (i + 0.5) * cw, cy: (j + 0.5) * cd });
+      }
+    }
+    return { cells: cells, cutsX: cutsX, cutsY: cutsY, nx: nx, ny: ny, r: MAGNET.durchmesser / 2 };
+  }
+
+  // Sutherland-Hodgman gegen eine Halbebene f(p) >= 0.
+  function clipHalf(poly, f) {
+    const out = [];
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i], b = poly[(i + 1) % poly.length];
+      const fa = f(a), fb = f(b);
+      if (fa >= 0) out.push(a);
+      if ((fa >= 0) !== (fb >= 0)) {
+        const s = fa / (fa - fb);
+        out.push([a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s]);
+      }
+    }
+    return out;
+  }
+  function clipCell(poly, c) {
+    let p = poly;
+    p = clipHalf(p, q => q[0] - c.x0);
+    p = clipHalf(p, q => c.x1 - q[0]);
+    p = clipHalf(p, q => q[1] - c.y0);
+    p = clipHalf(p, q => c.y1 - q[1]);
+    // Doppelte Punkte entstehen, wenn eine Kante genau auf der Schnittlinie liegt.
+    const out = [];
+    p.forEach(q => {
+      const last = out[out.length - 1];
+      if (!last || Math.hypot(q[0] - last[0], q[1] - last[1]) > 1e-7) out.push(q);
+    });
+    while (out.length > 1 && Math.hypot(out[0][0] - out[out.length - 1][0], out[0][1] - out[out.length - 1][1]) < 1e-7) out.pop();
+    return out;
+  }
+
+  /* Nur die Kanten auf einer inneren Zellgrenze werden unterteilt. Die Kanten
+     am Auszenrand bleiben, wie sie sind - dort haengt die Seitenwand dran.
+     Zwei Nachbarzellen sehen dieselbe innere Kante mit denselben Endpunkten
+     und unterteilen sie gleich, ihre Punkte treffen also aufeinander. */
+  function subdivideInner(poly, c, w, d) {
+    const nah = (a, b) => Math.abs(a - b) < 1e-7;
+    const innen = (a, b) =>
+      (nah(a[0], c.x0) && nah(b[0], c.x0) && c.x0 > 1e-7) ||
+      (nah(a[0], c.x1) && nah(b[0], c.x1) && c.x1 < w - 1e-7) ||
+      (nah(a[1], c.y0) && nah(b[1], c.y0) && c.y0 > 1e-7) ||
+      (nah(a[1], c.y1) && nah(b[1], c.y1) && c.y1 < d - 1e-7);
+    const out = [];
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i], b = poly[(i + 1) % poly.length];
+      out.push(a);
+      if (!innen(a, b)) continue;
+      const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / RAND_SCHRITT));
+      for (let s = 1; s < n; s++) out.push([a[0] + (b[0] - a[0]) * (s / n), a[1] + (b[1] - a[1]) * (s / n)]);
     }
     return out;
   }
 
-  function triangles(rg) {
-    const B = rg.bottom, T = rg.top, n = B.length, tris = [];
-    sideQuads(rg).forEach(q => { tris.push([q[0], q[1], q[2]], [q[0], q[2], q[3]]); });
-    for (let i = 1; i < n - 1; i++) tris.push([T[0], T[i], T[i + 1]]);   // Deckflaeche
-    for (let i = 1; i < n - 1; i++) tris.push([B[0], B[i + 1], B[i]]);   // Bodenflaeche
-    return tris;
+  // Lochkreis und Zellrand bekommen gleich viele Punkte: zu jedem Randpunkt
+  // gehoert der Kreispunkt unter demselben Winkel. Das Paar laesst sich dann
+  // ohne Suche zu einem Ring vernaehen.
+  function cellRing(bottom2d, cell, r, w, d) {
+    const poly = subdivideInner(clipCell(bottom2d, cell), cell, w, d);
+    if (poly.length < 3) return null;
+    const kreis = [];
+    for (const p of poly) {
+      const dx = p[0] - cell.cx, dy = p[1] - cell.cy;
+      if (Math.hypot(dx, dy) < r + MAGNET.wand) return null;   // Loch kaeme dem Rand zu nah
+      const a = Math.atan2(dy, dx);
+      kreis.push([cell.cx + Math.cos(a) * r, cell.cy + Math.sin(a) * r]);
+    }
+    return { rand: poly, kreis: kreis };
   }
 
   // Flaechennormale nach der Rechte-Hand-Regel, auf Laenge 1 gebracht.
@@ -2214,24 +2345,70 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     const len = Math.sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]) || 1;
     return [n[0] / len, n[1] / len, n[2] / len];
   }
+  // Dreieck so herum, dass die Normale in die Richtung ref zeigt.
+  function facing(a, b, c, ref) {
+    const n = normal(a, b, c);
+    return (n[0] * ref[0] + n[1] * ref[1] + n[2] * ref[2]) >= 0 ? [a, b, c] : [a, c, b];
+  }
+
+  const DOWN = [0, 0, -1], UP = [0, 0, 1];
+
+  function triangles(w, d, t, gw) {
+    const lay = magnets(w, d, t);
+    const rg = rings(w, d, t, gw, lay);
+    const B = rg.bottom, T = rg.top, n = B.length, tris = [];
+
+    sideQuads(rg).forEach(q => { tris.push([q[0], q[1], q[2]], [q[0], q[2], q[3]]); });
+
+    /* Deck- und Bodenflaeche werden vom Mittelpunkt aus gefaechert, nicht vom
+       ersten Umrisspunkt. Seit der Rand feiner unterteilt ist, liegen viele
+       Punkte auf einer Geraden - ein Faecher von dort erzeugt Dreiecke ohne
+       Flaeche, und die reiszen Loecher ins Netz. */
+    const mitteOben = [w / 2, d / 2, t];
+    for (let i = 0; i < n; i++) tris.push(facing(mitteOben, T[i], T[(i + 1) % n], UP));
+
+    const bottom2d = B.map(p => [p[0], p[1]]);
+    const ringe = lay.cells.map(c => cellRing(bottom2d, c, lay.r, w, d));
+    if (!lay.cells.length || ringe.some(r => r === null)) {
+      const mitteUnten = [w / 2, d / 2, 0];
+      for (let i = 0; i < n; i++) tris.push(facing(mitteUnten, B[i], B[(i + 1) % n], DOWN));
+      return tris;
+    }
+
+    const tiefe = MAGNET.tiefe;
+    ringe.forEach((ring, k) => {
+      const cell = lay.cells[k], R = ring.rand, C = ring.kreis, m = R.length;
+      for (let i = 0; i < m; i++) {
+        const j = (i + 1) % m;
+        const r0 = [R[i][0], R[i][1], 0], r1 = [R[j][0], R[j][1], 0];
+        const c0 = [C[i][0], C[i][1], 0], c1 = [C[j][0], C[j][1], 0];
+        const h0 = [C[i][0], C[i][1], tiefe], h1 = [C[j][0], C[j][1], tiefe];
+        tris.push(facing(r0, r1, c1, DOWN), facing(r0, c1, c0, DOWN));            // Boden um das Loch
+        // Wand des Lochs: die Normale zeigt zur Lochachse, dort ist kein Material.
+        const zurAchse = [cell.cx - C[i][0], cell.cy - C[i][1], 0];
+        tris.push(facing(c0, c1, h1, zurAchse), facing(c0, h1, h0, zurAchse));
+        if (i > 0 && i < m - 1) tris.push(facing([C[0][0], C[0][1], tiefe], h0, h1, DOWN)); // Lochdecke
+      }
+    });
+    return tris;
+  }
 
   /* ---------------- Vorschau ----------------
      Isometrie mit festem Blickwinkel. Der Koerper ist konvex, darum genuegt
      es, die Waende von hinten nach vorne zu malen - kein Tiefenpuffer. */
   const ISO_C = Math.cos(Math.PI / 6), ISO_S = Math.sin(Math.PI / 6);
   const project = p => [(p[0] - p[1]) * ISO_C, (p[0] + p[1]) * ISO_S - p[2]];
-  const depth = p => p[0] + p[1] + p[2];
+  const depth3 = p => p[0] + p[1] + p[2];
 
   const BASE_RGB = [226, 196, 140];
   const LIGHT = [0.45, 0.2, 0.87];
-  function shade(n) {
-    const lit = Math.max(0, n[0] * LIGHT[0] + n[1] * LIGHT[1] + n[2] * LIGHT[2]);
-    const b = 0.45 + 0.55 * lit;
+  function shade(nv) {
+    const b = 0.45 + 0.55 * Math.max(0, nv[0] * LIGHT[0] + nv[1] * LIGHT[1] + nv[2] * LIGHT[2]);
     return 'rgb(' + BASE_RGB.map(c => Math.round(Math.min(255, c * b))).join(',') + ')';
   }
 
-  // Umriss der Projektion: der Koerper ist konvex, also ist die konvexe
-  // Huelle der projizierten Punkte genau seine Silhouette.
+  // Der Koerper ist konvex, also ist die konvexe Huelle der projizierten
+  // Punkte genau seine Silhouette.
   function convexHull(pts) {
     const s = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
     const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
@@ -2246,73 +2423,103 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return chain(s).slice(0, -1).concat(chain(s.slice().reverse()).slice(0, -1));
   }
 
-  function path(pts2d) {
-    ctx.beginPath();
-    pts2d.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
-    ctx.closePath();
+  function path(g, pts) {
+    g.beginPath();
+    pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+    g.closePath();
   }
-
-  function draw(w, d, t, gw) {
-    const rg = rings(w, d, t, gw);
-    const all = rg.bottom.concat(rg.top);
-    const flat = all.map(project);
-
-    const xs = flat.map(p => p[0]), ys = flat.map(p => p[1]);
+  // Legt eine Punktwolke mittig in die Flaeche und liefert die Umrechnung.
+  function fitter(c, pts, pad) {
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
     const minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
     const minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
-    const pad = 30;
     const scale = Math.min(
-      (canvas.width - pad * 2) / Math.max(maxX - minX, 0.001),
-      (canvas.height - pad * 2) / Math.max(maxY - minY, 0.001)
+      (c.width - pad * 2) / Math.max(maxX - minX, 0.001),
+      (c.height - pad * 2) / Math.max(maxY - minY, 0.001)
     );
-    const offX = (canvas.width - (maxX - minX) * scale) / 2 - minX * scale;
-    const offY = (canvas.height - (maxY - minY) * scale) / 2 - minY * scale;
-    const to2d = p => { const q = project(p); return [q[0] * scale + offX, q[1] * scale + offY]; };
+    const offX = (c.width - (maxX - minX) * scale) / 2 - minX * scale;
+    const offY = (c.height - (maxY - minY) * scale) / 2 - minY * scale;
+    return p => [p[0] * scale + offX, p[1] * scale + offY];
+  }
 
-    // Schlagschatten: die Bodenflaeche verschwindet hinter dem Koerper,
-    // sichtbar bleibt nur ihr weicher Rand.
+  function drawTop(w, d, t, gw, lay) {
+    const rg = rings(w, d, t, gw, lay);
+    const flat = rg.bottom.concat(rg.top).map(project);
+    const map = fitter(canvas, flat, 28);
+    const to2d = p => map(project(p));
+
     ctx.save();
     ctx.shadowColor = 'rgba(60, 45, 20, .45)';
     ctx.shadowBlur = 14;
     ctx.shadowOffsetY = 9;
     ctx.fillStyle = 'rgba(60, 45, 20, .45)';
-    path(rg.bottom.map(to2d));
+    path(ctx, rg.bottom.map(to2d));
     ctx.fill();
     ctx.restore();
 
-    // Waende von hinten nach vorne, jede nach ihrer Neigung eingefaerbt.
     const quads = sideQuads(rg).map(q => ({
       pts: q.map(to2d),
       fill: shade(normal(q[0], q[1], q[2])),
-      z: (depth(q[0]) + depth(q[1]) + depth(q[2]) + depth(q[3])) / 4
+      z: (depth3(q[0]) + depth3(q[1]) + depth3(q[2]) + depth3(q[3])) / 4
     })).sort((a, b) => a.z - b.z);
     quads.forEach(q => {
       ctx.fillStyle = q.fill;
       ctx.strokeStyle = q.fill;   // deckt die Naht zwischen benachbarten Waenden
       ctx.lineWidth = 1;
-      path(q.pts);
+      path(ctx, q.pts);
       ctx.fill();
       ctx.stroke();
     });
 
     const topFlat = rg.top.map(to2d);
     ctx.fillStyle = shade([0, 0, 1]);
-    path(topFlat);
+    path(ctx, topFlat);
     ctx.fill();
 
     ctx.lineJoin = 'round';
     ctx.lineWidth = 1.5;
     ctx.strokeStyle = '#4a3a1e';
-    path(convexHull(flat.map((p, i) => [p[0] * scale + offX, p[1] * scale + offY])));
+    path(ctx, convexHull(flat.map(map)));
     ctx.stroke();
-    path(topFlat);
+    path(ctx, topFlat);
     ctx.stroke();
+  }
+
+  // Aufsicht auf die Unterseite. Von unten gesehen liegt die Breite
+  // gespiegelt, darum das Minus vor x.
+  function drawBack(w, d, t, gw, lay) {
+    const rg = rings(w, d, t, gw, lay);
+    const flat = rg.bottom.map(p => [-p[0], p[1]]);
+    const map = fitter(backCanvas, flat, 20);
+
+    backCtx.fillStyle = shade([0, 0, 1]);
+    backCtx.strokeStyle = '#4a3a1e';
+    backCtx.lineJoin = 'round';
+    backCtx.lineWidth = 1.5;
+    path(backCtx, flat.map(map));
+    backCtx.fill();
+    backCtx.stroke();
+
+    if (!lay.cells.length) return;
+    lay.cells.forEach(c => {
+      const m = map([-c.cx, c.cy]);
+      const edge = map([-(c.cx + lay.r), c.cy]);
+      const rpx = Math.abs(edge[0] - m[0]);
+      backCtx.beginPath();
+      backCtx.arc(m[0], m[1], rpx, 0, Math.PI * 2);
+      backCtx.fillStyle = '#6f6242';
+      backCtx.fill();
+      backCtx.lineWidth = 1.2;
+      backCtx.strokeStyle = '#4a3a1e';
+      backCtx.stroke();
+    });
   }
 
   function render() {
     const f = readAll();
     const gw = gwBox.checked;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    backCtx.clearRect(0, 0, backCanvas.width, backCanvas.height);
 
     const bad = KEYS.filter(k => f[k].state !== 'ok');
     KEYS.forEach(k => { inputs[k].classList.toggle('invalid', f[k].state !== 'ok'); });
@@ -2321,11 +2528,27 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     // Gezeichnet wird alles, was eine Zahl ist - auch zu gross oder zu klein,
     // damit die Vorschau nie etwas anderes zeigt als in den Feldern steht.
     const w = f.width.value, d = f.depth.value, t = f.thickness.value;
-    if (w !== null && d !== null && t !== null) draw(w, d, t, gw);
+    const komplett = w !== null && d !== null && t !== null;
+    let lay = { cells: [] };
+    if (komplett) {
+      lay = magnets(w, d, t);
+      const rand = rings(w, d, t, gw, lay).bottom.map(p => [p[0], p[1]]);
+      if (lay.cells.length && lay.cells.some(c => cellRing(rand, c, lay.r, w, d) === null)) {
+        lay = { cells: [], cutsX: [], cutsY: [], grund: 'Magnetlöcher passen bei dieser Größe nicht' };
+      }
+      drawTop(w, d, t, gw, lay);
+      drawBack(w, d, t, gw, lay);
+    }
 
-    dimsLabel.textContent = (w !== null && d !== null && t !== null)
+    dimsLabel.textContent = komplett
       ? fmt(w) + ' × ' + fmt(d) + ' × ' + fmt(t) + ' mm'
       : '—';
+    magnetLabel.textContent = !komplett ? ''
+      : lay.cells.length
+        ? lay.cells.length + (lay.cells.length === 1 ? ' Magnetloch' : ' Magnetlöcher') +
+          ' ⌀ ' + fmt(MAGNET.durchmesser) + ' × ' + fmt(MAGNET.tiefe) + ' mm tief' +
+          (lay.nx > 1 || lay.ny > 1 ? ' (' + lay.nx + ' × ' + lay.ny + ')' : '')
+        : (lay.grund || 'keine Magnetlöcher');
 
     if (!bad.length) {
       downloadBtn.disabled = false;
@@ -2371,9 +2594,9 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   function buildSTL(w, d, t, gw, name) {
     const num = n => n.toFixed(4);
     let out = 'solid ' + name + '\n';
-    triangles(rings(w, d, t, gw)).forEach(tri => {
-      const n = normal(tri[0], tri[1], tri[2]);
-      out += '  facet normal ' + num(n[0]) + ' ' + num(n[1]) + ' ' + num(n[2]) + '\n    outer loop\n';
+    triangles(w, d, t, gw).forEach(tri => {
+      const nv = normal(tri[0], tri[1], tri[2]);
+      out += '  facet normal ' + num(nv[0]) + ' ' + num(nv[1]) + ' ' + num(nv[2]) + '\n    outer loop\n';
       tri.forEach(p => { out += '      vertex ' + num(p[0]) + ' ' + num(p[1]) + ' ' + num(p[2]) + '\n'; });
       out += '    endloop\n  endfacet\n';
     });
