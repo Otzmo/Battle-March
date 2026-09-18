@@ -280,6 +280,10 @@ button:hover{ background:var(--maroon-dark); }
 .bg-field input:focus-visible{ outline:3px solid #c98a2f; outline-offset:1px; }
 .bg-field input.invalid{ border-color:var(--maroon); box-shadow:0 0 0 2px rgba(122,31,31,.18); }
 .bg-field .range{ font-size:.72rem; color:#5a4f3f; margin-top:3px; }
+.bg-check{ display:flex; align-items:center; gap:8px; margin:2px 0 10px; }
+.bg-check input{ width:16px; height:16px; accent-color:var(--maroon); cursor:pointer; flex:none; }
+.bg-check label{ margin:0; color:var(--maroon); font-size:.95rem; cursor:pointer; }
+.bg-check input:focus-visible{ outline:3px solid #c98a2f; outline-offset:2px; }
 .bg-dims{ font-size:.95rem; color:#4a3f2f; text-align:center; font-variant-numeric:tabular-nums; }
 .bg-dl{ width:100%; font-family:inherit; font-size:1rem; font-weight:bold; cursor:pointer; padding:10px 12px; border:2px solid var(--maroon); border-radius:4px; background:var(--maroon); color:#fff; }
 .bg-dl:hover:not(:disabled){ background:var(--maroon-dark); }
@@ -948,7 +952,11 @@ GermanComp is a complete restriction, balance and tournament system, developed b
         <input type="number" id="bgThickness" value="4" min="0.5" max="20" step="0.1" inputmode="decimal">
         <div class="range">0,5 bis 20 mm</div>
       </div>
-      <div class="hint">Flache, eckige Base ohne Oberflächenstruktur. Die Unterseite liegt im Nullpunkt, das Stück sitzt im Slicer also direkt auf der Druckplatte. Die Maße werden im Browser gemerkt.</div>
+      <div class="bg-check">
+        <input type="checkbox" id="bgGw">
+        <label for="bgGw">GW-Bases</label>
+      </div>
+      <div class="hint" id="bgHint"></div>
     </div>
 
     <div class="panel view">
@@ -2091,15 +2099,28 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   };
   const KEYS = Object.keys(SPECS);
   const STORAGE_KEY = 'battleMarchBaseState';
-  const DEFAULT_NOTE = 'Flache Base, keine Oberflächenstruktur';
+
+  /* Schaetzwerte fuer das GW-Profil - an echten Bases nicht nachgemessen.
+     radius = Eckenradius, taper = Verjuengung je Seite von unten nach oben,
+     segs   = Segmente je Ecke (mehr = runder, mehr Dreiecke). */
+  const GW = { radius: 1, taper: 0.4, segs: 6 };
+
+  const HINTS = {
+    plain: 'Scharfe Kanten, senkrechte Wände, keine Oberflächenstruktur. Die Unterseite liegt im Nullpunkt, das Stück sitzt im Slicer also direkt auf der Druckplatte.',
+    gw: 'Profil der Games-Workshop-Bases: Ecken mit ' + String(GW.radius).replace('.', ',') +
+        ' mm Radius, Wände je Seite um ' + String(GW.taper).replace('.', ',') +
+        ' mm nach oben verjüngt. Das eingegebene Maß ist die Unterseite. Die Werte sind geschätzt, nicht an echten Bases nachgemessen.'
+  };
 
   const inputs = {};
   KEYS.forEach(k => { inputs[k] = document.getElementById(SPECS[k].el); });
   const canvas = document.getElementById('bgPreview');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
+  const gwBox = document.getElementById('bgGw');
   const dimsLabel = document.getElementById('bgDims');
   const noteLabel = document.getElementById('bgNote');
+  const hintLabel = document.getElementById('bgHint');
   const downloadBtn = document.getElementById('bgDownload');
 
   const tidy = n => Math.round(n * 100) / 100;
@@ -2121,30 +2142,116 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return out;
   }
 
-  /* ----- Isometrie: fester Blickwinkel, darum stehen die drei sichtbaren
-     Flaechen vorab fest - reine 2D-Projektion, kein Tiefenpuffer ----- */
-  const ISO_C = Math.cos(Math.PI / 6), ISO_S = Math.sin(Math.PI / 6);
-  const project = (x, y, z) => [(x - y) * ISO_C, (x + y) * ISO_S - z];
-  const FACES = [
-    { idx: [1, 2, 6, 5], fill: '#a9976f' }, // rechts (x = Breite)
-    { idx: [3, 2, 6, 7], fill: '#8a7a55' }, // vorne  (y = Tiefe)
-    { idx: [4, 5, 6, 7], fill: '#e2c48c' }  // oben
-  ];
-  const BOTTOM = [0, 1, 2, 3];
+  /* ---------------- Geometrie ----------------
+     Ein Umriss in der xy-Ebene wird nach oben gezogen. Beim GW-Profil ist
+     der obere Ring der gleiche Umriss, nach innen versetzt - daraus ergeben
+     sich die geneigten Waende von selbst. Der scharfkantige Quader ist der
+     Sonderfall Radius 0 ohne Versatz. */
 
-  function trace(pts, idx) {
+  // Gegen den Uhrzeigersinn von oben gesehen, damit die Deckflaeche nach oben weist.
+  function outline(w, d, r, segs) {
+    if (r <= 0.001) return [[w, 0], [w, d], [0, d], [0, 0]];
+    const H = Math.PI / 2;
+    const arcs = [
+      [w - r, r,     -H,     0],
+      [w - r, d - r,  0,     H],
+      [r,     d - r,  H,     Math.PI],
+      [r,     r,      Math.PI, Math.PI + H]
+    ];
+    const pts = [];
+    arcs.forEach(a => {
+      for (let i = 0; i <= segs; i++) {
+        const ang = a[2] + (a[3] - a[2]) * (i / segs);
+        pts.push([a[0] + Math.cos(ang) * r, a[1] + Math.sin(ang) * r]);
+      }
+    });
+    return pts;
+  }
+
+  function rings(w, d, t, gw) {
+    // Radius und Verjuengung duerfen die Base nie auffressen.
+    const small = Math.min(w, d);
+    const r = gw ? Math.min(GW.radius, small / 2 - 0.01) : 0;
+    const ins = gw ? Math.min(GW.taper, small / 4) : 0;
+    const bottom = outline(w, d, r, GW.segs);
+    const top = ins > 0
+      ? outline(w - 2 * ins, d - 2 * ins, Math.max(r - ins, 0.05), GW.segs).map(p => [p[0] + ins, p[1] + ins])
+      : bottom;
+    return {
+      bottom: bottom.map(p => [p[0], p[1], 0]),
+      top: top.map(p => [p[0], p[1], t])
+    };
+  }
+
+  function sideQuads(rg) {
+    const B = rg.bottom, T = rg.top, n = B.length, out = [];
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      out.push([B[i], B[j], T[j], T[i]]);
+    }
+    return out;
+  }
+
+  function triangles(rg) {
+    const B = rg.bottom, T = rg.top, n = B.length, tris = [];
+    sideQuads(rg).forEach(q => { tris.push([q[0], q[1], q[2]], [q[0], q[2], q[3]]); });
+    for (let i = 1; i < n - 1; i++) tris.push([T[0], T[i], T[i + 1]]);   // Deckflaeche
+    for (let i = 1; i < n - 1; i++) tris.push([B[0], B[i + 1], B[i]]);   // Bodenflaeche
+    return tris;
+  }
+
+  // Flaechennormale nach der Rechte-Hand-Regel, auf Laenge 1 gebracht.
+  function normal(a, b, c) {
+    const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+    const v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const len = Math.sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]) || 1;
+    return [n[0] / len, n[1] / len, n[2] / len];
+  }
+
+  /* ---------------- Vorschau ----------------
+     Isometrie mit festem Blickwinkel. Der Koerper ist konvex, darum genuegt
+     es, die Waende von hinten nach vorne zu malen - kein Tiefenpuffer. */
+  const ISO_C = Math.cos(Math.PI / 6), ISO_S = Math.sin(Math.PI / 6);
+  const project = p => [(p[0] - p[1]) * ISO_C, (p[0] + p[1]) * ISO_S - p[2]];
+  const depth = p => p[0] + p[1] + p[2];
+
+  const BASE_RGB = [226, 196, 140];
+  const LIGHT = [0.45, 0.2, 0.87];
+  function shade(n) {
+    const lit = Math.max(0, n[0] * LIGHT[0] + n[1] * LIGHT[1] + n[2] * LIGHT[2]);
+    const b = 0.45 + 0.55 * lit;
+    return 'rgb(' + BASE_RGB.map(c => Math.round(Math.min(255, c * b))).join(',') + ')';
+  }
+
+  // Umriss der Projektion: der Koerper ist konvex, also ist die konvexe
+  // Huelle der projizierten Punkte genau seine Silhouette.
+  function convexHull(pts) {
+    const s = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const chain = arr => {
+      const st = [];
+      arr.forEach(q => {
+        while (st.length >= 2 && cross(st[st.length - 2], st[st.length - 1], q) <= 0) st.pop();
+        st.push(q);
+      });
+      return st;
+    };
+    return chain(s).slice(0, -1).concat(chain(s.slice().reverse()).slice(0, -1));
+  }
+
+  function path(pts2d) {
     ctx.beginPath();
-    idx.forEach((i, n) => n ? ctx.lineTo(pts[i][0], pts[i][1]) : ctx.moveTo(pts[i][0], pts[i][1]));
+    pts2d.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
     ctx.closePath();
   }
 
-  function drawIso(w, d, t) {
-    const corners = [
-      [0, 0, 0], [w, 0, 0], [w, d, 0], [0, d, 0],
-      [0, 0, t], [w, 0, t], [w, d, t], [0, d, t]
-    ].map(p => project(p[0], p[1], p[2]));
+  function draw(w, d, t, gw) {
+    const rg = rings(w, d, t, gw);
+    const all = rg.bottom.concat(rg.top);
+    const flat = all.map(project);
 
-    const xs = corners.map(p => p[0]), ys = corners.map(p => p[1]);
+    const xs = flat.map(p => p[0]), ys = flat.map(p => p[1]);
     const minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
     const minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
     const pad = 30;
@@ -2154,51 +2261,71 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     );
     const offX = (canvas.width - (maxX - minX) * scale) / 2 - minX * scale;
     const offY = (canvas.height - (maxY - minY) * scale) / 2 - minY * scale;
-    const pts = corners.map(p => [p[0] * scale + offX, p[1] * scale + offY]);
+    const to2d = p => { const q = project(p); return [q[0] * scale + offX, q[1] * scale + offY]; };
 
-    // Schlagschatten: die Bodenflaeche liegt hinter dem Koerper, sichtbar
-    // bleibt nur ihr weicher Rand.
+    // Schlagschatten: die Bodenflaeche verschwindet hinter dem Koerper,
+    // sichtbar bleibt nur ihr weicher Rand.
     ctx.save();
     ctx.shadowColor = 'rgba(60, 45, 20, .45)';
     ctx.shadowBlur = 14;
     ctx.shadowOffsetY = 9;
     ctx.fillStyle = 'rgba(60, 45, 20, .45)';
-    trace(pts, BOTTOM);
+    path(rg.bottom.map(to2d));
     ctx.fill();
     ctx.restore();
+
+    // Waende von hinten nach vorne, jede nach ihrer Neigung eingefaerbt.
+    const quads = sideQuads(rg).map(q => ({
+      pts: q.map(to2d),
+      fill: shade(normal(q[0], q[1], q[2])),
+      z: (depth(q[0]) + depth(q[1]) + depth(q[2]) + depth(q[3])) / 4
+    })).sort((a, b) => a.z - b.z);
+    quads.forEach(q => {
+      ctx.fillStyle = q.fill;
+      ctx.strokeStyle = q.fill;   // deckt die Naht zwischen benachbarten Waenden
+      ctx.lineWidth = 1;
+      path(q.pts);
+      ctx.fill();
+      ctx.stroke();
+    });
+
+    const topFlat = rg.top.map(to2d);
+    ctx.fillStyle = shade([0, 0, 1]);
+    path(topFlat);
+    ctx.fill();
 
     ctx.lineJoin = 'round';
     ctx.lineWidth = 1.5;
     ctx.strokeStyle = '#4a3a1e';
-    FACES.forEach(face => {
-      ctx.fillStyle = face.fill;
-      trace(pts, face.idx);
-      ctx.fill();
-      ctx.stroke();
-    });
+    path(convexHull(flat.map((p, i) => [p[0] * scale + offX, p[1] * scale + offY])));
+    ctx.stroke();
+    path(topFlat);
+    ctx.stroke();
   }
 
   function render() {
     const f = readAll();
+    const gw = gwBox.checked;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const bad = KEYS.filter(k => f[k].state !== 'ok');
     KEYS.forEach(k => { inputs[k].classList.toggle('invalid', f[k].state !== 'ok'); });
+    hintLabel.textContent = gw ? HINTS.gw : HINTS.plain;
 
     // Gezeichnet wird alles, was eine Zahl ist - auch zu gross oder zu klein,
     // damit die Vorschau nie etwas anderes zeigt als in den Feldern steht.
     const w = f.width.value, d = f.depth.value, t = f.thickness.value;
-    if (w !== null && d !== null && t !== null) drawIso(w, d, t);
+    if (w !== null && d !== null && t !== null) draw(w, d, t, gw);
 
     dimsLabel.textContent = (w !== null && d !== null && t !== null)
-      ? fmt(w) + ' \u00d7 ' + fmt(d) + ' \u00d7 ' + fmt(t) + ' mm'
-      : '\u2014';
+      ? fmt(w) + ' × ' + fmt(d) + ' × ' + fmt(t) + ' mm'
+      : '—';
 
     if (!bad.length) {
       downloadBtn.disabled = false;
-      noteLabel.textContent = DEFAULT_NOTE;
+      noteLabel.textContent = gw ? 'GW-Profil: gerundete Ecken, geneigte Wände' : 'Scharfkantiger Quader';
       noteLabel.classList.remove('error');
-      save(w, d, t);
+      save(w, d, t, gw);
     } else {
       downloadBtn.disabled = true;
       noteLabel.classList.add('error');
@@ -2219,8 +2346,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     render();
   }
 
-  function save(w, d, t) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ w: w, d: d, t: t })); }
+  function save(w, d, t, gw) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ w: w, d: d, t: t, gw: gw })); }
     catch (e) { /* privater Modus: dann eben ohne Merken */ }
   }
   function load() {
@@ -2232,31 +2359,16 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       const spec = SPECS[k], v = map[k];
       if (typeof v === 'number' && isFinite(v) && v >= spec.min && v <= spec.max) inputs[k].value = String(tidy(v));
     });
+    gwBox.checked = s.gw === true;
   }
 
-  function buildBoxSTL(w, d, h, name) {
-    const v = [
-      [0, 0, 0], [w, 0, 0], [w, d, 0], [0, d, 0], // unten: 0-3
-      [0, 0, h], [w, 0, h], [w, d, h], [0, d, h]  // oben:  4-7
-    ];
-    // [Normale, i0, i1, i2] je Dreieck, nach aussen gerichtet, Rechte-Hand-Regel
-    const tris = [
-      [[0, 0, -1], 0, 2, 1], [[0, 0, -1], 0, 3, 2],
-      [[0, 0, 1], 4, 5, 6], [[0, 0, 1], 4, 6, 7],
-      [[0, -1, 0], 0, 1, 5], [[0, -1, 0], 0, 5, 4],
-      [[0, 1, 0], 3, 7, 6], [[0, 1, 0], 3, 6, 2],
-      [[-1, 0, 0], 0, 4, 7], [[-1, 0, 0], 0, 7, 3],
-      [[1, 0, 0], 1, 2, 6], [[1, 0, 0], 1, 6, 5]
-    ];
+  function buildSTL(w, d, t, gw, name) {
     const num = n => n.toFixed(4);
     let out = 'solid ' + name + '\n';
-    tris.forEach(tri => {
-      const n = tri[0];
-      out += '  facet normal ' + n[0] + ' ' + n[1] + ' ' + n[2] + '\n    outer loop\n';
-      for (let i = 1; i < 4; i++) {
-        const p = v[tri[i]];
-        out += '      vertex ' + num(p[0]) + ' ' + num(p[1]) + ' ' + num(p[2]) + '\n';
-      }
+    triangles(rings(w, d, t, gw)).forEach(tri => {
+      const n = normal(tri[0], tri[1], tri[2]);
+      out += '  facet normal ' + num(n[0]) + ' ' + num(n[1]) + ' ' + num(n[2]) + '\n    outer loop\n';
+      tri.forEach(p => { out += '      vertex ' + num(p[0]) + ' ' + num(p[1]) + ' ' + num(p[2]) + '\n'; });
       out += '    endloop\n  endfacet\n';
     });
     return out + 'endsolid ' + name + '\n';
@@ -2266,12 +2378,12 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     const f = readAll();
     // Der Knopf ist gesperrt, solange etwas fehlt - hier also nur Absicherung.
     if (KEYS.some(k => f[k].state !== 'ok')) return;
-    const w = f.width.value, d = f.depth.value, t = f.thickness.value;
-    const blob = new Blob([buildBoxSTL(w, d, t, 'base')], { type: 'model/stl' });
+    const w = f.width.value, d = f.depth.value, t = f.thickness.value, gw = gwBox.checked;
+    const blob = new Blob([buildSTL(w, d, t, gw, 'base')], { type: 'model/stl' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'base_' + w + 'x' + d + 'x' + t + 'mm.stl';
+    a.download = 'base_' + w + 'x' + d + 'x' + t + 'mm' + (gw ? '_gw' : '') + '.stl';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -2282,6 +2394,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     inputs[k].addEventListener('input', render);
     inputs[k].addEventListener('change', () => clampField(k));
   });
+  gwBox.addEventListener('change', render);
   downloadBtn.addEventListener('click', downloadSTL);
 
   window.__refreshBase = render;
