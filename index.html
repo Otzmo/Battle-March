@@ -2132,7 +2132,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
      ein Stein aus der Flaeche ragt (bleibt unter 2 mm), fuge = Abstand
      zwischen zwei Steinen je Seite, streuung = wie stark die Groeszen um den
      Mittelwert schwanken duerfen. */
-  const PFLASTER = { ziel: 4, hoehe: 1.2, fuge: 0.35, streuung: 0.3, mindestZelle: 1.6 };
+  const PFLASTER = { ziel: 6, hoehe: 1.2, fuge: 0.35, streuung: 0.55, teilen: 0.4, mindestZelle: 1.6 };
 
   const HINTS = {
     plain: 'Scharfe Kanten, senkrechte Wände. Die Unterseite liegt im Nullpunkt, das Stück sitzt im Slicer also direkt auf der Druckplatte.',
@@ -2312,15 +2312,29 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return g;
   }
 
-  /* Teilt eine Strecke in n Stuecke zufaelliger Laenge, die zusammen genau
-     die Strecke ergeben. Ohne die Normierung bliebe am Ende ein Rest. */
-  function teile(a, b, n, rnd) {
+  /* Teilt eine Strecke in Stuecke zufaelliger Laenge, die zusammen genau die
+     Strecke ergeben - ohne die Normierung bliebe am Ende ein Rest. Faellt ein
+     Stueck unter das Mindestmasz, wird es mit dem kleineren Nachbarn
+     verschmolzen statt die ganze Teilung zu verwerfen; bei viel Streuung
+     kommen solche Ausreiszer sonst regelmaeszig vor. */
+  function teile(a, b, n, rnd, mindest) {
     const g = [];
     let summe = 0;
     for (let i = 0; i < n; i++) { const v = 1 - PFLASTER.streuung + 2 * PFLASTER.streuung * rnd(); g.push(v); summe += v; }
+    const laengen = g.map(v => (b - a) * (v / summe));
+    while (laengen.length > 1) {
+      let k = -1;
+      laengen.forEach((v, i) => { if (v < mindest && (k < 0 || v < laengen[k])) k = i; });
+      if (k < 0) break;
+      const j = k === 0 ? 1
+              : k === laengen.length - 1 ? k - 1
+              : (laengen[k - 1] < laengen[k + 1] ? k - 1 : k + 1);
+      laengen[Math.min(k, j)] = laengen[k] + laengen[j];
+      laengen.splice(Math.max(k, j), 1);
+    }
     const punkte = [a];
     let lauf = 0;
-    g.forEach(v => { lauf += v; punkte.push(a + (b - a) * (lauf / summe)); });
+    laengen.forEach(v => { lauf += v; punkte.push(a + lauf); });
     punkte[punkte.length - 1] = b;
     return punkte;
   }
@@ -2340,18 +2354,32 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     const rnd = zufall(seed);
 
     const reihen = Math.max(1, Math.round((y1 - y0) / PFLASTER.ziel));
-    const ys = teile(y0, y1, reihen, rnd);
+    const ys = teile(y0, y1, reihen, rnd, PFLASTER.mindestZelle);
     const xsProReihe = ys.slice(0, -1).map(() => {
       const ziel = PFLASTER.ziel * (1 - PFLASTER.streuung + 2 * PFLASTER.streuung * rnd());
-      return teile(x0, x1, Math.max(1, Math.round((x1 - x0) / ziel)), rnd);
+      return teile(x0, x1, Math.max(1, Math.round((x1 - x0) / ziel)), rnd, PFLASTER.mindestZelle);
     });
 
-    const cells = [], extra = [];
+    const cells = [], extra = [], extraY = [];
+    const nimm = (a, b, c, e) => cells.push({ x0: a, x1: b, y0: c, y1: e,
+                                              cx: (a + b) / 2, cy: (c + e) / 2 });
     for (let r = 0; r < reihen; r++) {
       const xs = xsProReihe[r];
       for (let i = 0; i < xs.length - 1; i++) {
-        cells.push({ x0: xs[i], x1: xs[i + 1], y0: ys[r], y1: ys[r + 1],
-                     cx: (xs[i] + xs[i + 1]) / 2, cy: (ys[r] + ys[r + 1]) / 2 });
+        const a = xs[i], b = xs[i + 1], c = ys[r], e = ys[r + 1];
+        /* Ohne das hier waeren alle Steine einer Reihe gleich hoch. Eine
+           Zelle darf sich darum quer teilen; der Schnitt endet auf den
+           senkrechten Fugen zu den Nachbarn, seine Endpunkte muessen also in
+           deren Rand mit hinein. Liegt er auszen, wird er zusaetzlich zum
+           Schnittpunkt des Umrisses, damit die Seitenwand ihn kennt. */
+        const yy = c + (e - c) * (0.35 + 0.3 * rnd());
+        if (rnd() < PFLASTER.teilen && yy - c >= PFLASTER.mindestZelle && e - yy >= PFLASTER.mindestZelle) {
+          nimm(a, b, c, yy); nimm(a, b, yy, e);
+          extra.push([a, yy], [b, yy]);
+          if (Math.abs(a - x0) < 1e-7 || Math.abs(b - x1) < 1e-7) extraY.push(yy);
+        } else {
+          nimm(a, b, c, e);
+        }
       }
       // Stoesze dieser Reihe an ihrer oberen und unteren Fuge festhalten
       if (r > 0) xs.slice(1, -1).forEach(x => extra.push([x, ys[r]]));
@@ -2364,7 +2392,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       // Am Auszenrand liegen nur die Stoesze der ersten und letzten Reihe
       // sowie die Reihengrenzen selbst.
       cuts: { x: xsProReihe[0].slice(1, -1).concat(xsProReihe[reihen - 1].slice(1, -1)),
-              y: ys.slice(1, -1) },
+              y: ys.slice(1, -1).concat(extraY) },
       bounds: { x0: x0, y0: y0, x1: x1, y1: y1 }
     };
   }
