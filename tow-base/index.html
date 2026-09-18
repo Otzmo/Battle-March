@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basen-Generator</title>
+<style>
+  :root {
+    --stone-950: #17140f;
+    --stone-900: #201b14;
+    --stone-800: #2c261c;
+    --stone-700: #3d3526;
+    --stone-500: #7a6b4f;
+    --stone-300: #b8ab8c;
+    --stone-100: #ede6d6;
+    --bronze: #b3793f;
+    --bronze-bright: #d69a5c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--stone-950);
+    color: var(--stone-100);
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    padding: 28px 24px 18px;
+    border-bottom: 1px solid var(--stone-800);
+  }
+  h1 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  header p {
+    margin: 0;
+    color: var(--stone-300);
+    font-size: 14px;
+    max-width: 60ch;
+  }
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  @media (min-width: 720px) {
+    main { flex-direction: row; align-items: flex-start; }
+  }
+  .panel {
+    background: var(--stone-900);
+    border: 1px solid var(--stone-800);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .controls { flex: 1; min-width: 240px; }
+  .preview {
+    flex: 1;
+    min-width: 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--stone-300);
+    margin-bottom: 6px;
+  }
+  .field { margin-bottom: 16px; }
+  .field:last-of-type { margin-bottom: 0; }
+  input[type="number"] {
+    width: 100%;
+    background: var(--stone-800);
+    border: 1px solid var(--stone-700);
+    color: var(--stone-100);
+    padding: 9px 10px;
+    border-radius: 6px;
+    font-size: 15px;
+  }
+  input[type="number"]:focus {
+    outline: 2px solid var(--bronze);
+    outline-offset: 1px;
+  }
+  .unit { color: var(--stone-500); font-size: 12px; margin-left: 6px; }
+  canvas {
+    background: repeating-conic-gradient(var(--stone-800) 0% 25%, var(--stone-900) 0% 50%) 50% / 20px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--stone-800);
+  }
+  .dims {
+    font-size: 13px;
+    color: var(--stone-300);
+    text-align: center;
+  }
+  button {
+    width: 100%;
+    background: var(--bronze);
+    color: var(--stone-950);
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: var(--bronze-bright); }
+  button:active { transform: translateY(1px); }
+  .note {
+    font-size: 12px;
+    color: var(--stone-500);
+    text-align: center;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Basen-Generator</h1>
+  <p>Maße eingeben, als STL für den 3D-Druck herunterladen. Aktuell: flache rechteckige Base ohne Oberflächenrelief.</p>
+</header>
+
+<main>
+  <div class="panel controls">
+    <div class="field">
+      <label for="width">Breite <span class="unit">mm</span></label>
+      <input type="number" id="width" value="30" min="5" max="200" step="0.5">
+    </div>
+    <div class="field">
+      <label for="depth">Tiefe <span class="unit">mm</span></label>
+      <input type="number" id="depth" value="30" min="5" max="200" step="0.5">
+    </div>
+    <div class="field">
+      <label for="thickness">Dicke <span class="unit">mm</span></label>
+      <input type="number" id="thickness" value="2" min="0.5" max="20" step="0.1">
+    </div>
+  </div>
+
+  <div class="panel preview">
+    <canvas id="preview" width="220" height="220"></canvas>
+    <div class="dims" id="dimsLabel">30 × 30 × 2 mm</div>
+    <button id="downloadBtn">STL herunterladen</button>
+    <div class="note">Flache Base, keine Oberflächenstruktur</div>
+  </div>
+</main>
+
+<script>
+  const widthInput = document.getElementById('width');
+  const depthInput = document.getElementById('depth');
+  const thicknessInput = document.getElementById('thickness');
+  const canvas = document.getElementById('preview');
+  const ctx = canvas.getContext('2d');
+  const dimsLabel = document.getElementById('dimsLabel');
+  const downloadBtn = document.getElementById('downloadBtn');
+
+  function drawPreview() {
+    const w = parseFloat(widthInput.value) || 0;
+    const d = parseFloat(depthInput.value) || 0;
+    const t = parseFloat(thicknessInput.value) || 0;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const padding = 24;
+    const maxDim = Math.max(w, d, 1);
+    const scale = (canvas.width - padding * 2) / maxDim;
+    const rectW = w * scale;
+    const rectH = d * scale;
+    const x = (canvas.width - rectW) / 2;
+    const y = (canvas.height - rectH) / 2;
+
+    ctx.fillStyle = '#b8ab8c';
+    ctx.strokeStyle = '#17140f';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.rect(x, y, rectW, rectH);
+    ctx.fill();
+    ctx.stroke();
+
+    dimsLabel.textContent = `${w} × ${d} × ${t} mm`;
+  }
+
+  function buildBoxSTL(w, d, h, name) {
+    // 8 corner vertices of the box
+    const v = [
+      [0, 0, 0], [w, 0, 0], [w, d, 0], [0, d, 0], // bottom: 0-3
+      [0, 0, h], [w, 0, h], [w, d, h], [0, d, h], // top: 4-7
+    ];
+
+    // [normal, i0, i1, i2] per triangle, outward-facing, right-hand rule
+    const tris = [
+      [[0, 0, -1], 0, 2, 1], [[0, 0, -1], 0, 3, 2],   // bottom
+      [[0, 0, 1], 4, 5, 6], [[0, 0, 1], 4, 6, 7],      // top
+      [[0, -1, 0], 0, 1, 5], [[0, -1, 0], 0, 5, 4],    // front (y=0)
+      [[0, 1, 0], 3, 7, 6], [[0, 1, 0], 3, 6, 2],      // back (y=d)
+      [[-1, 0, 0], 0, 4, 7], [[-1, 0, 0], 0, 7, 3],    // left (x=0)
+      [[1, 0, 0], 1, 2, 6], [[1, 0, 0], 1, 6, 5],      // right (x=w)
+    ];
+
+    let out = `solid ${name}\n`;
+    for (const [n, i0, i1, i2] of tris) {
+      out += `  facet normal ${n[0]} ${n[1]} ${n[2]}\n`;
+      out += `    outer loop\n`;
+      for (const idx of [i0, i1, i2]) {
+        const p = v[idx];
+        out += `      vertex ${p[0]} ${p[1]} ${p[2]}\n`;
+      }
+      out += `    endloop\n`;
+      out += `  endfacet\n`;
+    }
+    out += `endsolid ${name}\n`;
+    return out;
+  }
+
+  function downloadSTL() {
+    const w = parseFloat(widthInput.value) || 30;
+    const d = parseFloat(depthInput.value) || 30;
+    const t = parseFloat(thicknessInput.value) || 2;
+
+    const stl = buildBoxSTL(w, d, t, 'base');
+    const blob = new Blob([stl], { type: 'model/stl' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `base_${w}x${d}x${t}mm.stl`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  [widthInput, depthInput, thicknessInput].forEach(el => el.addEventListener('input', drawPreview));
+  downloadBtn.addEventListener('click', downloadSTL);
+
+  drawPreview();
+</script>
+
+</body>
+</html>
