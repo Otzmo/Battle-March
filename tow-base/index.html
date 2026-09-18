@@ -15,6 +15,7 @@
     --stone-100: #ede6d6;
     --bronze: #b3793f;
     --bronze-bright: #d69a5c;
+    --alert: #d9734f;
   }
   * { box-sizing: border-box; }
   body {
@@ -64,7 +65,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
   }
   label {
     display: block;
@@ -87,16 +88,30 @@
     outline: 2px solid var(--bronze);
     outline-offset: 1px;
   }
+  input[type="number"].invalid {
+    border-color: var(--alert);
+    outline-color: var(--alert);
+  }
   .unit { color: var(--stone-500); font-size: 12px; margin-left: 6px; }
+  .range { color: var(--stone-500); font-size: 12px; margin-top: 5px; }
   canvas {
     background: repeating-conic-gradient(var(--stone-800) 0% 25%, var(--stone-900) 0% 50%) 50% / 20px 20px;
     border-radius: 8px;
     border: 1px solid var(--stone-800);
+    display: block;
+  }
+  .viewlabel {
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--stone-500);
+    align-self: flex-start;
   }
   .dims {
     font-size: 13px;
     color: var(--stone-300);
     text-align: center;
+    margin-top: 4px;
   }
   button {
     width: 100%;
@@ -109,80 +124,190 @@
     font-weight: 600;
     cursor: pointer;
   }
-  button:hover { background: var(--bronze-bright); }
-  button:active { transform: translateY(1px); }
+  button:hover:not(:disabled) { background: var(--bronze-bright); }
+  button:active:not(:disabled) { transform: translateY(1px); }
+  button:disabled {
+    background: var(--stone-700);
+    color: var(--stone-500);
+    cursor: not-allowed;
+  }
   .note {
     font-size: 12px;
     color: var(--stone-500);
     text-align: center;
-    margin-top: 10px;
+    margin-top: -2px;
   }
+  .note.error { color: var(--alert); }
 </style>
 </head>
 <body>
 
 <header>
   <h1>Basen-Generator</h1>
-  <p>Maße eingeben, als STL für den 3D-Druck herunterladen. Aktuell: flache rechteckige Base ohne Oberflächenrelief.</p>
+  <p>Maße eingeben, als STL für den 3D-Druck herunterladen. Flache, eckige Base ohne Oberflächenrelief.</p>
 </header>
 
 <main>
   <div class="panel controls">
     <div class="field">
       <label for="width">Breite <span class="unit">mm</span></label>
-      <input type="number" id="width" value="30" min="5" max="200" step="0.5">
+      <input type="number" id="width" value="30" min="5" max="200" step="0.5" inputmode="decimal">
+      <div class="range">5 bis 200 mm</div>
     </div>
     <div class="field">
       <label for="depth">Tiefe <span class="unit">mm</span></label>
-      <input type="number" id="depth" value="30" min="5" max="200" step="0.5">
+      <input type="number" id="depth" value="30" min="5" max="200" step="0.5" inputmode="decimal">
+      <div class="range">5 bis 200 mm</div>
     </div>
     <div class="field">
       <label for="thickness">Dicke <span class="unit">mm</span></label>
-      <input type="number" id="thickness" value="2" min="0.5" max="20" step="0.1">
+      <input type="number" id="thickness" value="2" min="0.5" max="20" step="0.1" inputmode="decimal">
+      <div class="range">0,5 bis 20 mm</div>
     </div>
   </div>
 
   <div class="panel preview">
+    <div class="viewlabel">Draufsicht</div>
     <canvas id="preview" width="220" height="220"></canvas>
-    <div class="dims" id="dimsLabel">30 × 30 × 2 mm</div>
+    <div class="viewlabel">Seitenansicht</div>
+    <canvas id="side" width="220" height="64"></canvas>
+    <div class="dims" id="dimsLabel" aria-live="polite">30 &times; 30 &times; 2 mm</div>
     <button id="downloadBtn">STL herunterladen</button>
-    <div class="note">Flache Base, keine Oberflächenstruktur</div>
+    <div class="note" id="noteLabel">Flache Base, keine Oberflächenstruktur</div>
   </div>
 </main>
 
 <script>
-  const widthInput = document.getElementById('width');
-  const depthInput = document.getElementById('depth');
-  const thicknessInput = document.getElementById('thickness');
+  const SPECS = {
+    width:     { min: 5,   max: 200, def: 30 },
+    depth:     { min: 5,   max: 200, def: 30 },
+    thickness: { min: 0.5, max: 20,  def: 2  },
+  };
+  const LABELS = { width: 'Breite', depth: 'Tiefe', thickness: 'Dicke' };
+  const STORAGE_KEY = 'towBaseGeneratorState';
+  const DEFAULT_NOTE = 'Flache Base, keine Oberflächenstruktur';
+
+  const inputs = {
+    width: document.getElementById('width'),
+    depth: document.getElementById('depth'),
+    thickness: document.getElementById('thickness'),
+  };
   const canvas = document.getElementById('preview');
   const ctx = canvas.getContext('2d');
+  const sideCanvas = document.getElementById('side');
+  const sideCtx = sideCanvas.getContext('2d');
   const dimsLabel = document.getElementById('dimsLabel');
+  const noteLabel = document.getElementById('noteLabel');
   const downloadBtn = document.getElementById('downloadBtn');
 
-  function drawPreview() {
-    const w = parseFloat(widthInput.value) || 0;
-    const d = parseFloat(depthInput.value) || 0;
-    const t = parseFloat(thicknessInput.value) || 0;
+  // Rundet Tippfehler-Nachkommastellen weg, ohne echte Halbmillimeter zu verlieren.
+  const tidy = n => Math.round(n * 100) / 100;
+  const fmt = n => String(tidy(n)).replace('.', ',');
 
+  // Liest ein Feld, ohne es zu verändern: der Nutzer tippt noch.
+  function readField(key) {
+    const spec = SPECS[key];
+    const raw = inputs[key].value.trim();
+    if (raw === '') return { value: null, state: 'empty' };
+    const n = parseFloat(raw.replace(',', '.'));
+    if (!isFinite(n)) return { value: null, state: 'empty' };
+    if (n < spec.min || n > spec.max) return { value: tidy(n), state: 'range' };
+    return { value: tidy(n), state: 'ok' };
+  }
+
+  function readAll() {
+    const out = {};
+    for (const key of Object.keys(SPECS)) out[key] = readField(key);
+    return out;
+  }
+
+  function drawRect(c, g, w, h, scale) {
+    const px = Math.max(w * scale, 1);
+    const py = Math.max(h * scale, 2);
+    const x = (c.width - px) / 2;
+    const y = (c.height - py) / 2;
+    g.fillStyle = '#b8ab8c';
+    g.strokeStyle = '#17140f';
+    g.lineWidth = 2;
+    g.beginPath();
+    g.rect(x, y, px, py);
+    g.fill();
+    g.stroke();
+  }
+
+  function render() {
+    const f = readAll();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    sideCtx.clearRect(0, 0, sideCanvas.width, sideCanvas.height);
 
-    const padding = 24;
-    const maxDim = Math.max(w, d, 1);
-    const scale = (canvas.width - padding * 2) / maxDim;
-    const rectW = w * scale;
-    const rectH = d * scale;
-    const x = (canvas.width - rectW) / 2;
-    const y = (canvas.height - rectH) / 2;
+    const bad = Object.keys(SPECS).filter(k => f[k].state !== 'ok');
+    for (const key of Object.keys(SPECS)) {
+      inputs[key].classList.toggle('invalid', f[key].state !== 'ok');
+    }
 
-    ctx.fillStyle = '#b8ab8c';
-    ctx.strokeStyle = '#17140f';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.rect(x, y, rectW, rectH);
-    ctx.fill();
-    ctx.stroke();
+    // Gezeichnet wird alles, was eine Zahl ist - auch zu groß oder zu klein,
+    // damit die Vorschau nie etwas anderes zeigt als in den Feldern steht.
+    const w = f.width.value, d = f.depth.value, t = f.thickness.value;
+    if (w !== null && d !== null) {
+      const padding = 24;
+      const scale = (canvas.width - padding * 2) / Math.max(w, d, 1);
+      drawRect(canvas, ctx, w, d, scale);
+      if (t !== null) drawRect(sideCanvas, sideCtx, w, t, scale);
+    }
 
-    dimsLabel.textContent = `${w} × ${d} × ${t} mm`;
+    dimsLabel.textContent = [w, d, t].every(v => v !== null)
+      ? fmt(w) + ' × ' + fmt(d) + ' × ' + fmt(t) + ' mm'
+      : '—';
+
+    if (bad.length === 0) {
+      downloadBtn.disabled = false;
+      noteLabel.textContent = DEFAULT_NOTE;
+      noteLabel.classList.remove('error');
+      save(w, d, t);
+    } else {
+      downloadBtn.disabled = true;
+      noteLabel.classList.add('error');
+      const empty = bad.filter(k => f[k].state === 'empty');
+      noteLabel.textContent = empty.length
+        ? 'Maß fehlt: ' + empty.map(k => LABELS[k]).join(', ')
+        : bad.map(k => LABELS[k] + ' muss zwischen ' + fmt(SPECS[k].min) + ' und ' + fmt(SPECS[k].max) + ' mm liegen').join('. ');
+    }
+  }
+
+  // Erst wenn das Feld verlassen wird, wird ein Wert in die Grenzen gezogen -
+  // waehrend des Tippens wuerde das die Eingabe zerreissen ("3" -> "5").
+  function clampField(key) {
+    const spec = SPECS[key];
+    const f = readField(key);
+    if (f.state === 'range') {
+      inputs[key].value = String(Math.min(Math.max(f.value, spec.min), spec.max));
+    } else if (f.state === 'empty') {
+      inputs[key].value = String(spec.def);
+    } else {
+      inputs[key].value = String(f.value);
+    }
+    render();
+  }
+
+  function save(w, d, t) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ w: w, d: d, t: t }));
+    } catch (e) { /* Privater Modus o. ae.: dann eben ohne Merken. */ }
+  }
+
+  function load() {
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    } catch (e) { saved = null; }
+    if (!saved) return;
+    const map = { width: saved.w, depth: saved.d, thickness: saved.t };
+    for (const key of Object.keys(SPECS)) {
+      const spec = SPECS[key], v = map[key];
+      if (typeof v === 'number' && isFinite(v) && v >= spec.min && v <= spec.max) {
+        inputs[key].value = String(tidy(v));
+      }
+    }
   }
 
   function buildBoxSTL(w, d, h, name) {
@@ -202,13 +327,14 @@
       [[1, 0, 0], 1, 2, 6], [[1, 0, 0], 1, 6, 5],      // right (x=w)
     ];
 
+    const num = n => n.toFixed(4);
     let out = `solid ${name}\n`;
     for (const [n, i0, i1, i2] of tris) {
       out += `  facet normal ${n[0]} ${n[1]} ${n[2]}\n`;
       out += `    outer loop\n`;
       for (const idx of [i0, i1, i2]) {
         const p = v[idx];
-        out += `      vertex ${p[0]} ${p[1]} ${p[2]}\n`;
+        out += `      vertex ${num(p[0])} ${num(p[1])} ${num(p[2])}\n`;
       }
       out += `    endloop\n`;
       out += `  endfacet\n`;
@@ -218,9 +344,10 @@
   }
 
   function downloadSTL() {
-    const w = parseFloat(widthInput.value) || 30;
-    const d = parseFloat(depthInput.value) || 30;
-    const t = parseFloat(thicknessInput.value) || 2;
+    const f = readAll();
+    // Der Button ist gesperrt, solange etwas fehlt - hier also nur Absicherung.
+    if (Object.keys(SPECS).some(k => f[k].state !== 'ok')) return;
+    const w = f.width.value, d = f.depth.value, t = f.thickness.value;
 
     const stl = buildBoxSTL(w, d, t, 'base');
     const blob = new Blob([stl], { type: 'model/stl' });
@@ -234,10 +361,14 @@
     URL.revokeObjectURL(url);
   }
 
-  [widthInput, depthInput, thicknessInput].forEach(el => el.addEventListener('input', drawPreview));
+  for (const key of Object.keys(SPECS)) {
+    inputs[key].addEventListener('input', render);
+    inputs[key].addEventListener('change', () => clampField(key));
+  }
   downloadBtn.addEventListener('click', downloadSTL);
 
-  drawPreview();
+  load();
+  render();
 </script>
 
 </body>
