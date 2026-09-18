@@ -2142,7 +2142,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
         String(GW.taperPerMm).replace('.', ',') + ' mm je Millimeter Höhe), Ecken mit ' + String(GW.radius).replace('.', ',') +
         ' mm Radius. Bei 4 mm Dicke ist die Oberseite je Seite 1,5 mm kleiner als die Unterseite; das eingegebene Maß ist die Unterseite. Die Neigung ist an einer 30-mm-Base vermessen, der Eckenradius ist geschätzt.',
     stein: 'Pflaster: unregelmäßige Platten um ' + String(PFLASTER.ziel).replace('.', ',') + ' mm, rund ' +
-        String(PFLASTER.hoehe).replace('.', ',') + ' mm hoch aus der Fläche, mit angefasten Kanten und leicht unterschiedlicher Höhe und Neigung. Jeder Klick auf die Checkbox mischt die Anordnung neu. Die angegebene Dicke zählt bis zur Fuge, das Pflaster kommt obendrauf.'
+        String(PFLASTER.hoehe).replace('.', ',') + ' mm hoch aus der Fläche, mit angefasten Kanten, rauer Oberfläche und leicht unterschiedlicher Höhe und Neigung. Jeder Klick auf die Checkbox mischt die Anordnung neu. Die angegebene Dicke zählt bis zur Fuge, das Pflaster kommt obendrauf.'
   };
 
   const inputs = {};
@@ -2232,7 +2232,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
   const RAND_SCHRITT = 5;   // angestrebte Kantenlaenge am Rand in mm
 
-  function outlineParams(w, d, r, ins, cutsU, cutsO, schritt) {
+  function outlineParams(w, d, r, ins, cutsU, cutsO) {
     const p = [];
     const rund = r > 0.001;
     const arc = s => {
@@ -2241,7 +2241,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     };
     // aU..bU = Lage der Endpunkte am unteren Ring, aO..bO am oberen.
     const line = (s, aU, bU, aO, bO, cu, co) => {
-      const n = Math.max(1, Math.ceil(Math.abs(bU - aU) / schritt));
+      const n = Math.max(1, Math.ceil(Math.abs(bU - aU) / RAND_SCHRITT));
       // Bei scharfen Ecken ist der Anfang der Geraden derselbe Punkt wie die
       // Ecke davor - er darf kein zweites Mal in die Liste.
       const ts = rund ? [0] : [];
@@ -2249,18 +2249,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       const add = (v, a, b) => { const t = (v - a) / (b - a); if (t > 1e-6 && t < 1 - 1e-6) ts.push(t); };
       cu.forEach(v => add(v, aU, bU));
       co.forEach(v => add(v, aO, bO));
-      /* Entdoppelt wird nach dem Abstand in Millimetern, nicht nach dem
-         Anteil: auf einer langen Kante sind zwei Anteile, die sich erst in der
-         sechsten Stelle unterscheiden, immer noch Bruchteile eines Mikrometers
-         auseinander - zwei Punkte, die spaeter zusammenfallen. */
-      /* Doppelter Abstand mit Absicht: die Zelle behandelt alles unterhalb von
-         GLEICH als denselben Punkt. Laegen zwei Umrisspunkte genau auf dieser
-         Schranke, wuerde die Zelle den zweiten verschlucken, die Seitenwand
-         haette ihn aber - ein Loch von einem Mikrometer. */
-      const mindest = UMRISS_ENG / Math.max(Math.abs(bU - aU), 1e-9);
       ts.sort((x, y) => x - y);
-      let vor = -1;
-      ts.forEach(t => { if (vor < 0 || t - vor > mindest) { p.push({ s: s, t: t }); vor = t; } });
+      ts.forEach((t, i) => { if (i === 0 || t - ts[i - 1] > 1e-6) p.push({ s: s, t: t }); });
     };
     const o = ins;
     arc(0); line(1, r, d - r, o + r, d - o - r, cutsU.y, cutsO.y);
@@ -2274,19 +2264,14 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return gw ? Math.min(GW.taperPerMm * t, Math.min(w, d) / 4) : 0;
   }
 
-  function rings(w, d, t, gw, mag, pfl, fein) {
+  function rings(w, d, t, gw, mag, pfl) {
     const ins = taper(w, d, t, gw);
     /* Gleicher Radius oben wie unten. Ein echter Parallelversatz wuerde den
        Radius um die Neigung verkleinern und die Ecken oben spitz machen - an
        einer echten Base sind sie oben wie unten gerundet. */
     const r = gw ? Math.max(Math.min(GW.radius, (Math.min(w, d) - 2 * ins) / 2 - 0.01), 0) : 0;
     const leer = { x: [], y: [] };
-    /* Sobald Pflaster draufkommt, muss der Umriss so fein aufgeloest sein wie
-       die Steine - die Steinflaeche haengt mit ihren Randpunkten an der
-       Seitenwand. Ohne Pflaster bleibt es grob, ein glatter Quader kommt so
-       weiter mit zwoelf Dreiecken aus. */
-    const schritt = fein && pfl && pfl.cells.length ? PFLASTER.detail : RAND_SCHRITT;
-    const params = outlineParams(w, d, r, ins, mag ? mag.cuts : leer, pfl ? pfl.cuts : leer, schritt);
+    const params = outlineParams(w, d, r, ins, mag ? mag.cuts : leer, pfl ? pfl.cuts : leer);
     const unten = segments(w, d, r, 0), oben = segments(w, d, r, ins);
     return {
       bottom: params.map(q => { const p = pointAt(unten[q.s], q.t, r); return [p[0], p[1], 0]; }),
@@ -2344,8 +2329,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
   /* Wertrauschen: an jedem Gitterpunkt eine Zufallszahl, dazwischen weich
      ueberblendet. Drei Lagen unterschiedlicher Feinheit uebereinander ergeben
-     eine Oberflaeche, die grob welligt und fein koernig zugleich ist - anders
-     als eine einzelne Lage, die entweder nur Beulen oder nur Griesz waere. */
+     eine Oberflaeche, die grob wellig und fein koernig zugleich ist - eine
+     einzelne Lage waere entweder nur Beulen oder nur Griesz. */
   function rauschfeld(seed) {
     const wert = (x, y) => {
       let h = Math.imul(x | 0, 374761393) ^ Math.imul(y | 0, 668265263) ^ Math.imul(seed | 0, 1274126177);
@@ -2359,32 +2344,25 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       const a = wert(x0, y0), b = wert(x0 + 1, y0), c = wert(x0, y0 + 1), e = wert(x0 + 1, y0 + 1);
       return (a + (b - a) * fx) * (1 - fy) + (c + (e - c) * fx) * fy;
     };
-    // Summe der Lagen, auf etwa -1 .. 1 gebracht
     return (x, y) => (0.6 * lage(x / 2.2, y / 2.2) + 0.28 * lage(x / 0.9, y / 0.9)
                     + 0.12 * lage(x / 0.35, y / 0.35) - 0.5) * 2;
   }
 
-  // Teilt jede Kante eines Vielecks in Stuecke von hoechstens "schritt".
-  // Zwei Nachbarzellen sehen dieselbe Kante und teilen sie darum gleich.
-  function unterteile(poly, schritt) {
-    const out = [];
+  /* Teilt die Kanten eines Vielecks feiner auf und merkt sich, wo die Punkte
+     jeder Ausgangskante beginnen. Genau das erlaubt es spaeter, die grobe
+     Kante auf ihren feinen Abschnitt aufzufaechern - der geteilte Rand bleibt
+     grob, fein wird nur, was zu einem einzigen Stein gehoert. */
+  function feinerRand(poly, schritt) {
+    const pts = [], start = [];
     for (let i = 0; i < poly.length; i++) {
       const a = poly[i], b = poly[(i + 1) % poly.length];
-      out.push(a);
-      // Das Epsilon haelt Kanten, die rechnerisch genau die Schrittweite lang
-      // sind, ungeteilt - sonst entstuende am Auszenrand ein Punkt, den die
-      // Seitenwand nicht hat.
-      const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / schritt - 1e-9));
-      for (let s = 1; s < n; s++) out.push([a[0] + (b[0] - a[0]) * (s / n), a[1] + (b[1] - a[1]) * (s / n)]);
+      start.push(pts.length);
+      const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / schritt));
+      for (let s = 0; s < n; s++) pts.push([a[0] + (b[0] - a[0]) * (s / n), a[1] + (b[1] - a[1]) * (s / n)]);
     }
-    return out;
+    return { pts: pts, start: start };
   }
 
-  /* Alles, was sich zwei Nachbarn teilen, liegt auf einem Raster von 0,1 um.
-     Dieselbe Ecke, aus verschiedenen Richtungen gerechnet, unterscheidet sich
-     sonst in der letzten Stelle - und aus "fast gleich" wird an irgendeiner
-     Stelle "nicht gleich". Bei 0,35 mm Detail ist ein Zehntel Mikrometer
-     weit jenseits von allem, was zaehlt. */
   const raste = poly => poly.map(p => [Math.round(p[0] * 1e4) / 1e4, Math.round(p[1] * 1e4) / 1e4]);
 
   function voronoi(w, d, t, gw, an, seed) {
@@ -2461,35 +2439,14 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     }
     return out;
   }
-  /* Punkte, die naeher beieinander liegen als das, gelten als derselbe. Die
-     Schranke muss deutlich ueber der Genauigkeit der Datei liegen (vier
-     Nachkommastellen): ein Paar knapp darueber ueberlebt das Saeubern, rueckt
-     beim Schrumpfen des Steins aber zusammen und faellt beim Schreiben
-     zusammen - aus zwei Kanten wird eine, und das Netz zaehlt sie doppelt.
-     Ein Zehntel Mikrometer ist an einer Base ohnehin nichts. */
-  /* Drei Schranken, und ihre Reihenfolge ist entscheidend:
-       EINSETZEN < UMRISS_ENG <= SCHWEISSEN
-     Ein Umrisspunkt, der beim Entdoppeln wegfaellt, muss noch in
-     Schweiszreichweite des verbliebenen liegen, sonst erzeugt die Zelle ihn
-     beim Zuschneiden neu und steht mit einem Punkt da, den die Seitenwand
-     nicht hat. Umgekehrt muss das Einsetzen feiner sein als der Abstand
-     zweier Umrisspunkte, sonst wird einer davon als Doppelgaenger des
-     Kantenendes verworfen und fehlt in der Flaeche. */
-  const EINSETZEN = 1e-5, UMRISS_ENG = 1e-4, SCHWEISSEN = 1e-3;
-  const GLEICH = SCHWEISSEN;
-
-  /* Entfernt nur Punkte, die wirklich aufeinanderliegen. Mit einer groszen
-     Schranke waere das Ergebnis von der Durchlaufrichtung abhaengig: zwei
-     Nachbarzellen sehen dieselbe Kante in entgegengesetzter Richtung und
-     wuerfen dann unterschiedliche Punkte weg - genau dort reiszt das Netz.
-     Dass Punkte ueberhaupt zusammenfallen, besorgt das Rasten. */
+  // Doppelte Punkte entstehen, wenn eine Kante genau auf der Schnittlinie liegt.
   function saeubere(p) {
     const out = [];
     p.forEach(q => {
       const last = out[out.length - 1];
-      if (!last || Math.hypot(q[0] - last[0], q[1] - last[1]) > 1e-9) out.push(q);
+      if (!last || Math.hypot(q[0] - last[0], q[1] - last[1]) > 1e-7) out.push(q);
     });
-    while (out.length > 1 && Math.hypot(out[0][0] - out[out.length - 1][0], out[0][1] - out[out.length - 1][1]) < 1e-9) out.pop();
+    while (out.length > 1 && Math.hypot(out[0][0] - out[out.length - 1][0], out[0][1] - out[out.length - 1][1]) < 1e-7) out.pop();
     return out;
   }
   function clipCell(poly, c) {
@@ -2514,11 +2471,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       const drauf = [];
       extra.forEach(p => {
         const s = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2;
-        if (s <= 0 || s >= 1) return;
-        // Nicht nach dem Anteil, sondern nach dem Abstand zu den Enden pruefen:
-        // ein Punkt dicht am Ende waere ein Doppelgaenger.
-        if (Math.hypot(p[0] - a[0], p[1] - a[1]) < EINSETZEN) return;
-        if (Math.hypot(p[0] - b[0], p[1] - b[1]) < EINSETZEN) return;
+        if (s <= 1e-9 || s >= 1 - 1e-9) return;
         if (Math.hypot(p[0] - (a[0] + dx * s), p[1] - (a[1] + dy * s)) < 1e-6) drauf.push({ s: s, p: p });
       });
       drauf.sort((x, y) => x.s - y.s).forEach(o => out.push(o.p));
@@ -2559,8 +2512,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return out;
   }
 
-  function cellPoly(flaeche2d, cell, bounds, weld) {
-    const poly = saeubere(subdivideInner(clipCell(flaeche2d, cell), cell, bounds).map(weld));
+  function cellPoly(flaeche2d, cell, bounds) {
+    const poly = subdivideInner(clipCell(flaeche2d, cell), cell, bounds);
     return poly.length < 3 ? null : poly;
   }
 
@@ -2592,69 +2545,13 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
   // Aus einer Zelle wird ein Stein: Fusz um die Fuge kleiner als die Zelle,
   // Deckel um die Fase kleiner als der Fusz und leicht gekippt.
-  /* Gemeinsame Punkttabelle. Dieselbe Ecke, aus verschiedenen Richtungen
-     gerechnet, unterscheidet sich in der letzten Stelle - beim Zuschneiden
-     einer Zelle gegen andere Mittelsenkrechte kommt eine andere Reihenfolge
-     heraus als bei der Nachbarzelle. Ueber die Tabelle bekommt die zweite
-     Zelle denselben Punkt zurueck, den die erste eingetragen hat, und zwar
-     bitgenau. Aus "fast gleich" wird "gleich", und nur damit stimmen die
-     Kanten am Ende ueberein.
-
-     Gesucht wird ueber ein grobes Gitter, damit nicht jeder Punkt gegen alle
-     anderen geprueft werden muss. */
-  function punkttabelle(tol) {
-    const faecher = new Map();
-    const g = 1 / (2 * tol);
-    return p => {
-      const kx = Math.round(p[0] * g), ky = Math.round(p[1] * g);
-      for (let dx = -1; dx <= 1; dx++) {
-        for (let dy = -1; dy <= 1; dy++) {
-          const liste = faecher.get((kx + dx) + ':' + (ky + dy));
-          if (!liste) continue;
-          for (const q of liste) if (Math.hypot(p[0] - q[0], p[1] - q[1]) <= tol) return q;
-        }
-      }
-      const k = kx + ':' + ky;
-      if (!faecher.has(k)) faecher.set(k, []);
-      faecher.get(k).push(p);
-      return p;
-    };
-  }
-
-  /* Liegt ein Punkt auf dem Auszenrand, wird er auf den naechsten Umrisspunkt
-     gezogen - ohne Wenn und Aber. Beim Zuschneiden rechnet jede Zelle ihren
-     Schnittpunkt mit dem Rand selbst aus und landet um Bruchteile eines
-     Mikrometers neben dem Umrisspunkt; die Seitenwand haengt aber an genau
-     diesem. Jeder Randpunkt einer Zelle ist so zwangslaeufig einer, den die
-     Wand auch kennt. */
-  function aufRand(p, umriss) {
-    let abstand = Infinity, nah = null;
-    for (let i = 0; i < umriss.length; i++) {
-      const a = umriss[i], b = umriss[(i + 1) % umriss.length];
-      const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
-      if (len2 < 1e-18) continue;
-      let s = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2;
-      s = Math.max(0, Math.min(1, s));
-      const dd = Math.hypot(p[0] - (a[0] + dx * s), p[1] - (a[1] + dy * s));
-      if (dd < abstand) { abstand = dd; nah = s < 0.5 ? a : b; }
-    }
-    return abstand < EINSETZEN ? nah : p;
-  }
-
-  function zellRand(zelle, umriss2d, fein, weld) {
-    const geschnitten = clipUmriss(zelle.poly, umriss2d).map(p => aufRand(p, umriss2d));
-    const grob = insertPoints(saeubere(geschnitten.map(weld)), umriss2d);
-    if (grob.length < 3) return null;
-    // Kanten am Auszenrand sind schon fein genug, die bleiben unberuehrt;
-    // unterteilt werden nur die langen Zellgrenzen im Inneren.
-    return saeubere((fein ? unterteile(grob, PFLASTER.detail) : grob).map(weld));
-  }
-
-  function stein(zelle, poly, t) {
+  function stein(zelle, umriss2d, t) {
+    const poly = insertPoints(clipUmriss(zelle.poly, umriss2d), umriss2d);
+    if (poly.length < 3) return null;
     const m = mittelpunkt(poly);
 
     /* Gelegentlich entsteht am Rand eine hauchduenne Zelle. Fuge und Fase
-       zusammen passen dort nicht mehr hinein, das Schrumpfen liefe in seine
+       zusammen passen dort nicht hinein, das Schrumpfen liefe in seine
        Notbremse und erzeugte Dreiecke ohne Flaeche. Solche Zellen bleiben
        flach und gehen in der Fuge auf - im Bild ist das genau richtig. */
     let eng = Infinity;
@@ -2667,11 +2564,11 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     if (eng < PFLASTER.fuge + PFLASTER.fase + 0.15) return { rand: poly, mitte2d: m, flach: true };
 
     const fusz = schrumpfe(poly, m, PFLASTER.fuge);
-    const kopf = schrumpfe(fusz, m, PFLASTER.fase);
+    const oben = schrumpfe(fusz, m, PFLASTER.fase);
     const z = p => t + zelle.hoehe + zelle.gx * (p[0] - m[0]) + zelle.gy * (p[1] - m[1]);
     return {
-      rand: poly, fuss: fusz, kopf: kopf, ebene: z, mitte2d: m,
-      deckel: kopf.map(p => [p[0], p[1], z(p)]),
+      rand: poly, fuss: fusz, ebene: z, mitte2d: m,
+      deckel: oben.map(p => [p[0], p[1], z(p)]),
       mitte: [m[0], m[1], t + zelle.hoehe]
     };
   }
@@ -2716,50 +2613,20 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     for (let i = 0; i < pts.length; i++) tris.push(facing(mitte, pts[i], pts[(i + 1) % pts.length], ref));
   }
 
-  /* fein steuert die Aufloesung: die Datei bekommt die volle, die Vorschau
-     eine grobe. Am Bild aendert das nichts - 0,35 mm sind auf 260 Bildpunkten
-     ohnehin nicht zu sehen -, aber bei einer 200er Base spart es eine halbe
-     Sekunde Rechenzeit je Tastendruck. */
-  // Alle Punkte in der Naehe eines Vielecks - mehr muss beim Nachtragen
-  // fehlender Randpunkte nicht geprueft werden.
-  function inDerNaehe(punkte, poly) {
-    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    poly.forEach(p => {
-      if (p[0] < x0) x0 = p[0];
-      if (p[0] > x1) x1 = p[0];
-      if (p[1] < y0) y0 = p[1];
-      if (p[1] > y1) y1 = p[1];
-    });
-    return punkte.filter(p => p[0] > x0 - GLEICH && p[0] < x1 + GLEICH && p[1] > y0 - GLEICH && p[1] < y1 + GLEICH);
-  }
-
-  function bauteile(w, d, t, gw, mitPflaster, seed, fein) {
+  function bauteile(w, d, t, gw, mitPflaster, seed) {
     const mag = magnets(w, d, t);
     const pfl = voronoi(w, d, t, gw, mitPflaster, seed);
-    const rg = rings(w, d, t, gw, mag, pfl, fein);
+    const rg = rings(w, d, t, gw, mag, pfl);
     const unten2d = rg.bottom.map(p => [p[0], p[1]]);
     const oben2d = rg.top.map(p => [p[0], p[1]]);
-    // Die Umrisspunkte zuerst eintragen, damit Zellpunkte auf sie einrasten
-    // und nicht umgekehrt.
-    const weldU = punkttabelle(SCHWEISSEN); unten2d.forEach(weldU);
-    const weldO = punkttabelle(SCHWEISSEN); oben2d.forEach(weldO);
 
     const loecher = mag.cells.map(c => {
-      const poly = cellPoly(unten2d, c, mag.bounds, weldU);
+      const poly = cellPoly(unten2d, c, mag.bounds);
       if (!poly) return null;
       const kreis = lochKreis(poly, c, mag.r);
       return kreis ? { cell: c, rand: poly, innen: kreis } : null;
     });
-    /* Bei fast entarteten Lagen - vier Punkte beinahe auf einem Kreis -
-       bekommt eine Zelle an einer gemeinsamen Kante einen Eckpunkt, den ihre
-       Nachbarin nicht hat. Darum erst alle Zellraender bestimmen, dann jeden
-       gegen die Punkte seiner Umgebung ergaenzen und erst danach die Steine
-       formen. */
-    const raender = pfl.cells.map(c => zellRand(c, oben2d, fein, weldO));
-    const allePunkte = [];
-    raender.forEach(r => { if (r) r.forEach(p => allePunkte.push(p)); });
-    const steine = pfl.cells.map((c, i) => raender[i] &&
-      stein(c, saeubere(insertPoints(raender[i], inDerNaehe(allePunkte, raender[i]))), t));
+    const steine = pfl.cells.map(c => stein(c, oben2d, t));
 
     return {
       rg: rg,
@@ -2771,7 +2638,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   }
 
   function triangles(w, d, t, gw, mitPflaster, seed) {
-    const b = bauteile(w, d, t, gw, mitPflaster, seed, true);
+    const b = bauteile(w, d, t, gw, mitPflaster, seed);
     const B = b.rg.bottom, T = b.rg.top, tris = [];
 
     sideQuads(b.rg).forEach(q => { tris.push([q[0], q[1], q[2]], [q[0], q[2], q[3]]); });
@@ -2779,26 +2646,41 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     if (!b.steine.length) {
       fanFaces(tris, T, [w / 2, d / 2, t], UP);
     } else {
-      /* Die Oberseite wird in Ringe vom Rand zur Mitte aufgeloest und jeder
-         Punkt aus der Ebene heraus verdraengt. Der Randring wird dabei
-         mitverdraengt und dient zugleich als obere Kante der Fase - sonst
-         klaffte dort eine Luecke. */
       const feld = rauschfeld(seed);
       b.steine.forEach(s => {
         if (s.flach) { fanFaces(tris, at(s.rand, t), [s.mitte2d[0], s.mitte2d[1], t], UP); return; }
-        const hoch = p => [p[0], p[1], s.ebene(p) + PFLASTER.rauheit * feld(p[0], p[1])];
-        const rand3 = s.kopf.map(hoch);
-
-        ringFaces(tris, at(s.rand, t), at(s.fuss, t), UP);                     // Fuge
-        wallFaces(tris, at(s.fuss, t), rand3, s.mitte2d[0], s.mitte2d[1], true); // Fase
-
         const m = s.mitte2d;
-        const r = s.kopf.reduce((a, p) => a + Math.hypot(p[0] - m[0], p[1] - m[1]), 0) / s.kopf.length;
+        const R = s.rand, n = R.length;
+        const fein = feinerRand(s.fuss, PFLASTER.detail);
+        const F = fein.pts, mz = F.length;
+
+        /* Fuge: jede grobe Randkante wird auf ihren feinen Abschnitt des
+           Steinfuszes aufgefaechert. Die geteilte Auszenkante bleibt dadurch
+           genau so grob, wie die Nachbarzelle sie auch sieht - es gibt keine
+           feine Kante, die zwischen zwei Zellen auseinanderlaufen koennte. */
+        for (let i = 0; i < n; i++) {
+          const j = (i + 1) % n;
+          const p = fein.start[i], q = (i + 1 < n) ? fein.start[i + 1] : mz;
+          const r3 = [R[i][0], R[i][1], t];
+          tris.push(facing(r3, [R[j][0], R[j][1], t], [F[q % mz][0], F[q % mz][1], t], UP));
+          for (let k = q; k > p; k--) {
+            tris.push(facing(r3, [F[k % mz][0], F[k % mz][1], t], [F[(k - 1) % mz][0], F[(k - 1) % mz][1], t], UP));
+          }
+        }
+
+        // Fase und Oberflaeche gehoeren ganz zu diesem Stein - hier darf es so
+        // fein werden, wie es will.
+        const kopf = schrumpfe(F, m, PFLASTER.fase);
+        const hoch = p => [p[0], p[1], s.ebene(p) + PFLASTER.rauheit * feld(p[0], p[1])];
+        const kopf3 = kopf.map(hoch);
+        wallFaces(tris, at(F, t), kopf3, m[0], m[1], true);
+
+        const r = kopf.reduce((a, p) => a + Math.hypot(p[0] - m[0], p[1] - m[1]), 0) / kopf.length;
         const ringe = Math.max(2, Math.ceil(r / PFLASTER.detail));
-        let auszen = rand3;
+        let auszen = kopf3;
         for (let k = ringe - 1; k >= 1; k--) {
-          const innen = s.kopf.map(p => hoch([m[0] + (p[0] - m[0]) * (k / ringe),
-                                              m[1] + (p[1] - m[1]) * (k / ringe)]));
+          const innen = kopf.map(p => hoch([m[0] + (p[0] - m[0]) * (k / ringe),
+                                            m[1] + (p[1] - m[1]) * (k / ringe)]));
           ringFaces(tris, auszen, innen, UP);
           auszen = innen;
         }
@@ -2966,7 +2848,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     const komplett = w !== null && d !== null && t !== null;
     let b = null;
     if (komplett) {
-      b = bauteile(w, d, t, gw, stein, steinSeed, false);
+      b = bauteile(w, d, t, gw, stein, steinSeed);
       drawTop(b, t);
       drawBack(b);
     }
@@ -3034,9 +2916,9 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   }
 
   /* Binaeres STL. Mit Pflaster kommen zehntausende Dreiecke zusammen; als
-     Text waere die Datei ein Vielfaches so grosz und beim Schreiben spuerbar
-     langsam. Aufbau: 80 Byte Kopf, Anzahl als 32-Bit-Zahl, dann je Dreieck
-     Normale und drei Ecken als 32-Bit-Flieszkomma plus zwei ungenutzte Byte. */
+     Text waere die Datei ein Vielfaches so grosz. Aufbau: 80 Byte Kopf,
+     Anzahl als 32-Bit-Zahl, dann je Dreieck Normale und drei Ecken als
+     32-Bit-Flieszkomma plus zwei ungenutzte Byte. */
   function buildSTL(w, d, t, gw, mitPflaster, seed) {
     const tris = triangles(w, d, t, gw, mitPflaster, seed);
     const buf = new ArrayBuffer(84 + tris.length * 50);
