@@ -188,6 +188,12 @@ button:hover{ background:var(--maroon-dark); }
   position:absolute; bottom:-18px; left:0; font-size:.6rem; font-weight:bold; color:var(--maroon);
   background:var(--beige); border:1px solid var(--maroon); border-radius:3px; padding:0 3px; white-space:nowrap; z-index:4;
 }
+/* Sitzt mit seiner Mitte genau auf der Ecke, auf die die Koordinate zeigt. */
+.coord-dot{
+  position:absolute; bottom:0; width:9px; height:9px; border-radius:50%;
+  background:#d40000; border:1.5px solid #fff; box-shadow:0 0 0 1px #7a1f1f;
+  z-index:6; pointer-events:none;
+}
 
 .tex-forest{ background-color:#6f9a4f; background-image:
     radial-gradient(circle at 25% 30%, #4d7a37 4px, transparent 5px),
@@ -548,7 +554,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       <div class="info"><b>Ruine</b>7x7"</div></div><div class="chip"><div class="swatch" style="background:#d9c179"></div>
       <div class="info"><b>Feld</b>6x8"</div></div><div class="chip"><div class="swatch" style="background:#4c85b8"></div>
       <div class="info"><b>See</b>6x10"</div></div></div>
-    <div class="hint">Ziehe ein Stück auf das Raster (oder tippe es an). Platzierte Stücke lassen sich verschieben, per ⟳ drehen oder per × löschen.</div>
+    <div class="hint">Ziehe ein Stück auf das Raster (oder tippe es an). Platzierte Stücke lassen sich verschieben, per ⟳ drehen oder per × löschen. Der rote Punkt markiert die Ecke, auf die die angezeigte Koordinate verweist.</div>
 
     <div class="custom-form">
       <h2 style="border:none;margin-bottom:4px;">Eigenes Gelände</h2>
@@ -1443,6 +1449,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
         <button class="rotateBtn" title="Drehen">⟳</button>
         <button class="delBtn" title="Löschen">×</button>
       </div>
+      <div class="coord-dot"></div>
       <div class="coord-tag"></div>
     `;
     el.querySelector('.name').textContent = piece.name;
@@ -1474,16 +1481,29 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     const tag = el.querySelector('.coord-tag');
     if (!tag) return;
     const [bw] = pBox(piece);
+    /* Auf der rechten Hälfte wandert das Schild an die rechte untere Ecke,
+       damit es nicht über den Rand hinausragt - und mit ihm die Koordinate
+       und der Punkt. Welche Ecke gemeint ist, zeigt der Punkt. */
     const onRightHalf = piece.x + bw / 2 > cfg.w / 2;
     if (onRightHalf) {
       tag.style.left = 'auto'; tag.style.right = '0';
     } else {
       tag.style.left = '0'; tag.style.right = 'auto';
     }
-    // Zeigt immer die Koordinate der Ecke, an der das Tag tatsächlich sitzt
-    // (rechte Ecke des Stücks bei rechtsbündigem Tag, sonst die linke).
-    const cornerX = onRightHalf ? Math.round(piece.x + bw) : piece.x;
+    /* Nicht auf ganze Zoll runden: ein gedrehtes Stueck hat eine krumme
+       Huellbreite, und die rechte Ecke liegt dann eben auf 46,3 statt 46.
+       Gerundet stuende am Schild eine Zahl, auf die der Punkt gar nicht
+       zeigt - bis zu einem halben Zoll daneben. */
+    const cornerX = onRightHalf ? Math.round((piece.x + bw) * 10) / 10 : piece.x;
     tag.textContent = `(${cornerX}, ${piece.y})`;
+
+    const dot = el.querySelector('.coord-dot');
+    if (!dot) return;
+    if (onRightHalf) {
+      dot.style.left = 'auto'; dot.style.right = '0'; dot.style.transform = 'translate(50%, 50%)';
+    } else {
+      dot.style.left = '0'; dot.style.right = 'auto'; dot.style.transform = 'translate(-50%, 50%)';
+    }
   }
 
   function rerenderPiece(piece) {
