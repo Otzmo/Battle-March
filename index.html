@@ -190,7 +190,7 @@ button:hover{ background:var(--maroon-dark); }
 }
 /* Sitzt mit seiner Mitte genau auf der Ecke, auf die die Koordinate zeigt. */
 .coord-dot{
-  position:absolute; bottom:0; width:9px; height:9px; border-radius:50%;
+  position:absolute; width:9px; height:9px; border-radius:50%;
   background:#d40000; border:1.5px solid #fff; box-shadow:0 0 0 1px #7a1f1f;
   z-index:6; pointer-events:none;
 }
@@ -1477,33 +1477,58 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     sh.style.transform = 'rotate(' + (piece.ang || 0) + 'deg)';
   }
 
+  /* Die vier Ecken des Stuecks selbst, nicht die des umschlieszenden
+     Rechtecks. Bei einem gedrehten Stueck liegen die beiden weit
+     auseinander - die Ecke der Huelle waere schlicht neben dem Gelaende.
+     Gedreht wird im Bild im Uhrzeigersinn; weil die Brettkoordinate nach
+     oben zaehlt und der Bildschirm nach unten, kehrt sich das Vorzeichen
+     der Drehung um. */
+  function pieceCorners(piece) {
+    const a = (piece.ang || 0) * Math.PI / 180;
+    const ca = Math.cos(a), sa = Math.sin(a);
+    const [bw, bd] = pBox(piece);
+    const cx = piece.x + bw / 2, cy = piece.y + bd / 2;
+    const out = [];
+    [-1, 1].forEach(sx => [-1, 1].forEach(sy => {
+      const dx = sx * piece.w / 2, dy = sy * piece.d / 2;
+      out.push({ x: cx + dx * ca + dy * sa, y: cy - dx * sa + dy * ca });
+    }));
+    return out;
+  }
+
   function positionCoordTag(el, piece) {
     const tag = el.querySelector('.coord-tag');
-    if (!tag) return;
-    const [bw] = pBox(piece);
-    /* Auf der rechten Hälfte wandert das Schild an die rechte untere Ecke,
-       damit es nicht über den Rand hinausragt - und mit ihm die Koordinate
-       und der Punkt. Welche Ecke gemeint ist, zeigt der Punkt. */
-    const onRightHalf = piece.x + bw / 2 > cfg.w / 2;
-    if (onRightHalf) {
-      tag.style.left = 'auto'; tag.style.right = '0';
-    } else {
-      tag.style.left = '0'; tag.style.right = 'auto';
-    }
-    /* Nicht auf ganze Zoll runden: ein gedrehtes Stueck hat eine krumme
-       Huellbreite, und die rechte Ecke liegt dann eben auf 46,3 statt 46.
-       Gerundet stuende am Schild eine Zahl, auf die der Punkt gar nicht
-       zeigt - bis zu einem halben Zoll daneben. */
-    const cornerX = onRightHalf ? Math.round((piece.x + bw) * 10) / 10 : piece.x;
-    tag.textContent = `(${cornerX}, ${piece.y})`;
-
     const dot = el.querySelector('.coord-dot');
+    if (!tag) return;
+    const [bw, bd] = pBox(piece);
+    const rechts = piece.x + bw / 2 > cfg.w / 2;
+
+    /* Genommen wird die unterste Ecke des Stuecks. Liegen zwei gleich tief -
+       bei einem ungedrehten Stueck sind das immer zwei -, entscheidet die
+       Haelfte des Bretts, damit das Schild nicht ueber den Rand haengt. */
+    let ecke = null;
+    pieceCorners(piece).forEach(e => {
+      if (!ecke) { ecke = e; return; }
+      if (e.y < ecke.y - 1e-6) ecke = e;
+      else if (Math.abs(e.y - ecke.y) < 1e-6 && (rechts ? e.x > ecke.x : e.x < ecke.x)) ecke = e;
+    });
+
+    const rund = v => Math.round(v * 10) / 10;
+    tag.textContent = `(${rund(ecke.x)}, ${rund(ecke.y)})`;
+
+    // Schild unter den Punkt, am Brettrand nach innen gerueckt
+    const anteil = bw > 0 ? (ecke.x - piece.x) / bw : 0;
+    tag.style.right = 'auto';
+    tag.style.left = (anteil * 100) + '%';
+    tag.style.transform = ecke.x < 6 ? 'translateX(0)'
+                        : ecke.x > cfg.w - 6 ? 'translateX(-100%)'
+                        : 'translateX(-50%)';
+
     if (!dot) return;
-    if (onRightHalf) {
-      dot.style.left = 'auto'; dot.style.right = '0'; dot.style.transform = 'translate(50%, 50%)';
-    } else {
-      dot.style.left = '0'; dot.style.right = 'auto'; dot.style.transform = 'translate(-50%, 50%)';
-    }
+    dot.style.right = 'auto'; dot.style.bottom = 'auto';
+    dot.style.left = px(ecke.x - piece.x) + 'px';
+    dot.style.top = px(bd - (ecke.y - piece.y)) + 'px';
+    dot.style.transform = 'translate(-50%, -50%)';
   }
 
   function rerenderPiece(piece) {
