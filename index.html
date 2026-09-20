@@ -1067,7 +1067,19 @@ GermanComp is a complete restriction, balance and tournament system, developed b
           }
         });
       }
-      if (Array.isArray(data.pieces)) pieces = data.pieces;
+      if (Array.isArray(data.pieces)) {
+        pieces = data.pieces;
+        /* Aeltere gespeicherte Karten koennen noch schraege Stuecke enthalten.
+           Sie werden auf 90 Grad gestellt; weil sich damit die umschlieszende
+           Box aendert, muss die Lage neu ins Brett gezogen werden. */
+        pieces.forEach(p => {
+          if (p.ang !== 0 && p.ang !== 90) {
+            p.ang = 90;
+            const [bw, bd] = pBox(p);
+            [p.x, p.y] = clampPos(p.x, p.y, bw, bd);
+          }
+        });
+      }
       if (Number.isFinite(data.pieceSeq)) pieceSeq = data.pieceSeq;
       if (Array.isArray(data.zoneGrid)) zoneGrid = data.zoneGrid;
       if (Array.isArray(data.treasures)) treasures = data.treasures;
@@ -1078,10 +1090,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   function px(inches) { return inches * cfg.scale; }
 
   /* Umschliessende Box eines (evtl. gedrehten) Stuecks */
-  function bbox(w, d, ang) {
-    if (ang === 45 || ang === 135) { const s = (w + d) * Math.SQRT1_2; return [s, s]; }
-    return (ang === 90) ? [d, w] : [w, d];
-  }
+  // Nur noch achsparallel: bei 90 Grad tauschen Breite und Tiefe die Rollen.
+  function bbox(w, d, ang) { return (ang === 90) ? [d, w] : [w, d]; }
   function pBox(p) { return bbox(p.w, p.d, p.ang || 0); }
 
   /* --- responsive Skalierung: Board passt sich der Bildschirmbreite an --- */
@@ -1540,7 +1550,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     el.style.left = px(piece.x) + 'px';
     el.style.bottom = px(piece.y) + 'px';
     styleShape(el, piece);
-    el.querySelector('.dims').textContent = `${piece.w}x${piece.d}"` + ((piece.ang === 45 || piece.ang === 135) ? ' \u2220' : '');
+    el.querySelector('.dims').textContent = `${piece.w}x${piece.d}"`;
     positionCoordTag(el, piece);
   }
 
@@ -1689,8 +1699,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
       order.forEach(({ type, idx }) => {
         const w = type.w, d = type.d;
-        // Zufaellige Ausrichtung: 0/90 Grad achsparallel, 45/135 Grad diagonal
-        const angles = [0, 90, 45, 135];
+        // Ausrichtung: nur achsparallel, quer oder laengs
+        const angles = [0, 90];
         const ang = angles[Math.floor(Math.random() * angles.length)];
         let [bw, bd] = bbox(w, d, ang);
         bw = Math.ceil(bw); bd = Math.ceil(bd);
@@ -1733,7 +1743,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   function rotatePiece(id) {
     const piece = pieces.find(p => p.id === id);
     if (!piece) return;
-    piece.ang = ((piece.ang || 0) + 45) % 180;
+    piece.ang = ((piece.ang || 0) + 90) % 180;
     const [bw, bd] = pBox(piece);
     [piece.x, piece.y] = clampPos(piece.x, piece.y, bw, bd);
     rerenderPiece(piece);
@@ -1857,7 +1867,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
   document.getElementById('mirrorHBtn').addEventListener('click', () => {
     zoneGrid.forEach(row => row.reverse());
-    pieces.forEach(p => { p.x = cfg.w - p.x - pBox(p)[0]; if (p.ang === 45) p.ang = 135; else if (p.ang === 135) p.ang = 45; });
+    pieces.forEach(p => { p.x = cfg.w - p.x - pBox(p)[0]; });
     drawZones();
     pieces.forEach(rerenderPiece);
     saveState();
@@ -1865,7 +1875,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
   document.getElementById('mirrorVBtn').addEventListener('click', () => {
     zoneGrid.reverse();
-    pieces.forEach(p => { p.y = cfg.h - p.y - pBox(p)[1]; if (p.ang === 45) p.ang = 135; else if (p.ang === 135) p.ang = 45; });
+    pieces.forEach(p => { p.y = cfg.h - p.y - pBox(p)[1]; });
     drawZones();
     pieces.forEach(rerenderPiece);
     saveState();
@@ -1964,7 +1974,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       g.font = 'bold ' + Math.max(10, Math.round(S * 0.5)) + 'px Georgia, serif';
       g.fillText(p.name, ccx, ccy - S * 0.3);
       g.font = 'italic ' + Math.max(8, Math.round(S * 0.4)) + 'px Georgia, serif';
-      g.fillText(p.w + 'x' + p.d + '"' + ((p.ang === 45 || p.ang === 135) ? ' \u2220' : ''), ccx, ccy + S * 0.3);
+      g.fillText(p.w + 'x' + p.d + '"', ccx, ccy + S * 0.3);
     });
     pieces.forEach(p => tag('(' + p.x + ', ' + p.y + ')', p.x + pBox(p)[0] / 2, p.y));
 
