@@ -1,0 +1,53 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Battle March</title>
+<style>
+  html, body { margin:0; padding:0; height:100%; }
+  body { background:var(--beige); color:var(--text); font-family:var(--font-serif); overflow:hidden; }
+  .cover { position:relative; width:960px; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; }
+  .brand { fill:var(--maroon); }
+  .p1 { fill:var(--zone-p1); }
+  .p2 { fill:var(--zone-p2); }
+  .forest { fill:var(--terrain-forest); stroke:var(--ink-edge); stroke-width:1.4px; }
+  .blk { rx:var(--radius-4); }
+  .piece { rx:var(--radius-6); }
+  .coin { fill:var(--treasure); stroke:var(--treasure-edge); stroke-width:1.6px; }
+  .rule { stroke:var(--grid-major); stroke-width:1px; fill:none; }
+  .words { position:absolute; left:24px; bottom:24px; max-width:440px; }
+  .name { margin:0; font-size:104px; line-height:.95; font-weight:700; letter-spacing:.02em; color:var(--maroon); }
+  .tag { margin:8px 0 0 4px; font-size:14px; line-height:20px; font-style:italic; color:var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      maroon 130×256 slab bled off the top (10×scale, the brand colour, largest) · zone-p1 band 12×scale wide, 6×scale tall · zone-p2 band bled off the right, 6×scale tall · terrain-forest piece 3×5 scale · one treasure coin — ≈35% of 960×288
+  arrangement one tall maroon slab with a deployment map beside it: Spieler-1 band on top, Spieler-2 band below, No Man's Land left open as the ground, one Wald piece in between
+  pattern     board grid, from "Brett-Raster alle 6 Zoll": four grid-major hairlines at a 6×scale (78px) pitch crossing the bands, like the Kartenbau mat
+  scales      sides in scale (13px) multiples; gutters space-16; corners radius-4 for blocks, radius-6 for the terrain piece, coin radius-round
+-->
+<rect class="brand blk" x="16" y="-16" width="130" height="256" rx="4"/>
+<line class="rule" x1="162" y1="0" x2="162" y2="288"/>
+<line class="rule" x1="240" y1="0" x2="240" y2="288"/>
+<line class="rule" x1="318" y1="0" x2="318" y2="288"/>
+<line class="rule" x1="396" y1="0" x2="396" y2="288"/>
+<rect class="p1 blk" x="162" y="16" width="234" height="78" rx="4"/>
+<rect class="forest piece" x="266" y="110" width="39" height="65" rx="6"/>
+<circle class="coin" cx="210" cy="142" r="8"/>
+<rect class="p2 blk" x="162" y="190" width="334" height="78" rx="4"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Battle<br>March</h1>
+<p class="tag">Leitfaden für Gefechtsmarsch-Spiele</p>
+</div>
+</div>
+</body>
+</html>
