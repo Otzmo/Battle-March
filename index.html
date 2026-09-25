@@ -89,6 +89,12 @@ body{
 .chip .swatch{ width:26px; height:20px; border-radius:3px; border:1px solid rgba(0,0,0,.35); flex-shrink:0; }
 .chip .info{ font-size:.78rem; line-height:1.2; }
 .chip .info b{ display:block; font-size:.82rem; }
+.chip .chip-del{
+  margin-left:auto; width:20px; height:20px; padding:0; flex-shrink:0; border-radius:50%;
+  border:1px solid #2b2620; background:#fff; color:#1a1a1a; font-size:.8rem; line-height:1;
+}
+.chip .chip-del:hover{ background:var(--maroon); color:#fff; }
+#resetAllBtn.confirm{ background:#b3261e; }
 
 .hint{ font-size:.72rem; color:#5a4f3f; font-style:italic; margin-top:8px; line-height:1.4; }
 
@@ -555,12 +561,12 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       <div class="info"><b>Ruine</b>7x7"</div></div><div class="chip"><div class="swatch" style="background:#d9c179"></div>
       <div class="info"><b>Feld</b>6x8"</div></div><div class="chip"><div class="swatch" style="background:#4c85b8"></div>
       <div class="info"><b>See</b>6x10"</div></div></div>
-    <div class="hint">Ziehe ein Stück auf das Raster (oder tippe es an). Platzierte Stücke lassen sich verschieben, per ⟳ drehen oder per × löschen. Der rote Punkt markiert die Ecke, auf die die angezeigte Koordinate verweist.</div>
+    <div class="hint">Ziehe ein Stück auf das Raster (oder tippe es an). Platzierte Stücke lassen sich verschieben, per ⟳ drehen oder per × löschen. Der rote Punkt markiert die Ecke, auf die die angezeigte Koordinate verweist. Eigene Geländetypen entfernt das × in der Palette.</div>
 
     <div class="custom-form">
       <h2 style="border:none;margin-bottom:4px;">Eigenes Gelände</h2>
       <label for="cName">Name</label>
-      <input type="text" id="cName" placeholder="z. B. Turm">
+      <input type="text" id="cName" placeholder="z. B. Turm" maxlength="40">
       <label for="cW">Breite (Zoll)</label>
       <input type="number" id="cW" value="6" min="1" max="48">
       <label for="cD">Tiefe (Zoll)</label>
@@ -603,6 +609,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 
     <div class="toolbar">
       <button id="resetBtn">Gelände leeren</button>
+      <button id="resetAllBtn" title="Löscht Gelände, Zonen, Schätze, eigene Geländetypen und Feldgröße – auch aus dem Browser-Speicher">Alles zurücksetzen</button>
       <button id="downloadBtn" title="Aktuelle Karte als PNG-Bild herunterladen">⬇ Karte herunterladen</button>
       <button id="mirrorHBtn" title="Spiegelt Gelände und Zonen links/rechts">⇋ Horizontal spiegeln</button>
       <button id="mirrorVBtn" title="Spiegelt Gelände und Zonen oben/unten">⇵ Vertikal spiegeln</button>
@@ -1027,10 +1034,12 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
   /* --- Zwischenspeicherung im Browser (localStorage) --- */
   const STORAGE_KEY = 'battleMarchBuilderState';
+  // Bei einer Formatänderung hochzählen: ältere Stände werden dann verworfen statt falsch gelesen.
+  const STATE_VERSION = 1;
 
   function serializeState() {
     return {
-      version: 1,
+      version: STATE_VERSION,
       cfg: { w: cfg.w, h: cfg.h, circle: cfg.circle },
       pieces, pieceSeq,
       zoneGrid,
@@ -1039,13 +1048,61 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     };
   }
 
-  let _saveTimer;
+  /* Die einzelnen Aktionen melden Änderungen über saveState() nur an;
+     geschrieben wird gebündelt. Beim Verlassen oder Verstecken der Seite
+     wird der Gesamtstand zusätzlich geprüft und geschrieben, falls er sich
+     geändert hat – auch wenn die Wartezeit noch läuft oder eine Aktion das
+     Melden vergessen hat. Unveränderte Stände werden nie geschrieben,
+     damit ein zweiter, nur angesehener Tab nichts überschreibt. */
+  let _saveTimer = null;
+  let _lastWritten = null;
+
+  function writeState() {
+    clearTimeout(_saveTimer);
+    _saveTimer = null;
+    const json = JSON.stringify(serializeState());
+    if (json === _lastWritten) return;
+    try { localStorage.setItem(STORAGE_KEY, json); _lastWritten = json; }
+    catch (e) { /* Speicher voll oder nicht verfügbar (z. B. privates Fenster) */ }
+  }
+
   function saveState() {
     clearTimeout(_saveTimer);
-    _saveTimer = setTimeout(() => {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState())); }
-      catch (e) { /* Speicher voll oder nicht verfügbar (z. B. privates Fenster) */ }
-    }, 300);
+    _saveTimer = setTimeout(writeState, 300);
+  }
+  window.addEventListener('pagehide', writeState);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') writeState();
+  });
+
+  /* --- Prüfen gespeicherter Daten ---
+     Was aus dem Speicher kommt, kann veraltet oder manipuliert sein. Es
+     wird nur übernommen, was in Form und Wertebereich passt. */
+  const TEXTURES = new Set(defaultTypes.map(t => t.tex));
+  const BOARD_LIMITS = { w: [12, 96], h: [12, 96], circle: [0, 40] };
+
+  function clampInt(v, min, max, fallback) {
+    const n = Math.round(Number(v));
+    return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
+  }
+  function numIn(v, min, max) { return typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max; }
+  function isColor(v) { return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v); }
+  function cleanName(v) { return typeof v === 'string' ? v.slice(0, 40) : null; }
+
+  function cleanType(t) {
+    if (!t || typeof t !== 'object') return null;
+    const name = cleanName(t.name);
+    if (!name || !numIn(t.w, 1, 96) || !numIn(t.d, 1, 96) || !isColor(t.color)) return null;
+    return { name, w: t.w, d: t.d, tex: TEXTURES.has(t.tex) ? t.tex : '', color: t.color, dark: !!t.dark };
+  }
+
+  function cleanPiece(p) {
+    const type = cleanType(p);
+    if (!type || !Number.isInteger(p.id) || p.id < 1) return null;
+    if (!numIn(p.x, 0, 96) || !numIn(p.y, 0, 96)) return null;
+    // Nur noch achsparallel; schräge Stücke älterer Karten stehen auf 90 Grad.
+    const ang = p.ang === 0 || p.ang === 90 ? p.ang : ([45, 135].includes(p.ang) ? 90 : 0);
+    return Object.assign(type, { id: p.id, x: p.x, y: p.y, ang });
   }
 
   function loadState() {
@@ -1054,31 +1111,39 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     if (!raw) return false;
     let data;
     try { data = JSON.parse(raw); } catch (e) { return false; }
-    if (!data || typeof data !== 'object') return false;
-    try {
-      if (data.cfg) {
-        if (Number.isFinite(data.cfg.w)) cfg.w = data.cfg.w;
-        if (Number.isFinite(data.cfg.h)) cfg.h = data.cfg.h;
-        if (Number.isFinite(data.cfg.circle)) cfg.circle = data.cfg.circle;
-      }
-      if (Array.isArray(data.customTypes)) {
-        data.customTypes.forEach(t => {
-          if (t && typeof t.name === 'string') {
-            defaultTypes.push({ name: t.name, w: t.w, d: t.d, tex: t.tex || '', color: t.color, dark: !!t.dark });
-          }
-        });
-      }
-      if (Array.isArray(data.pieces)) {
-        pieces = data.pieces;
-        // Aeltere Karten koennen schraege Stuecke enthalten; auf 0 Grad
-        // gestellt bleibt die umschlieszende Box dieselbe wie bisher.
-        pieces.forEach(p => { if (p.ang !== 0 && p.ang !== 90) p.ang = 0; });
-      }
-      if (Number.isFinite(data.pieceSeq)) pieceSeq = data.pieceSeq;
-      if (Array.isArray(data.zoneGrid)) zoneGrid = data.zoneGrid;
-      if (Array.isArray(data.treasures)) treasures = data.treasures;
-      return true;
-    } catch (e) { return false; }
+    if (!data || typeof data !== 'object' || data.version !== STATE_VERSION) return false;
+
+    if (data.cfg && typeof data.cfg === 'object') {
+      cfg.w = clampInt(data.cfg.w, ...BOARD_LIMITS.w, cfg.w);
+      cfg.h = clampInt(data.cfg.h, ...BOARD_LIMITS.h, cfg.h);
+      cfg.circle = clampInt(data.cfg.circle, ...BOARD_LIMITS.circle, cfg.circle);
+    }
+    if (Array.isArray(data.customTypes)) {
+      data.customTypes.map(cleanType).filter(Boolean).forEach(t => defaultTypes.push(t));
+    }
+    if (Array.isArray(data.pieces)) {
+      // Doppelte Nummern würden Drehen/Löschen auf das falsche Stück lenken.
+      const seen = new Set();
+      pieces = data.pieces.map(cleanPiece).filter(p => p && !seen.has(p.id) && seen.add(p.id));
+      /* Die Lage wird immer neu ins Brett gezogen: schräge Stücke aus älteren
+         Karten stehen jetzt auf 90 Grad und haben damit eine andere Box. */
+      pieces.forEach(p => { [p.x, p.y] = clampPos(p.x, p.y, ...pBox(p)); });
+    }
+    // Der Zähler muss immer hinter der höchsten vorhandenen Nummer stehen.
+    const maxId = pieces.reduce((m, p) => Math.max(m, p.id), 0);
+    pieceSeq = Math.max(maxId + 1, Number.isInteger(data.pieceSeq) ? data.pieceSeq : 1);
+
+    const ZONE_VALUES = ['p1', 'p2', 'nml', 'none'];
+    if (Array.isArray(data.zoneGrid) && data.zoneGrid.length === cfg.h &&
+        data.zoneGrid.every(row => Array.isArray(row) && row.length === cfg.w && row.every(v => ZONE_VALUES.includes(v)))) {
+      zoneGrid = data.zoneGrid;
+    }
+    if (Array.isArray(data.treasures)) {
+      treasures = data.treasures
+        .filter(t => t && numIn(t.x, 0, cfg.w) && numIn(t.y, 0, cfg.h))
+        .map(t => ({ x: t.x, y: t.y }));
+    }
+    return true;
   }
 
   function px(inches) { return inches * cfg.scale; }
@@ -1415,19 +1480,31 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   function makeChip(type) {
     const chip = document.createElement('div');
     chip.className = 'chip';
-    const swatch = document.createElement('div');
-    swatch.className = 'swatch';
-    swatch.style.background = type.color;
-    const info = document.createElement('div');
-    info.className = 'info';
-    const b = document.createElement('b');
-    b.textContent = type.name;
-    info.appendChild(b);
-    info.appendChild(document.createTextNode(`${type.w}x${type.d}"`));
-    chip.appendChild(swatch);
-    chip.appendChild(info);
+    chip.innerHTML = '<div class="swatch"></div><div class="info"><b></b><span class="dims"></span></div>';
+    chip.querySelector('.swatch').style.background = type.color;
+    chip.querySelector('b').textContent = type.name;
+    chip.querySelector('.dims').textContent = `${type.w}x${type.d}"`;
+    // Eigene Typen lassen sich wieder entfernen; die mitgelieferten nicht.
+    if (defaultTypes.indexOf(type) >= INITIAL_TYPE_COUNT) {
+      const del = document.createElement('button');
+      del.className = 'chip-del';
+      del.title = 'Aus der Palette entfernen';
+      del.setAttribute('aria-label', 'Aus der Palette entfernen');
+      del.textContent = '×';
+      del.addEventListener('pointerdown', (e) => e.stopPropagation());
+      del.addEventListener('click', (e) => { e.stopPropagation(); removeCustomType(type); });
+      chip.appendChild(del);
+    }
     chip.addEventListener('pointerdown', (e) => startCreateDrag(e, type));
     return chip;
+  }
+
+  function removeCustomType(type) {
+    const i = defaultTypes.indexOf(type);
+    if (i < INITIAL_TYPE_COUNT) return;
+    defaultTypes.splice(i, 1);   // bereits platzierte Stücke bleiben stehen
+    buildPalette();
+    saveState();
   }
 
   function clampPos(x, y, w, d) {
@@ -1448,7 +1525,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     el.innerHTML = `
       <div class="shape"></div>
       <span class="name"></span>
-      <span class="dims">${piece.w}x${piece.d}"</span>
+      <span class="dims"></span>
       <div class="btns">
         <button class="rotateBtn" title="Drehen">⟳</button>
         <button class="delBtn" title="Löschen">×</button>
@@ -1456,7 +1533,9 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       <div class="coord-dot"></div>
       <div class="coord-tag"></div>
     `;
+    // Werte nur über textContent – Namen und gespeicherte Daten sind nicht vertrauenswürdig.
     el.querySelector('.name').textContent = piece.name;
+    el.querySelector('.dims').textContent = dimsText(piece);
     styleShape(el, piece);
     el.querySelector('.rotateBtn').addEventListener('click', (e) => { e.stopPropagation(); rotatePiece(piece.id); });
     el.querySelector('.delBtn').addEventListener('click', (e) => { e.stopPropagation(); removePiece(piece.id); });
@@ -1467,6 +1546,10 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     });
     positionCoordTag(el, piece);
     return el;
+  }
+
+  function dimsText(piece) {
+    return `${piece.w}x${piece.d}"`;
   }
 
   function styleShape(el, piece) {
@@ -1510,7 +1593,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     el.style.left = px(piece.x) + 'px';
     el.style.bottom = px(piece.y) + 'px';
     styleShape(el, piece);
-    el.querySelector('.dims').textContent = `${piece.w}x${piece.d}"`;
+    el.querySelector('.dims').textContent = dimsText(piece);
     positionCoordTag(el, piece);
   }
 
@@ -1741,6 +1824,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       if (!overlapsOthers(piece, tx, ty)) { piece.x = tx; piece.y = ty; }
       rerenderPiece(piece);
     }
+    // Auch ein abgebrochenes Ziehen (z. B. Systemgeste am Handy) beendet sauber.
     function onUp() {
       piece.x = Math.round(piece.x);
       piece.y = Math.round(piece.y);
@@ -1748,10 +1832,12 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       el.classList.remove('dragging');
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerup', onUp);
+      el.removeEventListener('pointercancel', onUp);
       saveState();
     }
     el.addEventListener('pointermove', onMove);
     el.addEventListener('pointerup', onUp);
+    el.addEventListener('pointercancel', onUp);
   }
 
   function startCreateDrag(e, type) {
@@ -1768,14 +1854,9 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     ghost.style.top = e.clientY - px(type.d) / 2 + 'px';
     ghost.style.opacity = '0.85';
     ghost.style.pointerEvents = 'none';
-    const ghostName = document.createElement('span');
-    ghostName.className = 'name';
-    ghostName.textContent = type.name;
-    const ghostDims = document.createElement('span');
-    ghostDims.className = 'dims';
-    ghostDims.textContent = `${type.w}x${type.d}"`;
-    ghost.appendChild(ghostName);
-    ghost.appendChild(ghostDims);
+    ghost.innerHTML = '<span class="name"></span><span class="dims"></span>';
+    ghost.querySelector('.name').textContent = type.name;
+    ghost.querySelector('.dims').textContent = `${type.w}x${type.d}"`;
     document.body.appendChild(ghost);
 
     function onMove(ev) {
@@ -1814,6 +1895,41 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     pieces.forEach(p => board.appendChild(createPieceEl(p)));
     renderTreasures();
   }
+
+  /* Löscht den gespeicherten Stand und stellt die Ausgangslage wieder her.
+     Zweiter Klick bestätigt: Browser-Dialoge sind in eingebetteten
+     Ansichten oft gesperrt. */
+  const resetAllBtn = document.getElementById('resetAllBtn');
+  let _resetAllTimer = null;
+  resetAllBtn.addEventListener('click', () => {
+    if (!_resetAllTimer) {
+      resetAllBtn.textContent = 'Wirklich alles löschen?';
+      resetAllBtn.classList.add('confirm');
+      _resetAllTimer = setTimeout(disarmResetAll, 5000);
+      return;
+    }
+    disarmResetAll();
+    clearTimeout(_saveTimer);
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* nicht verfügbar */ }
+    _lastWritten = null;
+    defaultTypes.length = INITIAL_TYPE_COUNT;
+    cfg.w = 48; cfg.h = 36; cfg.circle = 16;
+    pieces = []; pieceSeq = 1; treasures = [];
+    document.getElementById('setW').value = cfg.w;
+    document.getElementById('setH').value = cfg.h;
+    document.getElementById('setCircle').value = cfg.circle;
+    buildPalette();
+    computeScale();
+    rebuildAll(true);
+    writeState();
+  });
+  function disarmResetAll() {
+    clearTimeout(_resetAllTimer);
+    _resetAllTimer = null;
+    resetAllBtn.textContent = resetAllBtn.dataset.label;
+    resetAllBtn.classList.remove('confirm');
+  }
+  resetAllBtn.dataset.label = resetAllBtn.textContent;
 
   document.getElementById('resetBtn').addEventListener('click', () => {
     pieces = [];
@@ -1964,19 +2080,26 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   document.getElementById('downloadBtn').addEventListener('click', downloadMap);
 
   document.getElementById('applySettingsBtn').addEventListener('click', () => {
-    cfg.w = parseInt(document.getElementById('setW').value) || 48;
-    cfg.h = parseInt(document.getElementById('setH').value) || 36;
-    cfg.circle = parseInt(document.getElementById('setCircle').value) || 0;
+    cfg.w = clampInt(parseInt(document.getElementById('setW').value) || 48, ...BOARD_LIMITS.w, 48);
+    cfg.h = clampInt(parseInt(document.getElementById('setH').value) || 36, ...BOARD_LIMITS.h, 36);
+    cfg.circle = clampInt(parseInt(document.getElementById('setCircle').value) || 0, ...BOARD_LIMITS.circle, 0);
+    document.getElementById('setW').value = cfg.w;
+    document.getElementById('setH').value = cfg.h;
+    document.getElementById('setCircle').value = cfg.circle;
     computeScale();
-    pieces.forEach(p => { [p.x, p.y] = clampPos(p.x, p.y, p.w, p.d); });
+    // Gedrehte Stücke brauchen ihre umschließende Box, nicht die Grundmaße.
+    pieces.forEach(p => { [p.x, p.y] = clampPos(p.x, p.y, ...pBox(p)); });
     rebuildAll(true);
+    // Schätze hängen an Feldmitte und Zonen – beides ist jetzt neu.
+    if (treasures.length) { treasures = computeTreasures(); renderTreasures(); }
     saveState();
   });
 
   document.getElementById('addCustomBtn').addEventListener('click', () => {
-    const name = document.getElementById('cName').value.trim() || 'Gelände';
-    const w = Math.max(1, parseInt(document.getElementById('cW').value) || 6);
-    const d = Math.max(1, parseInt(document.getElementById('cD').value) || 6);
+    // Gleiche Grenzen wie beim Laden, sonst verschwände der Typ nach dem Neuladen.
+    const name = document.getElementById('cName').value.trim().slice(0, 40) || 'Gelände';
+    const w = clampInt(parseInt(document.getElementById('cW').value) || 6, 1, 96, 6);
+    const d = clampInt(parseInt(document.getElementById('cD').value) || 6, 1, 96, 6);
     const color = document.getElementById('cColor').value;
     const type = { name, w, d, tex: '', color };
     defaultTypes.push(type);
@@ -2007,6 +2130,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   computeScale();
   rebuildAll(!restored);
   setZoneMode(false);
+  // Ausgangspunkt für "hat sich etwas geändert?" beim Verlassen der Seite.
+  _lastWritten = JSON.stringify(serializeState());
 })();
 
 /* ================= Tab-Navigation ================= */
