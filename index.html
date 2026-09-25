@@ -1153,6 +1153,17 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   function bbox(w, d, ang) { return (ang === 90) ? [d, w] : [w, d]; }
   function pBox(p) { return bbox(p.w, p.d, p.ang || 0); }
 
+  /* Welche Ecke die angezeigte Koordinate benennt: die untere linke oder die
+     untere rechte, je nachdem auf welcher Haelfte des Bretts das Stueck
+     liegt - so haengt das Schild nicht ueber den Rand. Bildschirm und
+     PNG-Export fragen hier, sonst nennen sie verschiedene Ecken. */
+  function coordEcke(piece) {
+    const [bw] = pBox(piece);
+    const rechts = piece.x + bw / 2 > cfg.w / 2;
+    const rund = v => Math.round(v * 10) / 10;   // beim Ziehen sind halbe Zoll moeglich
+    return { x: rund(rechts ? piece.x + bw : piece.x), y: rund(piece.y), rechts: rechts };
+  }
+
   /* --- responsive Skalierung: Board passt sich der Bildschirmbreite an --- */
   function computeScale() {
     const col = document.querySelector('.center-col');
@@ -1570,18 +1581,14 @@ GermanComp is a complete restriction, balance and tournament system, developed b
      zugleich die der umschlieszenden Box. Die senkrechte Lage von Punkt
      und Schild steht fest und kommt aus dem Stylesheet. */
   function positionCoordTag(el, piece) {
-    const [bw] = pBox(piece);
-    const rechts = piece.x + bw / 2 > cfg.w / 2;
-    const ex = rechts ? piece.x + bw : piece.x;
-    const rund = v => Math.round(v * 10) / 10;   // beim Ziehen sind halbe Zoll moeglich
-
+    const e = coordEcke(piece);
     const tag = el.querySelector('.coord-tag');
-    tag.textContent = `(${rund(ex)}, ${rund(piece.y)})`;
-    tag.style.left = rechts ? '100%' : '0';
-    tag.style.transform = ex < 6 ? 'translateX(0)'
-                        : ex > cfg.w - 6 ? 'translateX(-100%)'
+    tag.textContent = `(${e.x}, ${e.y})`;
+    tag.style.left = e.rechts ? '100%' : '0';
+    tag.style.transform = e.x < 6 ? 'translateX(0)'
+                        : e.x > cfg.w - 6 ? 'translateX(-100%)'
                         : 'translateX(-50%)';
-    el.querySelector('.coord-dot').style.left = rechts ? '100%' : '0';
+    el.querySelector('.coord-dot').style.left = e.rechts ? '100%' : '0';
   }
 
   function rerenderPiece(piece) {
@@ -2049,7 +2056,14 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       g.font = 'italic ' + Math.max(8, Math.round(S * 0.4)) + 'px Georgia, serif';
       g.fillText(p.w + 'x' + p.d + '"', ccx, ccy + S * 0.3);
     });
-    pieces.forEach(p => tag('(' + p.x + ', ' + p.y + ')', p.x + pBox(p)[0] / 2, p.y));
+    pieces.forEach(p => {
+      const e = coordEcke(p);
+      tag('(' + e.x + ', ' + e.y + ')', e.x, e.y);
+      g.beginPath();
+      g.arc(cx(e.x), cy(e.y), Math.max(3, S * 0.16), 0, Math.PI * 2);
+      g.fillStyle = '#d40000'; g.fill();
+      g.strokeStyle = '#ffffff'; g.lineWidth = 1.5; g.stroke();
+    });
 
     // Schätze
     treasures.forEach(t => {
