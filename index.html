@@ -190,7 +190,8 @@ button:hover{ background:var(--maroon-dark); }
 }
 /* Sitzt mit seiner Mitte genau auf der Ecke, auf die die Koordinate zeigt. */
 .coord-dot{
-  position:absolute; width:9px; height:9px; border-radius:50%;
+  position:absolute; bottom:0; transform:translate(-50%, 50%);
+  width:9px; height:9px; border-radius:50%;
   background:#d40000; border:1.5px solid #fff; box-shadow:0 0 0 1px #7a1f1f;
   z-index:6; pointer-events:none;
 }
@@ -1069,16 +1070,9 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       }
       if (Array.isArray(data.pieces)) {
         pieces = data.pieces;
-        /* Aeltere gespeicherte Karten koennen noch schraege Stuecke enthalten.
-           Sie werden auf 90 Grad gestellt; weil sich damit die umschlieszende
-           Box aendert, muss die Lage neu ins Brett gezogen werden. */
-        pieces.forEach(p => {
-          if (p.ang !== 0 && p.ang !== 90) {
-            p.ang = 90;
-            const [bw, bd] = pBox(p);
-            [p.x, p.y] = clampPos(p.x, p.y, bw, bd);
-          }
-        });
+        // Aeltere Karten koennen schraege Stuecke enthalten; auf 0 Grad
+        // gestellt bleibt die umschlieszende Box dieselbe wie bisher.
+        pieces.forEach(p => { if (p.ang !== 0 && p.ang !== 90) p.ang = 0; });
       }
       if (Number.isFinite(data.pieceSeq)) pieceSeq = data.pieceSeq;
       if (Array.isArray(data.zoneGrid)) zoneGrid = data.zoneGrid;
@@ -1487,58 +1481,24 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     sh.style.transform = 'rotate(' + (piece.ang || 0) + 'deg)';
   }
 
-  /* Die vier Ecken des Stuecks selbst, nicht die des umschlieszenden
-     Rechtecks. Bei einem gedrehten Stueck liegen die beiden weit
-     auseinander - die Ecke der Huelle waere schlicht neben dem Gelaende.
-     Gedreht wird im Bild im Uhrzeigersinn; weil die Brettkoordinate nach
-     oben zaehlt und der Bildschirm nach unten, kehrt sich das Vorzeichen
-     der Drehung um. */
-  function pieceCorners(piece) {
-    const a = (piece.ang || 0) * Math.PI / 180;
-    const ca = Math.cos(a), sa = Math.sin(a);
-    const [bw, bd] = pBox(piece);
-    const cx = piece.x + bw / 2, cy = piece.y + bd / 2;
-    const out = [];
-    [-1, 1].forEach(sx => [-1, 1].forEach(sy => {
-      const dx = sx * piece.w / 2, dy = sy * piece.d / 2;
-      out.push({ x: cx + dx * ca + dy * sa, y: cy - dx * sa + dy * ca });
-    }));
-    return out;
-  }
-
+  /* Genannt wird eine untere Ecke des Stuecks; welche, entscheidet die
+     Haelfte des Bretts, damit das Schild nicht ueber den Rand haengt.
+     Stuecke stehen nur achsparallel, die Ecke des Stuecks ist damit
+     zugleich die der umschlieszenden Box. Die senkrechte Lage von Punkt
+     und Schild steht fest und kommt aus dem Stylesheet. */
   function positionCoordTag(el, piece) {
-    const tag = el.querySelector('.coord-tag');
-    const dot = el.querySelector('.coord-dot');
-    if (!tag) return;
-    const [bw, bd] = pBox(piece);
+    const [bw] = pBox(piece);
     const rechts = piece.x + bw / 2 > cfg.w / 2;
+    const ex = rechts ? piece.x + bw : piece.x;
+    const rund = v => Math.round(v * 10) / 10;   // beim Ziehen sind halbe Zoll moeglich
 
-    /* Genommen wird die unterste Ecke des Stuecks. Liegen zwei gleich tief -
-       bei einem ungedrehten Stueck sind das immer zwei -, entscheidet die
-       Haelfte des Bretts, damit das Schild nicht ueber den Rand haengt. */
-    let ecke = null;
-    pieceCorners(piece).forEach(e => {
-      if (!ecke) { ecke = e; return; }
-      if (e.y < ecke.y - 1e-6) ecke = e;
-      else if (Math.abs(e.y - ecke.y) < 1e-6 && (rechts ? e.x > ecke.x : e.x < ecke.x)) ecke = e;
-    });
-
-    const rund = v => Math.round(v * 10) / 10;
-    tag.textContent = `(${rund(ecke.x)}, ${rund(ecke.y)})`;
-
-    // Schild unter den Punkt, am Brettrand nach innen gerueckt
-    const anteil = bw > 0 ? (ecke.x - piece.x) / bw : 0;
-    tag.style.right = 'auto';
-    tag.style.left = (anteil * 100) + '%';
-    tag.style.transform = ecke.x < 6 ? 'translateX(0)'
-                        : ecke.x > cfg.w - 6 ? 'translateX(-100%)'
+    const tag = el.querySelector('.coord-tag');
+    tag.textContent = `(${rund(ex)}, ${rund(piece.y)})`;
+    tag.style.left = rechts ? '100%' : '0';
+    tag.style.transform = ex < 6 ? 'translateX(0)'
+                        : ex > cfg.w - 6 ? 'translateX(-100%)'
                         : 'translateX(-50%)';
-
-    if (!dot) return;
-    dot.style.right = 'auto'; dot.style.bottom = 'auto';
-    dot.style.left = px(ecke.x - piece.x) + 'px';
-    dot.style.top = px(bd - (ecke.y - piece.y)) + 'px';
-    dot.style.transform = 'translate(-50%, -50%)';
+    el.querySelector('.coord-dot').style.left = rechts ? '100%' : '0';
   }
 
   function rerenderPiece(piece) {
@@ -1700,10 +1660,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       order.forEach(({ type, idx }) => {
         const w = type.w, d = type.d;
         // Ausrichtung: nur achsparallel, quer oder laengs
-        const angles = [0, 90];
-        const ang = angles[Math.floor(Math.random() * angles.length)];
-        let [bw, bd] = bbox(w, d, ang);
-        bw = Math.ceil(bw); bd = Math.ceil(bd);
+        const ang = Math.random() < 0.5 ? 0 : 90;
+        const [bw, bd] = bbox(w, d, ang);
         if (bw > cfg.w || bd > cfg.h) { results[idx] = null; return; }
 
         // Abstand stufenweise verringern - aber niemals ueberlappen lassen
@@ -1865,21 +1823,20 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     saveState();
   });
 
-  document.getElementById('mirrorHBtn').addEventListener('click', () => {
-    zoneGrid.forEach(row => row.reverse());
-    pieces.forEach(p => { p.x = cfg.w - p.x - pBox(p)[0]; });
+  function spiegle(waagerecht) {
+    if (waagerecht) {
+      zoneGrid.forEach(row => row.reverse());
+      pieces.forEach(p => { p.x = cfg.w - p.x - pBox(p)[0]; });
+    } else {
+      zoneGrid.reverse();
+      pieces.forEach(p => { p.y = cfg.h - p.y - pBox(p)[1]; });
+    }
     drawZones();
     pieces.forEach(rerenderPiece);
     saveState();
-  });
-
-  document.getElementById('mirrorVBtn').addEventListener('click', () => {
-    zoneGrid.reverse();
-    pieces.forEach(p => { p.y = cfg.h - p.y - pBox(p)[1]; });
-    drawZones();
-    pieces.forEach(rerenderPiece);
-    saveState();
-  });
+  }
+  document.getElementById('mirrorHBtn').addEventListener('click', () => spiegle(true));
+  document.getElementById('mirrorVBtn').addEventListener('click', () => spiegle(false));
 
   document.getElementById('randomBtn').addEventListener('click', () => {
     randomizeMap();
@@ -2588,12 +2545,15 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   const mittelpunkt = poly => [poly.reduce((s, p) => s + p[0], 0) / poly.length,
                                poly.reduce((s, p) => s + p[1], 0) / poly.length];
 
+  const mittelRadius = (poly, m) =>
+    poly.reduce((s, p) => s + Math.hypot(p[0] - m[0], p[1] - m[1]), 0) / poly.length;
+
   /* Schrumpft ein Vieleck zur Mitte hin um etwa "abstand". Ein echter
      Parallelversatz waere genauer, koennte aber Ecken verschlucken - dann
      haetten Rand und Stein nicht mehr gleich viele Punkte, und genau diese
      Zuordnung Punkt fuer Punkt macht das Vernaehen ohne Suche moeglich. */
   function schrumpfe(poly, m, abstand) {
-    const r = poly.reduce((s, p) => s + Math.hypot(p[0] - m[0], p[1] - m[1]), 0) / poly.length;
+    const r = mittelRadius(poly, m);
     const f = Math.max(0.25, (r - abstand) / r);
     return poly.map(p => [m[0] + (p[0] - m[0]) * f, m[1] + (p[1] - m[1]) * f]);
   }
@@ -2620,11 +2580,14 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
     const fusz = schrumpfe(poly, m, PFLASTER.fuge);
     const oben = schrumpfe(fusz, m, PFLASTER.fase);
-    const z = p => t + zelle.hoehe + zelle.gx * (p[0] - m[0]) + zelle.gy * (p[1] - m[1]);
+    // Die leicht gekippte Ebene des Deckels als drei Zahlen statt als
+    // Funktion: so haengt am Stein nicht die ganze Zelle mit dran.
+    const z0 = t + zelle.hoehe;
+    const z = p => z0 + zelle.gx * (p[0] - m[0]) + zelle.gy * (p[1] - m[1]);
     return {
-      rand: poly, fuss: fusz, ebene: z, mitte2d: m,
-      deckel: oben.map(p => [p[0], p[1], z(p)]),
-      mitte: [m[0], m[1], t + zelle.hoehe]
+      rand: poly, fuss: fusz, mitte2d: m,
+      z0: z0, gx: zelle.gx, gy: zelle.gy,
+      deckel: oben.map(p => [p[0], p[1], z(p)])
     };
   }
 
@@ -2636,10 +2599,15 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     const len = Math.sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]) || 1;
     return [n[0] / len, n[1] / len, n[2] / len];
   }
-  // Dreieck so herum, dass die Normale in Richtung ref zeigt.
+  /* Dreieck so herum, dass die Normale in Richtung ref zeigt. Gerechnet wird
+     mit dem unnormierten Kreuzprodukt: das Teilen durch eine positive Laenge
+     kann am Vorzeichen nichts aendern, und bei zehntausenden Dreiecken je
+     Datei spart das ebenso viele Wurzeln. */
   function facing(a, b, c, ref) {
-    const n = normal(a, b, c);
-    return (n[0] * ref[0] + n[1] * ref[1] + n[2] * ref[2]) >= 0 ? [a, b, c] : [a, c, b];
+    const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
+    const vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+    const s = (uy * vz - uz * vy) * ref[0] + (uz * vx - ux * vz) * ref[1] + (ux * vy - uy * vx) * ref[2];
+    return s >= 0 ? [a, b, c] : [a, c, b];
   }
 
   const DOWN = [0, 0, -1], UP = [0, 0, 1];
@@ -2652,6 +2620,24 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       tris.push(facing(auszen[i], auszen[j], innen[j], ref), facing(auszen[i], innen[j], innen[i], ref));
     }
   }
+  /* Vernaeht zwei Ringe, die nicht gleich viele Punkte haben. Es rueckt
+     immer der Zeiger vor, dessen naechster Punkt anteilig frueher kommt;
+     jeder Schritt setzt ein Dreieck. Gebraucht wird das, damit ein innerer
+     Ring weniger Punkte tragen darf als der aeuszere. */
+  function nahtFaces(tris, auszen, innen, ref) {
+    const na = auszen.length, ni = innen.length;
+    let i = 0, j = 0;
+    while (i < na || j < ni) {
+      if (j >= ni || (i < na && (i + 1) / na <= (j + 1) / ni)) {
+        tris.push(facing(auszen[i % na], auszen[(i + 1) % na], innen[j % ni], ref));
+        i++;
+      } else {
+        tris.push(facing(auszen[i % na], innen[(j + 1) % ni], innen[j % ni], ref));
+        j++;
+      }
+    }
+  }
+
   // Senkrechte Wand zwischen unterer und oberer Kontur.
   function wallFaces(tris, unten, oben, cx, cy, nachAuszen) {
     const s = nachAuszen ? 1 : -1;
@@ -2681,14 +2667,19 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       const kreis = lochKreis(poly, c, mag.r);
       return kreis ? { cell: c, rand: poly, innen: kreis } : null;
     });
-    const steine = pfl.cells.map(c => stein(c, oben2d, t));
+    /* Zellen, die fuer Fuge und Fase zu eng sind, kommen als eigene Liste
+       zurueck. Vermengt mit den Steinen muesste sonst jeder Verbraucher sie
+       wieder aussortieren - und wer es vergisst, greift ins Leere. */
+    const teile = pfl.cells.map(c => stein(c, oben2d, t));
+    const luecke = teile.some(x => x === null);
 
     return {
       rg: rg,
       mag: loecher.some(x => x === null) ? { cells: [], cuts: { x: [], y: [] }, grund: 'Magnetlöcher passen bei dieser Größe nicht' } : mag,
       loecher: loecher.some(x => x === null) ? [] : loecher,
       pfl: pfl,
-      steine: steine.some(x => x === null) ? [] : steine
+      steine: luecke ? [] : teile.filter(s => !s.flach),
+      fugen: luecke ? [] : teile.filter(s => s.flach)
     };
   }
 
@@ -2698,16 +2689,16 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
     sideQuads(b.rg).forEach(q => { tris.push([q[0], q[1], q[2]], [q[0], q[2], q[3]]); });
 
-    if (!b.steine.length) {
+    if (!b.steine.length && !b.fugen.length) {
       fanFaces(tris, T, [w / 2, d / 2, t], UP);
     } else {
       const feld = rauschfeld(seed);
+      b.fugen.forEach(f => fanFaces(tris, at(f.rand, t), [f.mitte2d[0], f.mitte2d[1], t], UP));
       b.steine.forEach(s => {
-        if (s.flach) { fanFaces(tris, at(s.rand, t), [s.mitte2d[0], s.mitte2d[1], t], UP); return; }
         const m = s.mitte2d;
         const R = s.rand, n = R.length;
         const fein = feinerRand(s.fuss, PFLASTER.detail);
-        const F = fein.pts, mz = F.length;
+        const F = fein.pts, mz = F.length, F3 = at(F, t);
 
         /* Fuge: jede grobe Randkante wird auf ihren feinen Abschnitt des
            Steinfuszes aufgefaechert. Die geteilte Auszenkante bleibt dadurch
@@ -2717,29 +2708,40 @@ GermanComp is a complete restriction, balance and tournament system, developed b
           const j = (i + 1) % n;
           const p = fein.start[i], q = (i + 1 < n) ? fein.start[i + 1] : mz;
           const r3 = [R[i][0], R[i][1], t];
-          tris.push(facing(r3, [R[j][0], R[j][1], t], [F[q % mz][0], F[q % mz][1], t], UP));
-          for (let k = q; k > p; k--) {
-            tris.push(facing(r3, [F[k % mz][0], F[k % mz][1], t], [F[(k - 1) % mz][0], F[(k - 1) % mz][1], t], UP));
-          }
+          tris.push(facing(r3, [R[j][0], R[j][1], t], F3[q % mz], UP));
+          for (let k = q; k > p; k--) tris.push(facing(r3, F3[k % mz], F3[(k - 1) % mz], UP));
         }
 
         // Fase und Oberflaeche gehoeren ganz zu diesem Stein - hier darf es so
         // fein werden, wie es will.
         const kopf = schrumpfe(F, m, PFLASTER.fase);
-        const hoch = p => [p[0], p[1], s.ebene(p) + PFLASTER.rauheit * feld(p[0], p[1])];
-        const kopf3 = kopf.map(hoch);
-        wallFaces(tris, at(F, t), kopf3, m[0], m[1], true);
+        const hoch = (x, y) => [x, y,
+          s.z0 + s.gx * (x - m[0]) + s.gy * (y - m[1]) + PFLASTER.rauheit * feld(x, y)];
+        const kopf3 = kopf.map(p => hoch(p[0], p[1]));
+        wallFaces(tris, F3, kopf3, m[0], m[1], true);
 
-        const r = kopf.reduce((a, p) => a + Math.hypot(p[0] - m[0], p[1] - m[1]), 0) / kopf.length;
-        const ringe = Math.max(2, Math.ceil(r / PFLASTER.detail));
+        /* Zur Mitte hin schrumpft der Umfang, also schrumpft die Punktzahl
+           mit. Gleich viele Punkte je Ring machten die Flaeche innen um ein
+           Vielfaches feiner als auszen, ohne dass man es saehe - und das
+           waeren vier Fuenftel aller Dreiecke der Datei. */
+        const ringe = Math.max(2, Math.ceil(mittelRadius(kopf, m) / PFLASTER.detail));
+        const ringPunkte = (anz, fk) => {
+          const out = [];
+          for (let i = 0; i < anz; i++) {
+            const lauf = i * mz / anz, i0 = Math.floor(lauf) % mz, rest = lauf - Math.floor(lauf);
+            const a = kopf[i0], b2 = kopf[(i0 + 1) % mz];
+            const x = a[0] + (b2[0] - a[0]) * rest, y = a[1] + (b2[1] - a[1]) * rest;
+            out.push(hoch(m[0] + (x - m[0]) * fk, m[1] + (y - m[1]) * fk));
+          }
+          return out;
+        };
         let auszen = kopf3;
         for (let k = ringe - 1; k >= 1; k--) {
-          const innen = kopf.map(p => hoch([m[0] + (p[0] - m[0]) * (k / ringe),
-                                            m[1] + (p[1] - m[1]) * (k / ringe)]));
-          ringFaces(tris, auszen, innen, UP);
+          const innen = ringPunkte(Math.max(3, Math.round(mz * k / ringe)), k / ringe);
+          nahtFaces(tris, auszen, innen, UP);
           auszen = innen;
         }
-        fanFaces(tris, auszen, hoch(m), UP);
+        fanFaces(tris, auszen, hoch(m[0], m[1]), UP);
       });
     }
 
@@ -2806,7 +2808,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   function drawTop(b, t) {
     const rg = b.rg;
     const alle = rg.bottom.concat(rg.top).map(project);
-    b.steine.forEach(s => { if (!s.flach) s.deckel.forEach(p => alle.push(project(p))); });
+    b.steine.forEach(s => s.deckel.forEach(p => alle.push(project(p))));
     const map = fitter(canvas, alle, 28);
     const to2d = p => map(project(p));
 
@@ -2851,10 +2853,10 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     // Deckflaeche darauf.
     const flanke = shade([0.6, 0.6, 0]);
     const deckel = shade(UP);
-    b.steine.filter(s => !s.flach).map(s => ({
+    b.steine.map(s => ({
       huelle: convexHull(at(s.fuss, t).concat(s.deckel).map(to2d)),
       deckel: s.deckel.map(to2d),
-      z: s.mitte[0] + s.mitte[1]
+      z: s.mitte2d[0] + s.mitte2d[1]
     })).sort((a, b2) => a.z - b2.z).forEach(s => {
       ctx.lineWidth = 0.8;
       ctx.fillStyle = flanke; ctx.strokeStyle = '#4a3a1e';
@@ -2911,8 +2913,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     // Die Steine streuen in der Hoehe, also nicht mit dem Mittelwert rechnen,
     // sondern den tatsaechlich hoechsten Punkt nehmen.
     const gesamt = !komplett ? null
-      : b.steine.some(s => !s.flach)
-        ? Math.max.apply(null, b.steine.filter(s => !s.flach).map(s => Math.max.apply(null, s.deckel.map(p => p[2]))))
+      : b.steine.length
+        ? Math.max.apply(null, b.steine.map(s => Math.max.apply(null, s.deckel.map(p => p[2]))))
       : t;
     dimsLabel.textContent = komplett
       ? fmt(w) + ' × ' + fmt(d) + ' × ' + fmt(t) + ' mm'
@@ -2928,8 +2930,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     if (!bad.length) {
       downloadBtn.disabled = false;
       noteLabel.textContent = (gw ? 'GW-Profil: geneigte Wände, gerundete Ecken' : 'Scharfkantiger Quader')
-        + (b && b.steine.length ? ' · ' + b.steine.filter(s => !s.flach).length +
-            (b.steine.filter(s => !s.flach).length === 1 ? ' Pflasterstein' : ' Pflastersteine') : '');
+        + (b && b.steine.length ? ' · ' + b.steine.length +
+            (b.steine.length === 1 ? ' Pflasterstein' : ' Pflastersteine') : '');
       noteLabel.classList.remove('error');
       save(w, d, t, gw, stein);
     } else {
