@@ -158,7 +158,7 @@ button:hover{ background:var(--maroon-dark); }
   border:2px solid var(--maroon);
   box-sizing:content-box;   /* Rand liegt aussen, innen bleiben exakt Breite x Massstab */
 }
-#zoneCanvas{ position:absolute; top:0; left:0; pointer-events:none; }
+.zone-canvas{ position:absolute; top:0; left:0; pointer-events:none; }
 
 .no-terrain-circle{
   position:absolute; border-radius:50%; border:1.6px solid var(--maroon);
@@ -239,8 +239,8 @@ button:hover{ background:var(--maroon-dark); }
 
   .layout{ gap:14px; }
   .palette{ width:100%; }
-  #paletteList{ display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:7px; }
-  #paletteList .chip{ margin-bottom:0; }
+  .palette-list{ display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:7px; }
+  .palette-list .chip{ margin-bottom:0; }
 
   .board-row{ flex-direction:column; }
   .zone-legend{ position:static; width:100%; height:auto !important; display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
@@ -560,7 +560,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 
   <div class="panel palette">
     <h2>Gelände-Palette</h2>
-    <div id="paletteList"><div class="chip"><div class="swatch" style="background:#6f9a4f"></div>
+    <div id="paletteList" class="palette-list"><div class="chip"><div class="swatch" style="background:#6f9a4f"></div>
       <div class="info"><b>Wald</b>6x10"</div></div><div class="chip"><div class="swatch" style="background:#a8541c"></div>
       <div class="info"><b>Gebäude</b>6x8"</div></div><div class="chip"><div class="swatch" style="background:#a9834a"></div>
       <div class="info"><b>Hügel</b>8x6"</div></div><div class="chip"><div class="swatch" style="background:#7d7568"></div>
@@ -612,7 +612,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         <span><span class="dot" style="background:var(--p2)"></span>Spieler 2</span>
         <span><span class="dot" style="background:var(--nml)"></span>No Man's Land</span>
       </div>
-      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt unter den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht. Die Karte ist 48×36 Zoll groß. Im Kreis von 16 Zoll Durchmesser in der Mitte steht kein Gelände und niemand stellt auf. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
+      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt unter den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht. Die Karte ist <span class="feld-mass">48×36</span> Zoll groß. Im Kreis von <span class="kreis-mass">16</span> Zoll Durchmesser in der Mitte steht kein Gelände und niemand stellt auf. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
     </div>
 
     <div class="toolbar">
@@ -627,7 +627,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     <div class="board-outer">
       <div class="board-row">
         <div class="board" id="board" style="--scale: 13px; width: 624px; height: 468px;">
-          <canvas id="zoneCanvas" width="624" height="468" style="width: 624px; height: 468px; pointer-events: none; cursor: default;"></canvas>
+          <canvas id="zoneCanvas" class="zone-canvas" width="624" height="468" style="width: 624px; height: 468px; pointer-events: none; cursor: default;"></canvas>
         <div class="no-terrain-circle" style="width: 208px; height: 208px; left: 208px; bottom: 130px;"><span>16" Durchmesser</span></div></div>
         <div class="zone-legend" id="zoneLegend" style="height: 468px;"><div class="zone-legend-item" style="top: 65px;"><b><span class="swatchline" style="background:#b9c6d6"></span>SPIELER 2</b>Tiefe: 10"<br>16" bis zur gegn. Zone</div><div class="zone-legend-item" style="top: 234px;"><b><span class="swatchline" style="background:#ded6c2"></span>NO MAN'S LAND</b>Breite: 16"</div><div class="zone-legend-item" style="top: 403px;"><b><span class="swatchline" style="background:#e2c48c"></span>SPIELER 1</b>Tiefe: 10"<br>16" bis zur gegn. Zone</div></div>
       </div>
@@ -642,10 +642,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 
 <!-- ===================== KARTENBAU: CORE BATTLE ===================== -->
 <div class="tab-content" id="panel-corebattle" role="tabpanel" aria-labelledby="tab-corebattle" tabindex="0" hidden="">
-<div class="guide">
-<h1>Kartenbau – Core Battle</h1>
-<p>Hier entsteht der Kartenbau für Core Battle.</p>
-</div>
+<div class="builder" id="coreBuilder"><!-- wird beim Laden aus dem Battle-March-Kartenbau kopiert --></div>
 </div>
 
 <!-- ===================== GERMANCOMP ===================== -->
@@ -1012,14 +1009,28 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
 <script>
 /* ================= Terrain-Baukasten ================= */
+/* Core Battle bekommt eine Kopie des Battle-March-Kartenbaus. Sie muss vor dem
+   Start entstehen, sonst kaeme der schon gefuellte Zustand mit. Ids bekommen
+   die Endung -core, damit beide Karten ihre eigenen Elemente finden. */
 (function () {
-  const board = document.getElementById('board');
-  const canvas = document.getElementById('zoneCanvas');
-  const ctx = canvas.getContext('2d');
-  const zoneLegend = document.getElementById('zoneLegend');
-  const paletteList = document.getElementById('paletteList');
+  const ziel = document.getElementById('coreBuilder');
+  const kopie = document.querySelector('#panel-baukasten .builder').cloneNode(true);
+  kopie.querySelectorAll('[id]').forEach(el => { el.id += '-core'; });
+  kopie.querySelectorAll('label[for]').forEach(l => { l.htmlFor += '-core'; });
+  ziel.replaceWith(kopie);
+})();
 
-  const cfg = { w: 48, h: 36, circle: 16, scale: 13 };   // Feldgroesse und Kreis sind fest
+function kartenbau(opt) {
+  const $ = id => document.getElementById(id + opt.endung);
+  const board = $('board');
+  const canvas = $('zoneCanvas');
+  const ctx = canvas.getContext('2d');
+  const zoneLegend = $('zoneLegend');
+  const paletteList = $('paletteList');
+
+  const cfg = { w: opt.w, h: opt.h, circle: opt.kreis, scale: 13 };   // Feldgroesse und Kreis sind fest
+  board.closest('.builder').querySelectorAll('.feld-mass').forEach(el => { el.textContent = cfg.w + '×' + cfg.h; });
+  board.closest('.builder').querySelectorAll('.kreis-mass').forEach(el => { el.textContent = cfg.circle; });
   let pieces = [];
   let pieceSeq = 1;
   let zoneGrid = [];
@@ -1038,7 +1049,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   const INITIAL_TYPE_COUNT = defaultTypes.length;
 
   /* --- Zwischenspeicherung im Browser (localStorage) --- */
-  const STORAGE_KEY = 'battleMarchBuilderState';
+  const STORAGE_KEY = opt.speicher;
   // Bei einer Formatänderung hochzählen: ältere Stände werden dann verworfen statt falsch gelesen.
   const STATE_VERSION = 1;
 
@@ -1074,6 +1085,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   }
 
   function saveState() {
+    kreisBeschriftung();
     clearTimeout(_saveTimer);
     _saveTimer = setTimeout(writeState, 300);
   }
@@ -1177,7 +1189,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
   /* --- responsive Skalierung: Board passt sich der Bildschirmbreite an --- */
   function computeScale() {
-    const col = document.querySelector('.center-col');
+    const col = board.closest('.center-col');
     if (!col) return;
     const colW = col.clientWidth;
     if (colW <= 0) return; // Tab versteckt -> aktuelle Skalierung behalten
@@ -1634,9 +1646,22 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       else { tag.style.left = '0'; tag.style.right = 'auto'; }
       board.appendChild(el);
     });
-    // Mit Schatz in der Mitte rueckt die Kreis-Beschriftung nach oben.
+    kreisBeschriftung();
+  }
+
+  /* Liegt etwas auf der Kreismitte (Schatz oder der Turm als Landmarke),
+     rueckt die Beschriftung nach oben, sonst waere sie verdeckt. */
+  function mitteBelegt() {
+    if (treasures.length) return true;
+    const mx = cfg.w / 2, my = cfg.h / 2;
+    return pieces.some(p => {
+      const [bw, bd] = pBox(p);
+      return p.x < mx + 3 && p.x + bw > mx - 3 && p.y < my + 0.6 && p.y + bd > my - 0.6;
+    });
+  }
+  function kreisBeschriftung() {
     const circle = board.querySelector('.no-terrain-circle');
-    if (circle) circle.classList.toggle('text-top', treasures.length > 0);
+    if (circle) circle.classList.toggle('text-top', mitteBelegt());
   }
 
   function randomizeMap() {
@@ -1856,7 +1881,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   /* Löscht den gespeicherten Stand und stellt die Ausgangslage wieder her.
      Zweiter Klick bestätigt: Browser-Dialoge sind in eingebetteten
      Ansichten oft gesperrt. */
-  const resetAllBtn = document.getElementById('resetAllBtn');
+  const resetAllBtn = $('resetAllBtn');
   let _resetAllTimer = null;
   resetAllBtn.addEventListener('click', () => {
     if (!_resetAllTimer) {
@@ -1886,7 +1911,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   }
   resetAllBtn.dataset.label = resetAllBtn.textContent;
 
-  document.getElementById('resetBtn').addEventListener('click', () => {
+  $('resetBtn').addEventListener('click', () => {
     pieces = [];
     board.querySelectorAll('.piece').forEach(el => el.remove());
     treasures = [];
@@ -1906,30 +1931,30 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     pieces.forEach(rerenderPiece);
     saveState();
   }
-  document.getElementById('mirrorHBtn').addEventListener('click', () => spiegle(true));
-  document.getElementById('mirrorVBtn').addEventListener('click', () => spiegle(false));
+  $('mirrorHBtn').addEventListener('click', () => spiegle(true));
+  $('mirrorVBtn').addEventListener('click', () => spiegle(false));
 
-  document.getElementById('randomBtn').addEventListener('click', randomizeMap);
+  $('randomBtn').addEventListener('click', randomizeMap);
 
   /* --- Auswahl fuer den Kartenwuerfel: gewuerfelt wird unter den Haken ---
      Die Wahl reist mit dem Kartenstand, damit Haken und Karte zusammenpassen. */
   function angehakt(id) {
-    return Array.from(document.querySelectorAll('#' + id + ' input:checked')).map(i => i.value);
+    return Array.from($(id).querySelectorAll('input:checked')).map(i => i.value);
   }
   function wahlSetzen(zonen, missionen) {
-    document.querySelectorAll('#wahlZone input').forEach(i => { i.checked = zonen.includes(i.value); });
-    document.querySelectorAll('#wahlMission input').forEach(i => { i.checked = missionen.includes(i.value); });
+    $('wahlZone').querySelectorAll('input').forEach(i => { i.checked = zonen.includes(i.value); });
+    $('wahlMission').querySelectorAll('input').forEach(i => { i.checked = missionen.includes(i.value); });
   }
   function zeigeWurf() {
-    const ziel = document.getElementById('wurfErgebnis');
+    const ziel = $('wurfErgebnis');
     ziel.textContent = '';
     if (!wurf) return;
-    const name = (gruppe, wert) => document.querySelector(`#${gruppe} input[value="${wert}"]`).parentElement.textContent.trim();
+    const name = (gruppe, wert) => $(gruppe).querySelector(`input[value="${wert}"]`).parentElement.textContent.trim();
     const fett = t => Object.assign(document.createElement('b'), { textContent: t });
     ziel.append('Gewürfelt: ', fett(name('wahlZone', wurf.zone)), ' · Mission: ',
       fett(wurf.mission ? name('wahlMission', wurf.mission) : 'keine'));
   }
-  document.querySelectorAll('#wahlZone input, #wahlMission input').forEach(i => {
+  [...$('wahlZone').querySelectorAll('input'), ...$('wahlMission').querySelectorAll('input')].forEach(i => {
     i.addEventListener('change', () => {
       if (!angehakt('wahlZone').length) i.checked = true;   // ohne Zone gaebe es nichts zu wuerfeln
       saveState();
@@ -1988,8 +2013,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     g.strokeStyle = '#7a1f1f'; g.lineWidth = 1.6; g.stroke();
     g.fillStyle = '#7a1f1f'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.font = 'italic bold ' + F.mass + 'px Georgia, serif';
-    // Ein Schatz liegt in der Mitte - dann steht die Beschriftung darueber.
-    const kreisY = cy(cfg.h / 2) - (treasures.length ? cfg.circle * S * 0.3 : 0);
+    const kreisY = cy(cfg.h / 2) - (mitteBelegt() ? cfg.circle * S * 0.33 : 0);
     g.fillText(cfg.circle + '" Durchmesser', cx(cfg.w / 2), kreisY);
 
     // kleiner Koordinaten-Kasten
@@ -2061,21 +2085,21 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
     // Download auslösen
     const a = document.createElement('a');
-    a.download = 'battle-march-karte.png';
+    a.download = opt.datei;
     a.href = cv.toDataURL('image/png');
     document.body.appendChild(a);
     a.click();
     a.remove();
   }
 
-  document.getElementById('downloadBtn').addEventListener('click', downloadMap);
+  $('downloadBtn').addEventListener('click', downloadMap);
 
-  document.getElementById('addCustomBtn').addEventListener('click', () => {
+  $('addCustomBtn').addEventListener('click', () => {
     // Gleiche Grenzen wie beim Laden, sonst verschwände der Typ nach dem Neuladen.
-    const name = document.getElementById('cName').value.trim().slice(0, 40) || 'Gelände';
-    const w = clampInt(parseInt(document.getElementById('cW').value) || 6, 1, 96, 6);
-    const d = clampInt(parseInt(document.getElementById('cD').value) || 6, 1, 96, 6);
-    const color = document.getElementById('cColor').value;
+    const name = $('cName').value.trim().slice(0, 40) || 'Gelände';
+    const w = clampInt(parseInt($('cW').value) || 6, 1, 96, 6);
+    const d = clampInt(parseInt($('cD').value) || 6, 1, 96, 6);
+    const color = $('cColor').value;
     const type = { name, w, d, tex: '', color };
     defaultTypes.push(type);
     paletteList.appendChild(makeChip(type));
@@ -2091,11 +2115,11 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   window.addEventListener('resize', () => {
     clearTimeout(_rz);
     _rz = setTimeout(() => {
-      const col = document.querySelector('.center-col');
+      const col = board.closest('.center-col');
       if (col && col.clientWidth > 0) refreshLayout();
     }, 150);
   });
-  window.__refreshBuilder = refreshLayout;
+  window[opt.auffrischen] = refreshLayout;
 
   const restored = loadState();
   buildPalette();
@@ -2104,7 +2128,11 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   zeigeWurf();
   // Ausgangspunkt für "hat sich etwas geändert?" beim Verlassen der Seite.
   _lastWritten = JSON.stringify(serializeState());
-})();
+}
+kartenbau({ endung: '', w: 48, h: 36, kreis: 16, speicher: 'battleMarchBuilderState',
+            datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder' });
+kartenbau({ endung: '-core', w: 72, h: 48, kreis: 24, speicher: 'coreBattleBuilderState',
+            datei: 'core-battle-karte.png', auffrischen: '__refreshCore' });
 
 /* ================= Tab-Navigation ================= */
 (function () {
@@ -2144,6 +2172,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     });
     Object.keys(panels).forEach(k => { panels[k].hidden = (k !== name); });
     if (name === 'baukasten' && window.__refreshBuilder) window.__refreshBuilder();
+    if (name === 'corebattle' && window.__refreshCore) window.__refreshCore();
     if (name === 'base' && window.__refreshBase) window.__refreshBase();
   }
   [haupt].concat(Object.values(unter)).forEach(liste => liste.forEach((t, i) => {
