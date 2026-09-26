@@ -263,6 +263,7 @@ button:hover{ background:var(--maroon-dark); }
 .acc-body > .italic:first-child{ margin-top:.6rem; }
 
 .treasure{ position:absolute; border-radius:50%; border:1.6px solid #6b4a1a; background:radial-gradient(circle at 35% 30%, #f6db82, #d4a52a 65%, #a3781a); box-shadow:0 1px 2px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.25); z-index:5; pointer-events:none; }
+.treasure.ziel{ border-color:#0d1b33; background:radial-gradient(circle at 35% 30%, #6f8fc4, #1f3a6b 65%, #0d1b33); }
 .guide .magic-table td:nth-child(2){ text-align:center; white-space:nowrap; }
 .points-slider{ background:#fff; border:1.5px solid var(--maroon); border-left:5px solid var(--maroon); border-radius:4px; padding:12px 16px; margin:.4rem 0 1.2rem; }
 .points-slider label{ display:block; color:var(--maroon); font-size:1rem; margin-bottom:8px; }
@@ -1033,7 +1034,8 @@ function kartenbau(opt) {
   board.closest('.builder').querySelectorAll('.kreis-mass').forEach(el => { el.textContent = cfg.circle; });
 
   /* Missionen kommen aus den Optionen; art sagt, was auf der Karte passiert:
-     'turm' = Turm als Landmarke in der Mitte, 'schaetze' = drei Schaetze, 'keine' = nichts. */
+     'turm' = Turm als Landmarke in der Mitte, 'schaetze' = drei Schaetze, 'keine' = nichts,
+     oder eine Liste fester Missionsziele als Anteile von Breite und Tiefe. */
   const MISSIONEN = opt.missionen.map(m => m.wert);
   const missionsArt = wert => (opt.missionen.find(m => m.wert === wert) || {}).art;
   $('wahlMission').replaceChildren(...opt.missionen.map(m => {
@@ -1647,13 +1649,13 @@ function kartenbau(opt) {
     board.querySelectorAll('.treasure').forEach(el => el.remove());
     treasures.forEach((t, i) => {
       const el = document.createElement('div');
-      el.className = 'treasure';
+      el.className = 'treasure' + (opt.marker.klasse ? ' ' + opt.marker.klasse : '');
       el.style.width = px(TREASURE_D) + 'px';
       el.style.height = px(TREASURE_D) + 'px';
       el.style.left = px(t.x - TREASURE_R) + 'px';
       el.style.bottom = px(t.y - TREASURE_R) + 'px';
       const rx = Math.round(t.x * 10) / 10, ry = Math.round(t.y * 10) / 10;
-      el.title = 'Schatz ' + (i + 1) + ' (40 mm) \u2013 Mitte (' + rx + ', ' + ry + ')';
+      el.title = opt.marker.name + ' ' + (i + 1) + ' (40 mm) \u2013 Mitte (' + rx + ', ' + ry + ')';
       el.innerHTML = '<div class="coord-tag">(' + rx + ', ' + ry + ')</div>';
       const tag = el.querySelector('.coord-tag');
       if (t.x > cfg.w / 2) { tag.style.left = 'auto'; tag.style.right = '0'; }
@@ -1663,11 +1665,11 @@ function kartenbau(opt) {
     kreisBeschriftung();
   }
 
-  /* Liegt etwas auf der Kreismitte (Schatz oder der Turm als Landmarke),
-     rueckt die Beschriftung nach oben, sonst waere sie verdeckt. */
+  /* Liegt etwas auf der Kreismitte (Schatz, Missionsziel oder der Turm als
+     Landmarke), rueckt die Beschriftung nach oben, sonst waere sie verdeckt. */
   function mitteBelegt() {
-    if (treasures.length) return true;
     const mx = cfg.w / 2, my = cfg.h / 2;
+    if (treasures.some(t => Math.abs(t.x - mx) < 4 && Math.abs(t.y - my) < 1.5)) return true;
     return pieces.some(p => {
       const [bw, bd] = pBox(p);
       return p.x < mx + 3 && p.x + bw > mx - 3 && p.y < my + 0.6 && p.y + bd > my - 0.6;
@@ -1696,7 +1698,9 @@ function kartenbau(opt) {
     zoneGrid = maskCircle(zoneGrid);
     drawZones();
 
-    treasures = missionsArt(mission) === 'schaetze' ? computeTreasures() : [];
+    const art = missionsArt(mission);
+    treasures = art === 'schaetze' ? computeTreasures()
+              : Array.isArray(art) ? art.map(([fx, fy]) => ({ x: cfg.w * fx, y: cfg.h * fy })) : [];
 
     const MIN_GAP = 6;
 
@@ -2084,8 +2088,8 @@ function kartenbau(opt) {
     treasures.forEach(t => {
       g.beginPath();
       g.arc(cx(t.x), cy(t.y), TREASURE_R * S, 0, Math.PI * 2);
-      g.fillStyle = '#d4a52a'; g.fill();
-      g.strokeStyle = '#6b4a1a'; g.lineWidth = 1.6; g.stroke();
+      g.fillStyle = opt.marker.farbe; g.fill();
+      g.strokeStyle = opt.marker.rand; g.lineWidth = 1.6; g.stroke();
     });
     treasures.forEach(t => tag('(' + (Math.round(t.x * 10) / 10) + ', ' + (Math.round(t.y * 10) / 10) + ')', t.x, t.y - TREASURE_R));
 
@@ -2146,16 +2150,19 @@ function kartenbau(opt) {
 // zonenTiefe: Offene Feldschlacht und Unerwartete Begegnung; passAbstand: Gebirgspass
 kartenbau({ endung: '', w: 48, h: 36, kreis: 16, zonenTiefe: 10, passAbstand: 16,
             speicher: 'battleMarchBuilderState', datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder',
+            marker: { name: 'Schatz', farbe: '#d4a52a', rand: '#6b4a1a' },
             missionen: [{ wert: 'landmarke', name: 'Landmarke', art: 'turm' },
                         { wert: 'schaetze', name: 'Schätze', art: 'schaetze' },
                         { wert: 'versorgung', name: 'Versorgungswagen', art: 'keine' }],
             missionsHinweis: "Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht." });
 kartenbau({ endung: '-core', w: 72, h: 48, kreis: 24, zonenTiefe: 12, passAbstand: 24,
             speicher: 'coreBattleBuilderState', datei: 'core-battle-karte.png', auffrischen: '__refreshCore',
-            missionen: [{ wert: 'location4', name: 'Strategische Location 4', art: 'schaetze' },
-                        { wert: 'location3', name: 'Strategische Location 3', art: 'schaetze' },
-                        { wert: 'location2', name: 'Strategische Location 2', art: 'schaetze' }],
-            missionsHinweis: "Bei allen drei <b>Strategischen Locations</b> liegen vorerst drei Schätze im No Man's Land." });
+            marker: { name: 'Missionsziel', klasse: 'ziel', farbe: '#1f3a6b', rand: '#0d1b33' },
+            // Ziele jeweils auf halbem Weg zwischen Mitte und Mitte einer Kante
+            missionen: [{ wert: 'location4', name: 'Strategische Location 4', art: [[0.5, 0.75], [0.5, 0.25], [0.25, 0.5], [0.75, 0.5]] },
+                        { wert: 'location3', name: 'Strategische Location 3', art: [[0.25, 0.5], [0.5, 0.5], [0.75, 0.5]] },
+                        { wert: 'location2', name: 'Strategische Location 2', art: [[0.5, 0.75], [0.5, 0.25]] }],
+            missionsHinweis: 'Missionsziele liegen jeweils auf halbem Weg zwischen Feldmitte und Mitte einer Kante: <b>Strategische Location 4</b> – vier Ziele Richtung aller vier Kanten; <b>3</b> – eines in der Mitte und je eines Richtung der kurzen Kanten; <b>2</b> – je eines Richtung der langen Kanten.' });
 
 /* ================= Tab-Navigation ================= */
 (function () {
