@@ -1614,7 +1614,7 @@ function kartenbau(opt) {
 
   const TREASURE_D = 40 / 25.4;
   const TREASURE_R = TREASURE_D / 2;
-  const TREASURE_GAP = 3;
+  const TREASURE_GAP = opt.marker.abstand;   // Mindestabstand Gelaende - Markerrand
   const TREASURE_SPACING = 12;
   let treasures = [];
 
@@ -2152,14 +2152,14 @@ function kartenbau(opt) {
 // zonenTiefe: Offene Feldschlacht und Unerwartete Begegnung; passAbstand: Gebirgspass
 kartenbau({ endung: '', w: 48, h: 36, kreis: 16, zonenTiefe: 10, passAbstand: 16,
             speicher: 'battleMarchBuilderState', datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder',
-            marker: { name: 'Schatz', farbe: '#d4a52a', rand: '#6b4a1a' },
+            marker: { name: 'Schatz', farbe: '#d4a52a', rand: '#6b4a1a', abstand: 3 },
             missionen: [{ wert: 'landmarke', name: 'Landmarke', art: 'turm' },
                         { wert: 'schaetze', name: 'Schätze', art: 'schaetze' },
                         { wert: 'versorgung', name: 'Versorgungswagen', art: 'keine' }],
             missionsHinweis: "Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht." });
 kartenbau({ endung: '-core', w: 72, h: 48, kreis: 24, zonenTiefe: 12, passAbstand: 24,
             speicher: 'coreBattleBuilderState', datei: 'core-battle-karte.png', auffrischen: '__refreshCore',
-            marker: { name: 'Missionsziel', klasse: 'ziel', farbe: '#1f3a6b', rand: '#0d1b33' },
+            marker: { name: 'Missionsziel', klasse: 'ziel', farbe: '#1f3a6b', rand: '#0d1b33', abstand: 6 },
             // Ziele jeweils auf halbem Weg zwischen Mitte und Mitte einer Kante
             // Location 3 und 2 gibt es waagerecht und senkrecht
             missionen: [{ wert: 'location4', name: 'Strategische Location 4',
@@ -2170,7 +2170,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 24, zonenTiefe: 12, passAbstan
                         { wert: 'location2', name: 'Strategische Location 2',
                           art: { varianten: [[[0.5, 0.75], [0.5, 0.25]],
                                              [[0.25, 0.5], [0.75, 0.5]]] } }],
-            missionsHinweis: 'Missionsziele liegen jeweils auf halbem Weg zwischen Feldmitte und Mitte einer Kante: <b>Strategische Location 4</b> – vier Ziele Richtung aller vier Kanten; <b>3</b> – eines in der Mitte und zwei in einer Reihe, waagerecht oder senkrecht; <b>2</b> – zwei gegenüber, waagerecht oder senkrecht. Die Ausrichtung wird mitgewürfelt.' });
+            missionsHinweis: 'Missionsziele liegen jeweils auf halbem Weg zwischen Feldmitte und Mitte einer Kante: <b>Strategische Location 4</b> – vier Ziele Richtung aller vier Kanten; <b>3</b> – eines in der Mitte und zwei in einer Reihe, waagerecht oder senkrecht; <b>2</b> – zwei gegenüber, waagerecht oder senkrecht. Die Ausrichtung wird mitgewürfelt. Gelände bleibt mindestens 6 Zoll von jedem Ziel weg.' });
 
 /* ================= Tab-Navigation ================= */
 (function () {
