@@ -3,7 +3,7 @@
 <html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Battle March – Leitfaden &amp; Terrain-Baukasten</title>
+<title>OTZMO-TOW</title>
 <style>
 :root{
   --maroon:#7a1f1f; --maroon-dark:#591414;
@@ -21,9 +21,8 @@ body{
 }
 
 /* ---------- Seitenkopf ---------- */
-.page-header{ text-align:center; max-width:1320px; margin:0 auto 14px; }
+.page-header{ text-align:center; max-width:1320px; margin:0 auto 10px; }
 .page-header h1{ color:var(--maroon); font-size:2.1rem; letter-spacing:.05em; margin:0 0 2px; }
-.page-subtitle{ color:#4a3f2f; font-style:italic; margin:0; font-size:.95rem; }
 
 /* ---------- Tabs ---------- */
 .tabnav{
@@ -323,8 +322,7 @@ button:hover{ background:var(--maroon-dark); }
 <body>
 
 <div class="page-header">
-  <h1>Battle March</h1>
-  <p class="page-subtitle">Leitfaden für Gefechtsmarsch-Spiele · <span id="pointsSub">600</span> Punkte</p>
+  <h1>OTZMO-TOW</h1>
 </div>
 
 <nav class="tabnav">
@@ -2233,7 +2231,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   const up = (p, f) => Math.ceil(p * f);
   const dn = (p, f) => Math.floor(p * f);
   const calc = {
-    pointsSub:  p => p,
     pointsHead: p => p,
     m1vp:  p => Math.ceil(p / 6),
     m2vp:  p => up(p, 0.5),
