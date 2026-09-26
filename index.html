@@ -591,18 +591,18 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         <legend>Aufstellungszone</legend>
         <div class="wahl" id="wahlZone">
           <label><input type="checkbox" value="standard" checked> 1. Offene Feldschlacht</label>
-          <label><input type="checkbox" value="aufeinandertreffen"> 2. Aufeinandertreffen</label>
-          <label><input type="checkbox" value="flanken"> 3. Entgegengesetzte Flanken</label>
-          <label><input type="checkbox" value="begegnung"> 4. Unerwartete Begegnung</label>
-          <label><input type="checkbox" value="gebirgspass"> 5. Gebirgspass</label>
-          <label><input type="checkbox" value="ueberfluegeln"> 6. Überflügeln</label>
+          <label><input type="checkbox" value="aufeinandertreffen" checked> 2. Aufeinandertreffen</label>
+          <label><input type="checkbox" value="flanken" checked> 3. Entgegengesetzte Flanken</label>
+          <label><input type="checkbox" value="begegnung" checked> 4. Unerwartete Begegnung</label>
+          <label><input type="checkbox" value="gebirgspass" checked> 5. Gebirgspass</label>
+          <label><input type="checkbox" value="ueberfluegeln" checked> 6. Überflügeln</label>
         </div>
       </fieldset>
       <fieldset class="wahl-gruppe">
         <legend>Mission</legend>
         <div class="wahl" id="wahlMission">
-          <label><input type="checkbox" value="landmarke"> Landmarke</label>
-          <label><input type="checkbox" value="schaetze"> Schätze</label>
+          <label><input type="checkbox" value="landmarke" checked> Landmarke</label>
+          <label><input type="checkbox" value="schaetze" checked> Schätze</label>
           <label><input type="checkbox" value="versorgung" checked> Versorgungswagen</label>
         </div>
       </fieldset>
@@ -1216,7 +1216,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   }
 
   const MISSIONEN = ['landmarke', 'schaetze', 'versorgung'];
-  const WAHL_START = { zone: ['standard'], mission: ['versorgung'] };
+  const WAHL_START = { zone: ['standard', 'aufeinandertreffen', 'flanken', 'begegnung', 'gebirgspass', 'ueberfluegeln'],
+                       mission: ['landmarke', 'schaetze', 'versorgung'] };
   let wurf = null;   // was zuletzt gewuerfelt wurde: { zone, mission }
   const PRESETS = {
     standard(W, H) {
