@@ -612,7 +612,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         <span><span class="dot" style="background:var(--p2)"></span>Spieler 2</span>
         <span><span class="dot" style="background:var(--nml)"></span>No Man's Land</span>
       </div>
-      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt unter den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht. Die Karte ist <span class="feld-mass">48×36</span> Zoll groß. Im Kreis von <span class="kreis-mass">16</span> Zoll Durchmesser in der Mitte steht kein Gelände und niemand stellt auf. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
+      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt unter den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. <span class="missions-hinweis">Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht.</span> Die Karte ist <span class="feld-mass">48×36</span> Zoll groß. Im Kreis von <span class="kreis-mass">16</span> Zoll Durchmesser in der Mitte steht kein Gelände und niemand stellt auf. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
     </div>
 
     <div class="toolbar">
@@ -1031,6 +1031,18 @@ function kartenbau(opt) {
   const cfg = { w: opt.w, h: opt.h, circle: opt.kreis, scale: 13 };   // Feldgroesse und Kreis sind fest
   board.closest('.builder').querySelectorAll('.feld-mass').forEach(el => { el.textContent = cfg.w + '×' + cfg.h; });
   board.closest('.builder').querySelectorAll('.kreis-mass').forEach(el => { el.textContent = cfg.circle; });
+
+  /* Missionen kommen aus den Optionen; art sagt, was auf der Karte passiert:
+     'turm' = Turm als Landmarke in der Mitte, 'schaetze' = drei Schaetze, 'keine' = nichts. */
+  const MISSIONEN = opt.missionen.map(m => m.wert);
+  const missionsArt = wert => (opt.missionen.find(m => m.wert === wert) || {}).art;
+  $('wahlMission').replaceChildren(...opt.missionen.map(m => {
+    const label = document.createElement('label');
+    const box = Object.assign(document.createElement('input'), { type: 'checkbox', value: m.wert, checked: true });
+    label.append(box, ' ' + m.name);
+    return label;
+  }));
+  board.closest('.builder').querySelectorAll('.missions-hinweis').forEach(el => { el.innerHTML = opt.missionsHinweis; });
   let pieces = [];
   let pieceSeq = 1;
   let zoneGrid = [];
@@ -1135,7 +1147,10 @@ function kartenbau(opt) {
     if (data.wahl && typeof data.wahl === 'object') {
       const liste = v => [].concat(v || []);
       const zonen = liste(data.wahl.zone).filter(z => PRESETS[z]);
-      if (zonen.length) wahlSetzen(zonen, liste(data.wahl.mission).filter(m => MISSIONEN.includes(m)));
+      const missionen = liste(data.wahl.mission).filter(m => MISSIONEN.includes(m));
+      // Stand mit Missionen, die es hier nicht (mehr) gibt: alle anhaken
+      const fremd = liste(data.wahl.mission).length > 0 && missionen.length === 0;
+      if (zonen.length) wahlSetzen(zonen, fremd ? MISSIONEN : missionen);
     }
     if (data.wurf && typeof data.wurf === 'object' && PRESETS[data.wurf.zone] &&
         (data.wurf.mission === null || MISSIONEN.includes(data.wurf.mission))) {
@@ -1227,9 +1242,8 @@ function kartenbau(opt) {
     return !(hasNeg && hasPos);
   }
 
-  const MISSIONEN = ['landmarke', 'schaetze', 'versorgung'];
   const WAHL_START = { zone: ['standard', 'aufeinandertreffen', 'flanken', 'begegnung', 'gebirgspass', 'ueberfluegeln'],
-                       mission: ['landmarke', 'schaetze', 'versorgung'] };
+                       mission: MISSIONEN };
   let wurf = null;   // was zuletzt gewuerfelt wurde: { zone, mission }
   const PRESETS = {
     standard(W, H) {
@@ -1671,7 +1685,7 @@ function kartenbau(opt) {
     const mission = missionen.length ? zufallAus(missionen) : null;
     wurf = { zone: chosen, mission };
     zeigeWurf();
-    const landmark = mission === 'landmarke';   // Versorgungswagen: Karte bleibt ohne Zusatz
+    const landmark = missionsArt(mission) === 'turm';
     pieces = [];
     board.querySelectorAll('.piece').forEach(el => el.remove());
 
@@ -1682,7 +1696,7 @@ function kartenbau(opt) {
     zoneGrid = maskCircle(zoneGrid);
     drawZones();
 
-    treasures = mission === 'schaetze' ? computeTreasures() : [];
+    treasures = missionsArt(mission) === 'schaetze' ? computeTreasures() : [];
 
     const MIN_GAP = 6;
 
@@ -2131,9 +2145,17 @@ function kartenbau(opt) {
 }
 // zonenTiefe: Offene Feldschlacht und Unerwartete Begegnung; passAbstand: Gebirgspass
 kartenbau({ endung: '', w: 48, h: 36, kreis: 16, zonenTiefe: 10, passAbstand: 16,
-            speicher: 'battleMarchBuilderState', datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder' });
+            speicher: 'battleMarchBuilderState', datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder',
+            missionen: [{ wert: 'landmarke', name: 'Landmarke', art: 'turm' },
+                        { wert: 'schaetze', name: 'Schätze', art: 'schaetze' },
+                        { wert: 'versorgung', name: 'Versorgungswagen', art: 'keine' }],
+            missionsHinweis: "Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht." });
 kartenbau({ endung: '-core', w: 72, h: 48, kreis: 24, zonenTiefe: 12, passAbstand: 24,
-            speicher: 'coreBattleBuilderState', datei: 'core-battle-karte.png', auffrischen: '__refreshCore' });
+            speicher: 'coreBattleBuilderState', datei: 'core-battle-karte.png', auffrischen: '__refreshCore',
+            missionen: [{ wert: 'location4', name: 'Strategische Location 4', art: 'schaetze' },
+                        { wert: 'location3', name: 'Strategische Location 3', art: 'schaetze' },
+                        { wert: 'location2', name: 'Strategische Location 2', art: 'schaetze' }],
+            missionsHinweis: "Bei allen drei <b>Strategischen Locations</b> liegen vorerst drei Schätze im No Man's Land." });
 
 /* ================= Tab-Navigation ================= */
 (function () {
