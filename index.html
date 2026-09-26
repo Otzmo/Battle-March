@@ -1234,7 +1234,7 @@ function kartenbau(opt) {
   const PRESETS = {
     standard(W, H) {
       const g = emptyGrid();
-      const zd = Math.round(H * 0.28);
+      const zd = opt.zonenTiefe;   // Tiefe der Aufstellungszonen
       for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
         if (r < zd) g[r][c] = 'p1';
         else if (r >= H - zd) g[r][c] = 'p2';
@@ -1263,7 +1263,7 @@ function kartenbau(opt) {
     },
     begegnung(W, H) {
       const g = emptyGrid();
-      const zd = Math.round(H * 0.28);
+      const zd = opt.zonenTiefe;   // Tiefe der Aufstellungszonen
       for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
         const isP1 = r >= H - zd && c < W * 0.75;
         const isP2 = r < zd && c >= W * 0.25;
@@ -1273,7 +1273,7 @@ function kartenbau(opt) {
     },
     gebirgspass(W, H) {
       const g = emptyGrid();
-      const zb = (W - 16) / 2;   // 16 Zoll Abstand zwischen den Zonen
+      const zb = (W - opt.passAbstand) / 2;   // fester Abstand zwischen den Zonen
       for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
         const isP1 = c < zb;
         const isP2 = c >= W - zb;
@@ -2129,10 +2129,11 @@ function kartenbau(opt) {
   // Ausgangspunkt für "hat sich etwas geändert?" beim Verlassen der Seite.
   _lastWritten = JSON.stringify(serializeState());
 }
-kartenbau({ endung: '', w: 48, h: 36, kreis: 16, speicher: 'battleMarchBuilderState',
-            datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder' });
-kartenbau({ endung: '-core', w: 72, h: 48, kreis: 24, speicher: 'coreBattleBuilderState',
-            datei: 'core-battle-karte.png', auffrischen: '__refreshCore' });
+// zonenTiefe: Offene Feldschlacht und Unerwartete Begegnung; passAbstand: Gebirgspass
+kartenbau({ endung: '', w: 48, h: 36, kreis: 16, zonenTiefe: 10, passAbstand: 16,
+            speicher: 'battleMarchBuilderState', datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder' });
+kartenbau({ endung: '-core', w: 72, h: 48, kreis: 24, zonenTiefe: 12, passAbstand: 24,
+            speicher: 'coreBattleBuilderState', datei: 'core-battle-karte.png', auffrischen: '__refreshCore' });
 
 /* ================= Tab-Navigation ================= */
 (function () {
