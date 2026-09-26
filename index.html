@@ -118,25 +118,23 @@ button:hover{ background:var(--maroon-dark); }
 
 .toolbar{ display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
 .toolbar > button{ padding:8px 14px; }
-.settings, .zone-toolbar{
+.settings{
   display:flex; gap:10px; align-items:center; font-size:.78rem; background:#fff;
   border:1px solid #9a8f7a; border-radius:4px; padding:6px 10px; flex-wrap:wrap;
 }
 .settings label{ display:flex; align-items:center; gap:4px; }
 .settings input{ width:52px; padding:2px 4px; font-family:inherit; }
-.settings button, .zone-toolbar > button{ padding:5px 10px; }
+.settings button{ padding:5px 10px; }
 
 .zone-panel{ margin-bottom:12px; }
 .zone-panel .row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px; align-items:center; }
-.brush-btn{
-  display:flex; align-items:center; gap:6px; padding:5px 9px;
-  background:#fff; color:var(--text); border:1.5px solid #9a8f7a;
-}
-.brush-btn.active{ border-color:var(--maroon); box-shadow:0 0 0 2px rgba(122,31,31,.25); }
-.brush-btn .dot{ width:14px; height:14px; border-radius:3px; border:1px solid rgba(0,0,0,.35); }
-.preset-btn{ background:#fff; color:var(--maroon); border:1.5px solid var(--maroon); padding:5px 10px; font-size:.74rem; }
-.preset-btn:hover{ background:var(--maroon); color:#fff; }
-#zoneModeBtn.active{ background:var(--maroon-dark); }
+.wahl-gruppe{ border:1px solid #9a8f7a; border-radius:4px; background:#fff; padding:6px 10px 8px; margin:0 0 8px; }
+.wahl-gruppe legend{ font-weight:bold; color:var(--maroon); font-size:.8rem; padding:0 4px; }
+.wahl-gruppe .wahl{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:.8rem; }
+.wahl-gruppe label{ display:flex; align-items:center; gap:5px; cursor:pointer; }
+.wahl-gruppe input{ accent-color:var(--maroon); }
+.wurf{ font-size:.82rem; margin:2px 0 6px; min-height:1.2em; }
+.wurf b{ color:var(--maroon); }
 .legend{ display:flex; gap:14px; font-size:.74rem; margin-top:4px; flex-wrap:wrap; }
 .legend span{ display:inline-flex; align-items:center; gap:5px; }
 .legend .dot{ width:12px; height:12px; border-radius:3px; border:1px solid rgba(0,0,0,.3); }
@@ -167,7 +165,7 @@ button:hover{ background:var(--maroon-dark); }
   border:2px solid var(--maroon);
   box-sizing:content-box;   /* Rand liegt aussen, innen bleiben exakt Breite x Massstab */
 }
-#zoneCanvas{ position:absolute; top:0; left:0; touch-action:none; }
+#zoneCanvas{ position:absolute; top:0; left:0; pointer-events:none; }
 
 .no-terrain-circle{
   position:absolute; border-radius:50%; border:1.6px solid var(--maroon);
@@ -595,42 +593,42 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
   <div class="center-col">
 
     <div class="panel zone-panel">
-      <h2>Aufstellungszonen bearbeiten</h2>
-      <div class="row">
-        <button id="zoneModeBtn">Zonen-Modus: AUS</button>
-        <div class="zone-toolbar" id="brushToolbar">
-          <button class="brush-btn active" data-brush="p1"><span class="dot" style="background:var(--p1)"></span>Spieler 1</button>
-          <button class="brush-btn" data-brush="p2"><span class="dot" style="background:var(--p2)"></span>Spieler 2</button>
-          <button class="brush-btn" data-brush="nml"><span class="dot" style="background:var(--nml)"></span>No Man's Land</button>
-          <button class="brush-btn" data-brush="none"><span class="dot" style="background:var(--beige);border-color:#999"></span>Radieren</button>
+      <h2>Kartenwürfel</h2>
+      <fieldset class="wahl-gruppe">
+        <legend>Aufstellungszone</legend>
+        <div class="wahl" id="wahlZone">
+          <label><input type="checkbox" value="standard" checked> 1. Offene Feldschlacht</label>
+          <label><input type="checkbox" value="aufeinandertreffen" checked> 2. Aufeinandertreffen</label>
+          <label><input type="checkbox" value="flanken" checked> 3. Entgegengesetzte Flanken</label>
+          <label><input type="checkbox" value="begegnung" checked> 4. Unerwartete Begegnung</label>
+          <label><input type="checkbox" value="gebirgspass" checked> 5. Gebirgspass</label>
+          <label><input type="checkbox" value="ueberfluegeln" checked> 6. Überflügeln</label>
         </div>
-        <button id="clearZonesBtn" style="background:#8a6d3b;">Zonen leeren</button>
-      </div>
-      <div class="row">
-        <button class="preset-btn" data-preset="standard">1. Offene Feldschlacht</button>
-        <button class="preset-btn" data-preset="aufeinandertreffen">2. Aufeinandertreffen</button>
-        <button class="preset-btn" data-preset="flanken">3. Entgegengesetzte Flanken</button>
-        <button class="preset-btn" data-preset="begegnung">4. Unerwartete Begegnung</button>
-        <button class="preset-btn" data-preset="gebirgspass">5. Gebirgspass</button>
-        <button class="preset-btn" data-preset="ueberfluegeln">6. Überflügeln</button>
-      </div>
+      </fieldset>
+      <fieldset class="wahl-gruppe">
+        <legend>Mission</legend>
+        <div class="wahl" id="wahlMission">
+          <label><input type="checkbox" value="landmarke" checked> Landmarke</label>
+          <label><input type="checkbox" value="schaetze" checked> Schätze</label>
+          <label><input type="checkbox" value="versorgung" checked> Versorgungswagen</label>
+        </div>
+      </fieldset>
+      <p class="wurf" id="wurfErgebnis" aria-live="polite"></p>
       <div class="legend">
         <span><span class="dot" style="background:var(--p1)"></span>Spieler 1</span>
         <span><span class="dot" style="background:var(--p2)"></span>Spieler 2</span>
         <span><span class="dot" style="background:var(--nml)"></span>No Man's Land</span>
       </div>
-      <div class="hint" style="margin-top:8px;">Zonen-Modus einschalten, Pinsel wählen, dann auf dem Raster klicken/ziehen, um Zellen (1 Zoll) einzufärben. Presets füllen die Karte automatisch mit einem der sechs Layouts aus dem Leitfaden – danach lässt sich frei weiter anpassen. Bei jeder Zone stehen jetzt Abstände: die <b>Tiefe</b> der Zone und der <b>Abstand zur gegnerischen Zone</b>. Bei unregelmäßigen (z. B. diagonalen) Formen werden diese Werte aus der umschließenden Box abgeschätzt.</div>
+      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt aus den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
     </div>
 
     <div class="toolbar">
       <button id="resetBtn">Gelände leeren</button>
-      <button id="resetAllBtn" title="Löscht Gelände, Zonen, Schätze, eigene Geländetypen und Feldgröße – auch aus dem Browser-Speicher">Alles zurücksetzen</button>
+      <button id="resetAllBtn" title="Löscht Gelände, Zonen, Schätze, eigene Geländetypen, Feldgröße und die Würfelauswahl – auch aus dem Browser-Speicher">Alles zurücksetzen</button>
       <button id="downloadBtn" title="Aktuelle Karte als PNG-Bild herunterladen">⬇ Karte herunterladen</button>
       <button id="mirrorHBtn" title="Spiegelt Gelände und Zonen links/rechts">⇋ Horizontal spiegeln</button>
       <button id="mirrorVBtn" title="Spiegelt Gelände und Zonen oben/unten">⇵ Vertikal spiegeln</button>
-      <button id="randomBtn" title="Würfelt Zone, Spiegelung und Geländeplatzierung">🎲 Zufällige Karte</button>
-      <button id="landmarkBtn" title="Würfelt eine Karte mit Turm als Landmarke in der Mitte (ohne Ruine)">🗼 Landmarke (Mission)</button>
-      <button id="treasureBtn" title="Würfelt eine Karte mit drei 40-mm-Schätzen im No Man's Land (≥3″ Abstand zum Gelände)">💰 Schätze (Mission)</button>
+      <button id="randomBtn" title="Würfelt aus den angehakten Aufstellungszonen und Missionen, dazu Spiegelung und Geländeplatzierung">🎲 Zufällige Karte</button>
       <div class="settings">
         <label>Breite" <input type="number" id="setW" value="48" min="12" max="96"></label>
         <label>Tiefe" <input type="number" id="setH" value="36" min="12" max="96"></label>
@@ -1038,9 +1036,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   let pieces = [];
   let pieceSeq = 1;
   let zoneGrid = [];
-  let zoneMode = false;
-  let currentBrush = 'p1';
-  let painting = false;
 
   const ZONE_COLORS = { p1: '#e2c48c', p2: '#b9c6d6', nml: '#ded6c2', none: null };
 
@@ -1303,13 +1298,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return g;
   }
 
-  function applyPreset(name) {
-    if (!PRESETS[name]) return;
-    zoneGrid = maskCircle(PRESETS[name](cfg.w, cfg.h));
-    drawZones();
-    saveState();
-  }
-
   const ZONE_NAMES = { p1: 'SPIELER 1', p2: 'SPIELER 2', nml: "NO MAN'S LAND" };
 
   function computeZoneBounds() {
@@ -1428,69 +1416,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     });
   }
 
-  function cellFromEvent(e) {
-    const rect = canvas.getBoundingClientRect();
-    const px_ = e.clientX - rect.left;
-    const py_ = e.clientY - rect.top;
-    const c = Math.floor(px_ / cfg.scale);
-    const rTopDown = Math.floor(py_ / cfg.scale);
-    const r = cfg.h - 1 - rTopDown;
-    if (c < 0 || c >= cfg.w || r < 0 || r >= cfg.h) return null;
-    return { r, c };
-  }
-
-  function paintAt(e) {
-    const cell = cellFromEvent(e);
-    if (!cell) return;
-    if (inCircle(cell.c + 0.5, cell.r + 0.5)) return;
-    if (zoneGrid[cell.r][cell.c] !== currentBrush) {
-      zoneGrid[cell.r][cell.c] = currentBrush;
-      drawZones();
-      saveState();
-    }
-  }
-
-  canvas.addEventListener('pointerdown', (e) => {
-    if (!zoneMode) return;
-    painting = true;
-    canvas.setPointerCapture(e.pointerId);
-    paintAt(e);
-  });
-  canvas.addEventListener('pointermove', (e) => {
-    if (!zoneMode || !painting) return;
-    paintAt(e);
-  });
-  canvas.addEventListener('pointerup', () => { painting = false; });
-  canvas.addEventListener('pointercancel', () => { painting = false; });
-
-  function setZoneMode(on) {
-    zoneMode = on;
-    canvas.style.pointerEvents = on ? 'auto' : 'none';
-    canvas.style.cursor = on ? 'crosshair' : 'default';
-    document.getElementById('zoneModeBtn').textContent = 'Zonen-Modus: ' + (on ? 'AN' : 'AUS');
-    document.getElementById('zoneModeBtn').classList.toggle('active', on);
-  }
-
-  document.getElementById('zoneModeBtn').addEventListener('click', () => setZoneMode(!zoneMode));
-
-  document.querySelectorAll('.brush-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.brush-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentBrush = btn.dataset.brush;
-      if (!zoneMode) setZoneMode(true);
-    });
-  });
-
-  document.querySelectorAll('.preset-btn').forEach(btn => {
-    btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
-  });
-
-  document.getElementById('clearZonesBtn').addEventListener('click', () => {
-    zoneGrid = emptyGrid();
-    drawZones();
-    saveState();
-  });
 
   function renderCircle() {
     board.querySelectorAll('.no-terrain-circle').forEach(el => el.remove());
@@ -1574,7 +1499,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     el.querySelector('.rotateBtn').addEventListener('click', (e) => { e.stopPropagation(); rotatePiece(piece.id); });
     el.querySelector('.delBtn').addEventListener('click', (e) => { e.stopPropagation(); removePiece(piece.id); });
     el.addEventListener('pointerdown', (e) => {
-      if (zoneMode) return;
       if (e.target.closest('.btns')) return;
       startMoveDrag(e, piece.id);
     });
@@ -1716,21 +1640,30 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     if (circle) circle.classList.toggle('text-top', treasures.length > 0);
   }
 
-  function randomizeMap(opts) {
-    const landmark = !!(opts && opts.landmark);
+  function randomizeMap() {
+    const zufallAus = liste => liste[Math.floor(Math.random() * liste.length)];
+    const zonen = angehakt('wahlZone');
+    const chosen = zufallAus(zonen.length ? zonen : Object.keys(PRESETS));
+    const missionen = angehakt('wahlMission');
+    const mission = missionen.length ? zufallAus(missionen) : null;
+    const landmark = mission === 'landmarke';   // Versorgungswagen: Karte bleibt ohne Zusatz
     pieces = [];
     board.querySelectorAll('.piece').forEach(el => el.remove());
 
-    const presetNames = Object.keys(PRESETS);
-    const chosen = presetNames[Math.floor(Math.random() * presetNames.length)];
     zoneGrid = PRESETS[chosen](cfg.w, cfg.h);
+    const text = sel => document.querySelector(sel).parentElement.textContent.trim();
+    document.getElementById('wurfErgebnis').innerHTML = '';
+    document.getElementById('wurfErgebnis').append('Gewürfelt: ',
+      Object.assign(document.createElement('b'), { textContent: text(`#wahlZone input[value="${chosen}"]`) }),
+      ' · Mission: ',
+      Object.assign(document.createElement('b'), { textContent: mission ? text(`#wahlMission input[value="${mission}"]`) : 'keine' }));
 
     if (Math.random() < 0.5) zoneGrid.forEach(row => row.reverse());
     if (Math.random() < 0.5) zoneGrid.reverse();
     zoneGrid = maskCircle(zoneGrid);
     drawZones();
 
-    treasures = (!landmark && !!(opts && opts.treasure)) ? computeTreasures() : [];
+    treasures = mission === 'schaetze' ? computeTreasures() : [];
 
     const MIN_GAP = 6;
 
@@ -1940,7 +1873,9 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     }
     disarmResetAll();
     clearTimeout(_saveTimer);
-    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* nicht verfügbar */ }
+    try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(WAHL_KEY); } catch (e) { /* nicht verfügbar */ }
+    wahlSetzen(Object.keys(PRESETS), ['landmarke', 'schaetze', 'versorgung']);
+    document.getElementById('wurfErgebnis').textContent = '';
     _lastWritten = null;
     defaultTypes.length = INITIAL_TYPE_COUNT;
     cfg.w = 48; cfg.h = 36; cfg.circle = 16;
@@ -1984,16 +1919,31 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   document.getElementById('mirrorHBtn').addEventListener('click', () => spiegle(true));
   document.getElementById('mirrorVBtn').addEventListener('click', () => spiegle(false));
 
-  document.getElementById('randomBtn').addEventListener('click', () => {
-    randomizeMap();
-  });
+  document.getElementById('randomBtn').addEventListener('click', randomizeMap);
 
-  document.getElementById('landmarkBtn').addEventListener('click', () => {
-    randomizeMap({ landmark: true });
-  });
-
-  document.getElementById('treasureBtn').addEventListener('click', () => {
-    randomizeMap({ treasure: true });
+  /* --- Auswahl fuer den Kartenwuerfel (eigener Speicherplatz, Karte bleibt unberuehrt) --- */
+  const WAHL_KEY = 'battleMarchWuerfelWahl';
+  function angehakt(id) {
+    return Array.from(document.querySelectorAll('#' + id + ' input:checked')).map(i => i.value);
+  }
+  function wahlSpeichern() {
+    try {
+      localStorage.setItem(WAHL_KEY, JSON.stringify({ zone: angehakt('wahlZone'), mission: angehakt('wahlMission') }));
+    } catch (e) { /* nicht verfuegbar */ }
+  }
+  function wahlSetzen(zone, mission) {
+    document.querySelectorAll('#wahlZone input').forEach(i => { i.checked = zone.includes(i.value); });
+    document.querySelectorAll('#wahlMission input').forEach(i => { i.checked = mission.includes(i.value); });
+  }
+  try {
+    const w = JSON.parse(localStorage.getItem(WAHL_KEY));
+    if (w && Array.isArray(w.zone) && Array.isArray(w.mission) && w.zone.some(z => PRESETS[z])) wahlSetzen(w.zone, w.mission);
+  } catch (e) { /* kaputter oder fehlender Eintrag: Voreinstellung bleibt */ }
+  document.querySelectorAll('#wahlZone input, #wahlMission input').forEach(i => {
+    i.addEventListener('change', () => {
+      if (!angehakt('wahlZone').length) i.checked = true;   // ohne Zone gaebe es nichts zu wuerfeln
+      wahlSpeichern();
+    });
   });
 
   function downloadMap() {
@@ -2177,7 +2127,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   document.getElementById('setCircle').value = cfg.circle;
   computeScale();
   rebuildAll(!restored);
-  setZoneMode(false);
   // Ausgangspunkt für "hat sich etwas geändert?" beim Verlassen der Seite.
   _lastWritten = JSON.stringify(serializeState());
 })();
