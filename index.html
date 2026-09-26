@@ -84,6 +84,15 @@ body{
 .panel{ background:var(--beige); border:2.5px solid var(--maroon); border-radius:4px; padding:14px 16px; }
 .palette{ width:210px; flex-shrink:0; }
 .panel h2{ font-size:1.02rem; color:var(--maroon); border-bottom:2px solid var(--maroon); padding-bottom:6px; margin:0 0 10px; }
+.palette-kopf{ width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px;
+  background:none; border:0; border-radius:0; padding:0; margin:0; font:inherit; font-weight:bold; font-size:1.02rem;
+  color:var(--maroon); text-align:left; cursor:pointer; }
+.palette-kopf:hover{ background:none; color:var(--maroon-dark); }
+.palette-kopf:focus-visible{ outline:3px solid #c98a2f; outline-offset:2px; }
+.palette-kopf .acc-icon{ transition:transform .18s ease; }
+.palette.offen .palette-kopf{ border-bottom:2px solid var(--maroon); padding-bottom:6px; margin-bottom:10px; }
+.palette.offen .palette-kopf .acc-icon{ transform:rotate(90deg); }
+.palette-inhalt[hidden]{ display:none; }
 
 .chip{
   display:flex; align-items:center; gap:8px; padding:7px 8px; margin-bottom:7px;
@@ -564,7 +573,8 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 <div class="layout">
 
   <div class="panel palette">
-    <h2>Gelände-Palette</h2>
+    <button type="button" class="palette-kopf" id="paletteKopf" aria-expanded="false" aria-controls="paletteInhalt">Gelände-Palette<span class="acc-icon" aria-hidden="true">▸</span></button>
+    <div class="palette-inhalt" id="paletteInhalt" hidden="">
     <div id="paletteList" class="palette-list"><div class="chip"><div class="swatch" style="background:#6f9a4f"></div>
       <div class="info"><b>Wald</b>6x10"</div></div><div class="chip"><div class="swatch" style="background:#a8541c"></div>
       <div class="info"><b>Gebäude</b>6x8"</div></div><div class="chip"><div class="swatch" style="background:#a9834a"></div>
@@ -585,6 +595,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       <label for="cColor">Farbe</label>
       <input type="color" id="cColor" value="#7a5a9a">
       <button id="addCustomBtn">Zur Palette hinzufügen</button>
+    </div>
     </div>
   </div>
 
@@ -1130,6 +1141,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   const kopie = document.querySelector('#panel-baukasten .builder').cloneNode(true);
   kopie.querySelectorAll('[id]').forEach(el => { el.id += '-core'; });
   kopie.querySelectorAll('label[for]').forEach(l => { l.htmlFor += '-core'; });
+  kopie.querySelectorAll('[aria-controls]').forEach(el => { el.setAttribute('aria-controls', el.getAttribute('aria-controls') + '-core'); });
   ziel.replaceWith(kopie);
 })();
 
@@ -1140,6 +1152,14 @@ function kartenbau(opt) {
   const ctx = canvas.getContext('2d');
   const zoneLegend = $('zoneLegend');
   const paletteList = $('paletteList');
+
+  // Gelaende-Palette klappt auf und zu (startet zugeklappt)
+  $('paletteKopf').addEventListener('click', () => {
+    const auf = $('paletteInhalt').hidden;
+    $('paletteInhalt').hidden = !auf;
+    $('paletteKopf').setAttribute('aria-expanded', auf ? 'true' : 'false');
+    $('paletteKopf').closest('.palette').classList.toggle('offen', auf);
+  });
 
   const cfg = { w: opt.w, h: opt.h, circle: opt.kreis, scale: 13 };   // Feldgroesse und Kreis sind fest
   board.closest('.builder').querySelectorAll('.feld-mass').forEach(el => { el.textContent = cfg.w + '×' + cfg.h; });
