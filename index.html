@@ -1985,8 +1985,12 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   });
 
   function downloadMap() {
-    const S = 26;                       // Export-Auflösung: px pro Zoll
-    const ML = 40, MR = 16, MT = 16, MB = 30;   // Ränder für Achsen
+    const S = 36;                       // Export-Auflösung: px pro Zoll
+    const F = {                         // Schriftgrößen in px, relativ zum Zoll
+      tag: Math.round(S * 0.62), name: Math.round(S * 0.8),
+      mass: Math.round(S * 0.6), achse: Math.round(S * 0.62)
+    };
+    const ML = F.achse * 2 + 12, MR = F.achse + 8, MT = 20, MB = F.achse + 18;   // Ränder für Achsen
     const bW = cfg.w * S, bH = cfg.h * S;
     const cv = document.createElement('canvas');
     cv.width = bW + ML + MR;
@@ -2035,16 +2039,16 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
     // kleiner Koordinaten-Kasten
     function tag(text, centerXi, bottomYi) {
-      g.font = 'bold ' + Math.max(9, Math.round(S * 0.42)) + 'px Georgia, serif';
-      const th = Math.max(14, Math.round(S * 0.62));
-      const tw = Math.ceil(g.measureText(text).width) + 8;
+      g.font = 'bold ' + F.tag + 'px Georgia, serif';
+      const th = Math.round(F.tag * 1.45);
+      const tw = Math.ceil(g.measureText(text).width) + 12;
       let tx = cx(centerXi) - tw / 2;
       let ty = cy(bottomYi) + 2;
       if (ty + th > oy + bH) ty = cy(bottomYi) - th - 2;
       if (tx < ox + 1) tx = ox + 1;
       if (tx + tw > ox + bW) tx = ox + bW - tw - 1;
       g.fillStyle = '#f4ecd8'; g.fillRect(tx, ty, tw, th);
-      g.strokeStyle = '#7a1f1f'; g.lineWidth = 1; g.strokeRect(tx, ty, tw, th);
+      g.strokeStyle = '#7a1f1f'; g.lineWidth = 1.5; g.strokeRect(tx, ty, tw, th);
       g.fillStyle = '#7a1f1f'; g.textAlign = 'center'; g.textBaseline = 'middle';
       g.fillText(text, tx + tw / 2, ty + th / 2 + 0.5);
     }
@@ -2062,18 +2066,25 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       g.restore();
       g.fillStyle = p.dark ? '#1a1a1a' : '#ffffff';
       g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.font = 'bold ' + Math.max(10, Math.round(S * 0.5)) + 'px Georgia, serif';
-      g.fillText(p.name, ccx, ccy - S * 0.3);
-      g.font = 'italic ' + Math.max(8, Math.round(S * 0.4)) + 'px Georgia, serif';
-      g.fillText(p.w + 'x' + p.d + '"', ccx, ccy + S * 0.3);
+      // lange eigene Namen schrumpfen, bis sie ins Stück passen
+      const platz = bw * S - 8;
+      const passend = (stil, px, text) => {
+        g.font = stil + px + 'px Georgia, serif';
+        const b = g.measureText(text).width;
+        if (b > platz) g.font = stil + Math.max(8, Math.floor(px * platz / b)) + 'px Georgia, serif';
+      };
+      passend('bold ', F.name, p.name);
+      g.fillText(p.name, ccx, ccy - S * 0.42);
+      passend('italic ', F.mass, p.w + 'x' + p.d + '"');
+      g.fillText(p.w + 'x' + p.d + '"', ccx, ccy + S * 0.42);
     });
     pieces.forEach(p => {
       const e = coordEcke(p);
       tag('(' + e.x + ', ' + e.y + ')', e.x, e.y);
       g.beginPath();
-      g.arc(cx(e.x), cy(e.y), Math.max(3, S * 0.16), 0, Math.PI * 2);
+      g.arc(cx(e.x), cy(e.y), S * 0.2, 0, Math.PI * 2);
       g.fillStyle = '#d40000'; g.fill();
-      g.strokeStyle = '#ffffff'; g.lineWidth = 1.5; g.stroke();
+      g.strokeStyle = '#ffffff'; g.lineWidth = 2; g.stroke();
     });
 
     // Schätze
@@ -2087,11 +2098,11 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
     // Achsenbeschriftung (alle 6 Zoll)
     g.fillStyle = '#4a3f2f';
-    g.font = Math.max(9, Math.round(S * 0.42)) + 'px Georgia, serif';
+    g.font = 'bold ' + F.achse + 'px Georgia, serif';
     g.textAlign = 'center'; g.textBaseline = 'top';
-    for (let i = 0; i <= cfg.w; i += 6) g.fillText(i + '"', cx(i), oy + bH + 6);
+    for (let i = 0; i <= cfg.w; i += 6) g.fillText(i + '"', cx(i), oy + bH + 8);
     g.textAlign = 'right'; g.textBaseline = 'middle';
-    for (let j = 0; j <= cfg.h; j += 6) g.fillText(j + '"', ox - 6, cy(j));
+    for (let j = 0; j <= cfg.h; j += 6) g.fillText(j + '"', ox - 8, cy(j));
 
     // Download auslösen
     const a = document.createElement('a');
