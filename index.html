@@ -1035,7 +1035,8 @@ function kartenbau(opt) {
 
   /* Missionen kommen aus den Optionen; art sagt, was auf der Karte passiert:
      'turm' = Turm als Landmarke in der Mitte, 'schaetze' = drei Schaetze, 'keine' = nichts,
-     oder eine Liste fester Missionsziele als Anteile von Breite und Tiefe. */
+     oder { varianten: [...] } mit festen Missionszielen als Anteile von Breite und Tiefe -
+     eine der Varianten wird beim Wuerfeln gewaehlt. */
   const MISSIONEN = opt.missionen.map(m => m.wert);
   const missionsArt = wert => (opt.missionen.find(m => m.wert === wert) || {}).art;
   $('wahlMission').replaceChildren(...opt.missionen.map(m => {
@@ -1699,8 +1700,9 @@ function kartenbau(opt) {
     drawZones();
 
     const art = missionsArt(mission);
+    const ziele = art && art.varianten ? zufallAus(art.varianten) : null;   // Ausrichtung wird mitgewuerfelt
     treasures = art === 'schaetze' ? computeTreasures()
-              : Array.isArray(art) ? art.map(([fx, fy]) => ({ x: cfg.w * fx, y: cfg.h * fy })) : [];
+              : ziele ? ziele.map(([fx, fy]) => ({ x: cfg.w * fx, y: cfg.h * fy })) : [];
 
     const MIN_GAP = 6;
 
@@ -2159,10 +2161,16 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 24, zonenTiefe: 12, passAbstan
             speicher: 'coreBattleBuilderState', datei: 'core-battle-karte.png', auffrischen: '__refreshCore',
             marker: { name: 'Missionsziel', klasse: 'ziel', farbe: '#1f3a6b', rand: '#0d1b33' },
             // Ziele jeweils auf halbem Weg zwischen Mitte und Mitte einer Kante
-            missionen: [{ wert: 'location4', name: 'Strategische Location 4', art: [[0.5, 0.75], [0.5, 0.25], [0.25, 0.5], [0.75, 0.5]] },
-                        { wert: 'location3', name: 'Strategische Location 3', art: [[0.25, 0.5], [0.5, 0.5], [0.75, 0.5]] },
-                        { wert: 'location2', name: 'Strategische Location 2', art: [[0.5, 0.75], [0.5, 0.25]] }],
-            missionsHinweis: 'Missionsziele liegen jeweils auf halbem Weg zwischen Feldmitte und Mitte einer Kante: <b>Strategische Location 4</b> – vier Ziele Richtung aller vier Kanten; <b>3</b> – eines in der Mitte und je eines Richtung der kurzen Kanten; <b>2</b> – je eines Richtung der langen Kanten.' });
+            // Location 3 und 2 gibt es waagerecht und senkrecht
+            missionen: [{ wert: 'location4', name: 'Strategische Location 4',
+                          art: { varianten: [[[0.5, 0.75], [0.5, 0.25], [0.25, 0.5], [0.75, 0.5]]] } },
+                        { wert: 'location3', name: 'Strategische Location 3',
+                          art: { varianten: [[[0.25, 0.5], [0.5, 0.5], [0.75, 0.5]],
+                                             [[0.5, 0.25], [0.5, 0.5], [0.5, 0.75]]] } },
+                        { wert: 'location2', name: 'Strategische Location 2',
+                          art: { varianten: [[[0.5, 0.75], [0.5, 0.25]],
+                                             [[0.25, 0.5], [0.75, 0.5]]] } }],
+            missionsHinweis: 'Missionsziele liegen jeweils auf halbem Weg zwischen Feldmitte und Mitte einer Kante: <b>Strategische Location 4</b> – vier Ziele Richtung aller vier Kanten; <b>3</b> – eines in der Mitte und zwei in einer Reihe, waagerecht oder senkrecht; <b>2</b> – zwei gegenüber, waagerecht oder senkrecht. Die Ausrichtung wird mitgewürfelt.' });
 
 /* ================= Tab-Navigation ================= */
 (function () {
