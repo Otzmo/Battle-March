@@ -329,13 +329,17 @@ button:hover{ background:var(--maroon-dark); }
 <nav class="tabnav">
 <div class="tabbar" role="tablist" aria-label="Battle March Werkzeuge">
   <button class="tab-btn" role="tab" id="tab-battlemarch" data-tab="battlemarch" aria-selected="true" tabindex="0">Battle March</button>
-  <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="false" tabindex="-1">Kartenbau</button>
+  <button class="tab-btn" role="tab" id="tab-kartenbau" data-tab="kartenbau" aria-selected="false" tabindex="-1">Kartenbau</button>
   <button class="tab-btn" role="tab" id="tab-germancomp" data-tab="germancomp" aria-controls="panel-germancomp" aria-selected="false" tabindex="-1">GermanComp</button>
   <button class="tab-btn" role="tab" id="tab-base" data-tab="base" aria-controls="panel-base" aria-selected="false" tabindex="-1">BASE</button>
 </div>
-<div class="subtabbar" role="tablist" aria-label="Battle March">
+<div class="subtabbar" role="tablist" aria-label="Battle March" data-gruppe="battlemarch">
   <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
   <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="false" tabindex="-1">Armee &amp; Magie</button>
+</div>
+<div class="subtabbar" role="tablist" aria-label="Kartenbau" data-gruppe="kartenbau" hidden="">
+  <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="true" tabindex="0">Battle March</button>
+  <button class="tab-btn" role="tab" id="tab-corebattle" data-tab="corebattle" aria-controls="panel-corebattle" aria-selected="false" tabindex="-1">Core Battle</button>
 </div>
 </nav>
 
@@ -648,6 +652,14 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
   </div>
 
 </div>
+</div>
+</div>
+
+<!-- ===================== KARTENBAU: CORE BATTLE ===================== -->
+<div class="tab-content" id="panel-corebattle" role="tabpanel" aria-labelledby="tab-corebattle" tabindex="0" hidden="">
+<div class="guide">
+<h1>Kartenbau – Core Battle</h1>
+<p>Hier entsteht der Kartenbau für Core Battle.</p>
 </div>
 </div>
 
@@ -2172,19 +2184,22 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
 /* ================= Tab-Navigation ================= */
 (function () {
-  // "Battle March" ist ein Oberpunkt mit eigener Unterleiste (Leitfaden, Armee & Magie)
+  // Oberpunkte mit eigener Unterleiste: "Battle March" (Leitfaden, Armee & Magie)
+  // und "Kartenbau" (Battle March, Core Battle). Welche Unterleiste zu welchem
+  // Oberpunkt gehoert, steht im data-gruppe der Leiste.
   const haupt = Array.from(document.querySelectorAll('.tabbar .tab-btn'));
-  const unter = Array.from(document.querySelectorAll('.subtabbar .tab-btn'));
-  const unterleiste = document.querySelector('.subtabbar');
-  const panels = {
-    leitfaden: document.getElementById('panel-leitfaden'),
-    armee: document.getElementById('panel-armee'),
-    baukasten: document.getElementById('panel-baukasten'),
-    germancomp: document.getElementById('panel-germancomp'),
-    base: document.getElementById('panel-base')
-  };
-  const istUnter = name => unter.some(t => t.dataset.tab === name);
-  let letzterUnter = 'leitfaden';
+  const leisten = Array.from(document.querySelectorAll('.subtabbar'));
+  const unter = {};          // Gruppe -> Knoepfe der Unterleiste
+  const zuletzt = {};        // Gruppe -> zuletzt offener Unterpunkt
+  const gruppeVon = {};      // Unterpunkt -> Gruppe
+  leisten.forEach(l => {
+    const g = l.dataset.gruppe;
+    unter[g] = Array.from(l.querySelectorAll('.tab-btn'));
+    zuletzt[g] = unter[g][0].dataset.tab;
+    unter[g].forEach(t => { gruppeVon[t.dataset.tab] = g; });
+  });
+  const panels = {};
+  document.querySelectorAll('.tab-content').forEach(el => { panels[el.id.replace('panel-', '')] = el; });
   function markiere(liste, name, fokus) {
     liste.forEach(t => {
       const sel = t.dataset.tab === name;
@@ -2194,17 +2209,20 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     });
   }
   function activate(name, focusTab) {
-    if (name === 'battlemarch') name = letzterUnter;
-    const bm = istUnter(name);
-    if (bm) letzterUnter = name;
-    markiere(haupt, bm ? 'battlemarch' : name, focusTab && !bm);
-    markiere(unter, letzterUnter, focusTab && bm);
-    unterleiste.hidden = !bm;
+    if (unter[name]) name = zuletzt[name];      // Oberpunkt -> sein letzter Unterpunkt
+    const gruppe = gruppeVon[name];
+    if (gruppe) zuletzt[gruppe] = name;
+    markiere(haupt, gruppe || name, focusTab && !gruppe);
+    leisten.forEach(l => {
+      const g = l.dataset.gruppe;
+      l.hidden = g !== gruppe;
+      markiere(unter[g], zuletzt[g], focusTab && g === gruppe);
+    });
     Object.keys(panels).forEach(k => { panels[k].hidden = (k !== name); });
     if (name === 'baukasten' && window.__refreshBuilder) window.__refreshBuilder();
     if (name === 'base' && window.__refreshBase) window.__refreshBase();
   }
-  [haupt, unter].forEach(liste => liste.forEach((t, i) => {
+  [haupt].concat(Object.values(unter)).forEach(liste => liste.forEach((t, i) => {
     t.addEventListener('click', () => activate(t.dataset.tab));
     t.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
