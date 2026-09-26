@@ -160,14 +160,6 @@ button:hover{ background:var(--maroon-dark); }
 }
 #zoneCanvas{ position:absolute; top:0; left:0; pointer-events:none; }
 
-.no-terrain-circle{
-  position:absolute; border-radius:50%; border:1.6px solid var(--maroon);
-  background:repeating-linear-gradient(45deg, rgba(122,31,31,.22) 0 4px, transparent 4px 9px), rgba(233,217,217,.35);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-  pointer-events:none; z-index:3; overflow:hidden; box-sizing:border-box;
-}
-.no-terrain-circle span{ color:var(--maroon); font-style:italic; font-size:.68rem; line-height:1.25; }
-.no-terrain-circle span.strong{ font-weight:bold; }
 
 .piece{
   position:absolute;
@@ -261,7 +253,6 @@ button:hover{ background:var(--maroon-dark); }
 .acc-body[hidden]{ display:none; }
 .acc-body > .italic:first-child{ margin-top:.6rem; }
 
-.no-terrain-circle.text-top{ justify-content:flex-start; padding-top:16%; }
 .treasure{ position:absolute; border-radius:50%; border:1.6px solid #6b4a1a; background:radial-gradient(circle at 35% 30%, #f6db82, #d4a52a 65%, #a3781a); box-shadow:0 1px 2px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.25); z-index:5; pointer-events:none; }
 .guide .magic-table td:nth-child(2){ text-align:center; white-space:nowrap; }
 .points-slider{ background:#fff; border:1.5px solid var(--maroon); border-left:5px solid var(--maroon); border-radius:4px; padding:12px 16px; margin:.4rem 0 1.2rem; }
@@ -612,7 +603,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         <span><span class="dot" style="background:var(--p2)"></span>Spieler 2</span>
         <span><span class="dot" style="background:var(--nml)"></span>No Man's Land</span>
       </div>
-      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt unter den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht. Die Karte ist 48×36 Zoll groß, der freie Kreis in der Mitte hat 16 Zoll. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
+      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt unter den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht. Die Karte ist 48×36 Zoll groß. In einem Kreis von 16 Zoll in der Mitte steht kein Gelände und niemand stellt auf – er ist nicht eingezeichnet. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
     </div>
 
     <div class="toolbar">
@@ -627,8 +618,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     <div class="board-outer">
       <div class="board-row">
         <div class="board" id="board" style="--scale: 13px; width: 624px; height: 468px;">
-          <canvas id="zoneCanvas" width="624" height="468" style="width: 624px; height: 468px; pointer-events: none; cursor: default;"></canvas>
-        <div class="no-terrain-circle" style="width: 208px; height: 208px; left: 208px; bottom: 130px;"><span class="strong">Kein Gelände &amp; keine Aufstellung</span><span>16" Durchmesser</span></div></div>
+          <canvas id="zoneCanvas" width="624" height="468" style="width: 624px; height: 468px; pointer-events: none; cursor: default;"></canvas></div>
         <div class="zone-legend" id="zoneLegend" style="height: 468px;"><div class="zone-legend-item" style="top: 65px;"><b><span class="swatchline" style="background:#b9c6d6"></span>SPIELER 2</b>Tiefe: 10"<br>16" bis zur gegn. Zone</div><div class="zone-legend-item" style="top: 234px;"><b><span class="swatchline" style="background:#ded6c2"></span>NO MAN'S LAND</b>Breite: 16"</div><div class="zone-legend-item" style="top: 403px;"><b><span class="swatchline" style="background:#e2c48c"></span>SPIELER 1</b>Tiefe: 10"<br>16" bis zur gegn. Zone</div></div>
       </div>
     </div>
@@ -1147,7 +1137,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     const ZONE_VALUES = ['p1', 'p2', 'nml', 'none'];
     if (Array.isArray(data.zoneGrid) && data.zoneGrid.length === cfg.h &&
         data.zoneGrid.every(row => Array.isArray(row) && row.length === cfg.w && row.every(v => ZONE_VALUES.includes(v)))) {
-      zoneGrid = data.zoneGrid;
+      zoneGrid = maskCircle(data.zoneGrid);   // aeltere Staende hatten im Kreis ein Loch
     }
     if (Array.isArray(data.treasures)) {
       treasures = data.treasures
@@ -1286,10 +1276,12 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return Math.hypot(x - cx, y - cy) <= rad;
   }
 
+  /* Im Kreis in der Mitte darf niemand aufstellen: er gehoert zum No Man's
+     Land. Er wird nicht eingezeichnet, Gelaende haelt trotzdem Abstand. */
   function maskCircle(g) {
     for (let r = 0; r < cfg.h; r++) {
       for (let c = 0; c < cfg.w; c++) {
-        if (inCircle(c + 0.5, r + 0.5)) g[r][c] = 'none';
+        if (inCircle(c + 0.5, r + 0.5)) g[r][c] = 'nml';
       }
     }
     return g;
@@ -1413,20 +1405,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     });
   }
 
-
-  function renderCircle() {
-    board.querySelectorAll('.no-terrain-circle').forEach(el => el.remove());
-    if (cfg.circle > 0) {
-      const circle = document.createElement('div');
-      circle.className = 'no-terrain-circle';
-      circle.style.width = px(cfg.circle) + 'px';
-      circle.style.height = px(cfg.circle) + 'px';
-      circle.style.left = px(cfg.w / 2 - cfg.circle / 2) + 'px';
-      circle.style.bottom = px(cfg.h / 2 - cfg.circle / 2) + 'px';
-      circle.innerHTML = '<span class="strong">Kein Gelände &amp; keine Aufstellung</span><span>' + cfg.circle + '" Durchmesser</span>';
-      board.appendChild(circle);
-    }
-  }
 
   function buildPalette() {
     paletteList.innerHTML = '';
@@ -1633,8 +1611,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       else { tag.style.left = '0'; tag.style.right = 'auto'; }
       board.appendChild(el);
     });
-    const circle = board.querySelector('.no-terrain-circle');
-    if (circle) circle.classList.toggle('text-top', treasures.length > 0);
   }
 
   function randomizeMap() {
@@ -1845,7 +1821,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       zoneGrid = maskCircle(PRESETS.standard(cfg.w, cfg.h));
     }
     drawZones();
-    renderCircle();
     board.querySelectorAll('.piece').forEach(el => el.remove());
     pieces.forEach(p => board.appendChild(createPieceEl(p)));
     renderTreasures();
@@ -1978,14 +1953,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
     // Rahmen
     g.strokeStyle = '#7a1f1f'; g.lineWidth = 2; g.strokeRect(ox, oy, bW, bH);
-
-    // Kein-Gelände-Kreis
-    if (cfg.circle > 0) {
-      g.beginPath();
-      g.arc(cx(cfg.w / 2), cy(cfg.h / 2), (cfg.circle / 2) * S, 0, Math.PI * 2);
-      g.fillStyle = 'rgba(233,217,217,.35)'; g.fill();
-      g.strokeStyle = '#7a1f1f'; g.lineWidth = 1.6; g.stroke();
-    }
 
     // kleiner Koordinaten-Kasten
     function tag(text, centerXi, bottomYi) {
