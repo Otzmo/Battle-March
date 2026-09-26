@@ -1260,9 +1260,10 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     },
     gebirgspass(W, H) {
       const g = emptyGrid();
+      const zb = (W - 16) / 2;   // 16 Zoll Abstand zwischen den Zonen
       for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
-        const isP1 = c < W * 0.25;
-        const isP2 = c >= W * 0.75;
+        const isP1 = c < zb;
+        const isP2 = c >= W - zb;
         g[r][c] = isP1 ? 'p1' : (isP2 ? 'p2' : 'nml');
       }
       return g;
@@ -1379,7 +1380,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
       items.push({ key, b, center: boxTop + boxH / 2 });
     });
     items.sort((a, b) => a.center - b.center);
-    const ITEM_H = 46;
+    const ITEM_H = 58;   // Hoehe eines dreizeiligen Eintrags plus Luft
     for (let i = 1; i < items.length; i++) {
       const minCenter = items[i - 1].center + ITEM_H;
       if (items[i].center < minCenter) items[i].center = minCenter;
