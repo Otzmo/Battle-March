@@ -126,6 +126,8 @@ button:hover{ background:var(--maroon-dark); }
 .wahl-gruppe .wahl{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:.8rem; }
 .wahl-gruppe label{ display:flex; align-items:center; gap:5px; cursor:pointer; }
 .wahl-gruppe input{ accent-color:var(--maroon); }
+.wurf{ font-size:.82rem; margin:2px 0 6px; min-height:1.2em; }
+.wurf b{ color:var(--maroon); }
 .legend{ display:flex; gap:14px; font-size:.74rem; margin-top:4px; flex-wrap:wrap; }
 .legend span{ display:inline-flex; align-items:center; gap:5px; }
 .legend .dot{ width:12px; height:12px; border-radius:3px; border:1px solid rgba(0,0,0,.3); }
@@ -604,12 +606,13 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
           <label><input type="checkbox" value="versorgung" checked> Versorgungswagen</label>
         </div>
       </fieldset>
+      <p class="wurf" id="wurfErgebnis" aria-live="polite"></p>
       <div class="legend">
         <span><span class="dot" style="background:var(--p1)"></span>Spieler 1</span>
         <span><span class="dot" style="background:var(--p2)"></span>Spieler 2</span>
         <span><span class="dot" style="background:var(--nml)"></span>No Man's Land</span>
       </div>
-      <div class="hint" style="margin-top:8px;">Je eine Aufstellungszone und eine Mission ist gewählt. Ein Klick auf eine andere würfelt sofort eine neue Karte damit, <b>🎲 Zufällige Karte</b> würfelt mit derselben Auswahl neu. Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht. Die Karte ist 48×36 Zoll groß, der freie Kreis in der Mitte hat 16 Zoll. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
+      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt unter den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht. Die Karte ist 48×36 Zoll groß, der freie Kreis in der Mitte hat 16 Zoll. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
     </div>
 
     <div class="toolbar">
@@ -618,7 +621,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       <button id="downloadBtn" title="Aktuelle Karte als PNG-Bild herunterladen">⬇ Karte herunterladen</button>
       <button id="mirrorHBtn" title="Spiegelt Gelände und Zonen links/rechts">⇋ Horizontal spiegeln</button>
       <button id="mirrorVBtn" title="Spiegelt Gelände und Zonen oben/unten">⇵ Vertikal spiegeln</button>
-      <button id="randomBtn" title="Würfelt mit der gewählten Aufstellungszone und Mission eine neue Spiegelung und Geländeplatzierung">🎲 Zufällige Karte</button>
+      <button id="randomBtn" title="Würfelt unter den angehakten Aufstellungszonen und Missionen, dazu Spiegelung und Geländeplatzierung">🎲 Zufällige Karte</button>
     </div>
 
     <div class="board-outer">
@@ -1043,7 +1046,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return {
       version: STATE_VERSION,
       cfg: { w: cfg.w, h: cfg.h, circle: cfg.circle },
-      wahl: { zone: gewaehlt('wahlZone'), mission: gewaehlt('wahlMission') },
+      wahl: { zone: angehakt('wahlZone'), mission: angehakt('wahlMission') },
+      wurf,
       pieces, pieceSeq,
       zoneGrid,
       treasures,
@@ -1116,8 +1120,14 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     if (!data || typeof data !== 'object' || data.version !== STATE_VERSION) return false;
 
     // Feldgroesse aus aelteren Staenden wird ignoriert: das Brett ist immer 48x36.
-    if (data.wahl && typeof data.wahl === 'object' && PRESETS[data.wahl.zone] && MISSIONEN.includes(data.wahl.mission)) {
-      wahlSetzen(data.wahl.zone, data.wahl.mission);
+    if (data.wahl && typeof data.wahl === 'object') {
+      const liste = v => [].concat(v || []);
+      const zonen = liste(data.wahl.zone).filter(z => PRESETS[z]);
+      if (zonen.length) wahlSetzen(zonen, liste(data.wahl.mission).filter(m => MISSIONEN.includes(m)));
+    }
+    if (data.wurf && typeof data.wurf === 'object' && PRESETS[data.wurf.zone] &&
+        (data.wurf.mission === null || MISSIONEN.includes(data.wurf.mission))) {
+      wurf = { zone: data.wurf.zone, mission: data.wurf.mission };
     }
     if (Array.isArray(data.customTypes)) {
       data.customTypes.map(cleanType).filter(Boolean).forEach(t => defaultTypes.push(t));
@@ -1206,7 +1216,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   }
 
   const MISSIONEN = ['landmarke', 'schaetze', 'versorgung'];
-  const WAHL_START = { zone: 'standard', mission: 'versorgung' };
+  const WAHL_START = { zone: ['standard'], mission: ['versorgung'] };
+  let wurf = null;   // was zuletzt gewuerfelt wurde: { zone, mission }
   const PRESETS = {
     standard(W, H) {
       const g = emptyGrid();
@@ -1626,8 +1637,12 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   }
 
   function randomizeMap() {
-    const chosen = gewaehlt('wahlZone');
-    const mission = gewaehlt('wahlMission');
+    const zufallAus = liste => liste[Math.floor(Math.random() * liste.length)];
+    const chosen = zufallAus(angehakt('wahlZone'));
+    const missionen = angehakt('wahlMission');
+    const mission = missionen.length ? zufallAus(missionen) : null;
+    wurf = { zone: chosen, mission };
+    zeigeWurf();
     const landmark = mission === 'landmarke';   // Versorgungswagen: Karte bleibt ohne Zusatz
     pieces = [];
     board.querySelectorAll('.piece').forEach(el => el.remove());
@@ -1851,6 +1866,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     clearTimeout(_saveTimer);
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* nicht verfügbar */ }
     wahlSetzen(WAHL_START.zone, WAHL_START.mission);
+    wurf = null; zeigeWurf();
     _lastWritten = null;
     defaultTypes.length = INITIAL_TYPE_COUNT;
     pieces = []; pieceSeq = 1; treasures = [];
@@ -1892,21 +1908,28 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
   document.getElementById('randomBtn').addEventListener('click', randomizeMap);
 
-  /* --- Auswahl fuer den Kartenwuerfel: je Gruppe genau ein Haken ---
+  /* --- Auswahl fuer den Kartenwuerfel: gewuerfelt wird unter den Haken ---
      Die Wahl reist mit dem Kartenstand, damit Haken und Karte zusammenpassen. */
-  function gewaehlt(id) {
-    const i = document.querySelector('#' + id + ' input:checked');
-    return i ? i.value : null;
+  function angehakt(id) {
+    return Array.from(document.querySelectorAll('#' + id + ' input:checked')).map(i => i.value);
   }
-  function wahlSetzen(zone, mission) {
-    document.querySelectorAll('#wahlZone input').forEach(i => { i.checked = i.value === zone; });
-    document.querySelectorAll('#wahlMission input').forEach(i => { i.checked = i.value === mission; });
+  function wahlSetzen(zonen, missionen) {
+    document.querySelectorAll('#wahlZone input').forEach(i => { i.checked = zonen.includes(i.value); });
+    document.querySelectorAll('#wahlMission input').forEach(i => { i.checked = missionen.includes(i.value); });
+  }
+  function zeigeWurf() {
+    const ziel = document.getElementById('wurfErgebnis');
+    ziel.textContent = '';
+    if (!wurf) return;
+    const name = (gruppe, wert) => document.querySelector(`#${gruppe} input[value="${wert}"]`).parentElement.textContent.trim();
+    const fett = t => Object.assign(document.createElement('b'), { textContent: t });
+    ziel.append('Gewürfelt: ', fett(name('wahlZone', wurf.zone)), ' · Mission: ',
+      fett(wurf.mission ? name('wahlMission', wurf.mission) : 'keine'));
   }
   document.querySelectorAll('#wahlZone input, #wahlMission input').forEach(i => {
     i.addEventListener('change', () => {
-      if (!i.checked) { i.checked = true; return; }   // der gewaehlte Haken bleibt stehen
-      i.closest('.wahl').querySelectorAll('input').forEach(o => { if (o !== i) o.checked = false; });
-      randomizeMap();
+      if (!angehakt('wahlZone').length) i.checked = true;   // ohne Zone gaebe es nichts zu wuerfeln
+      saveState();
     });
   });
 
@@ -2072,6 +2095,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   buildPalette();
   computeScale();
   rebuildAll(!restored);
+  zeigeWurf();
   // Ausgangspunkt für "hat sich etwas geändert?" beim Verlassen der Seite.
   _lastWritten = JSON.stringify(serializeState());
 })();
