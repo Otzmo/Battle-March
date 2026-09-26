@@ -118,13 +118,6 @@ button:hover{ background:var(--maroon-dark); }
 
 .toolbar{ display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
 .toolbar > button{ padding:8px 14px; }
-.settings{
-  display:flex; gap:10px; align-items:center; font-size:.78rem; background:#fff;
-  border:1px solid #9a8f7a; border-radius:4px; padding:6px 10px; flex-wrap:wrap;
-}
-.settings label{ display:flex; align-items:center; gap:4px; }
-.settings input{ width:52px; padding:2px 4px; font-family:inherit; }
-.settings button{ padding:5px 10px; }
 
 .zone-panel{ margin-bottom:12px; }
 .zone-panel .row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px; align-items:center; }
@@ -133,8 +126,6 @@ button:hover{ background:var(--maroon-dark); }
 .wahl-gruppe .wahl{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:.8rem; }
 .wahl-gruppe label{ display:flex; align-items:center; gap:5px; cursor:pointer; }
 .wahl-gruppe input{ accent-color:var(--maroon); }
-.wurf{ font-size:.82rem; margin:2px 0 6px; min-height:1.2em; }
-.wurf b{ color:var(--maroon); }
 .legend{ display:flex; gap:14px; font-size:.74rem; margin-top:4px; flex-wrap:wrap; }
 .legend span{ display:inline-flex; align-items:center; gap:5px; }
 .legend .dot{ width:12px; height:12px; border-radius:3px; border:1px solid rgba(0,0,0,.3); }
@@ -598,28 +589,27 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         <legend>Aufstellungszone</legend>
         <div class="wahl" id="wahlZone">
           <label><input type="checkbox" value="standard" checked> 1. Offene Feldschlacht</label>
-          <label><input type="checkbox" value="aufeinandertreffen" checked> 2. Aufeinandertreffen</label>
-          <label><input type="checkbox" value="flanken" checked> 3. Entgegengesetzte Flanken</label>
-          <label><input type="checkbox" value="begegnung" checked> 4. Unerwartete Begegnung</label>
-          <label><input type="checkbox" value="gebirgspass" checked> 5. Gebirgspass</label>
-          <label><input type="checkbox" value="ueberfluegeln" checked> 6. Überflügeln</label>
+          <label><input type="checkbox" value="aufeinandertreffen"> 2. Aufeinandertreffen</label>
+          <label><input type="checkbox" value="flanken"> 3. Entgegengesetzte Flanken</label>
+          <label><input type="checkbox" value="begegnung"> 4. Unerwartete Begegnung</label>
+          <label><input type="checkbox" value="gebirgspass"> 5. Gebirgspass</label>
+          <label><input type="checkbox" value="ueberfluegeln"> 6. Überflügeln</label>
         </div>
       </fieldset>
       <fieldset class="wahl-gruppe">
         <legend>Mission</legend>
         <div class="wahl" id="wahlMission">
-          <label><input type="checkbox" value="landmarke" checked> Landmarke</label>
-          <label><input type="checkbox" value="schaetze" checked> Schätze</label>
+          <label><input type="checkbox" value="landmarke"> Landmarke</label>
+          <label><input type="checkbox" value="schaetze"> Schätze</label>
           <label><input type="checkbox" value="versorgung" checked> Versorgungswagen</label>
         </div>
       </fieldset>
-      <p class="wurf" id="wurfErgebnis" aria-live="polite"></p>
       <div class="legend">
         <span><span class="dot" style="background:var(--p1)"></span>Spieler 1</span>
         <span><span class="dot" style="background:var(--p2)"></span>Spieler 2</span>
         <span><span class="dot" style="background:var(--nml)"></span>No Man's Land</span>
       </div>
-      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt aus den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
+      <div class="hint" style="margin-top:8px;">Je eine Aufstellungszone und eine Mission ist gewählt. Ein Klick auf eine andere würfelt sofort eine neue Karte damit, <b>🎲 Zufällige Karte</b> würfelt mit derselben Auswahl neu. Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht. Die Karte ist 48×36 Zoll groß, der freie Kreis in der Mitte hat 16 Zoll. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
     </div>
 
     <div class="toolbar">
@@ -628,13 +618,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       <button id="downloadBtn" title="Aktuelle Karte als PNG-Bild herunterladen">⬇ Karte herunterladen</button>
       <button id="mirrorHBtn" title="Spiegelt Gelände und Zonen links/rechts">⇋ Horizontal spiegeln</button>
       <button id="mirrorVBtn" title="Spiegelt Gelände und Zonen oben/unten">⇵ Vertikal spiegeln</button>
-      <button id="randomBtn" title="Würfelt aus den angehakten Aufstellungszonen und Missionen, dazu Spiegelung und Geländeplatzierung">🎲 Zufällige Karte</button>
-      <div class="settings">
-        <label>Breite" <input type="number" id="setW" value="48" min="12" max="96"></label>
-        <label>Tiefe" <input type="number" id="setH" value="36" min="12" max="96"></label>
-        <label>Kreis-Ø" <input type="number" id="setCircle" value="16" min="0" max="40"></label>
-        <button id="applySettingsBtn">Anwenden</button>
-      </div>
+      <button id="randomBtn" title="Würfelt mit der gewählten Aufstellungszone und Mission eine neue Spiegelung und Geländeplatzierung">🎲 Zufällige Karte</button>
     </div>
 
     <div class="board-outer">
@@ -1032,7 +1016,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   const zoneLegend = document.getElementById('zoneLegend');
   const paletteList = document.getElementById('paletteList');
 
-  let cfg = { w: 48, h: 36, circle: 16, scale: 13 };
+  const cfg = { w: 48, h: 36, circle: 16, scale: 13 };   // Feldgroesse und Kreis sind fest
   let pieces = [];
   let pieceSeq = 1;
   let zoneGrid = [];
@@ -1059,6 +1043,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return {
       version: STATE_VERSION,
       cfg: { w: cfg.w, h: cfg.h, circle: cfg.circle },
+      wahl: { zone: gewaehlt('wahlZone'), mission: gewaehlt('wahlMission') },
       pieces, pieceSeq,
       zoneGrid,
       treasures,
@@ -1097,7 +1082,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
      Was aus dem Speicher kommt, kann veraltet oder manipuliert sein. Es
      wird nur übernommen, was in Form und Wertebereich passt. */
   const TEXTURES = new Set(defaultTypes.map(t => t.tex));
-  const BOARD_LIMITS = { w: [12, 96], h: [12, 96], circle: [0, 40] };
 
   function clampInt(v, min, max, fallback) {
     const n = Math.round(Number(v));
@@ -1131,10 +1115,9 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     try { data = JSON.parse(raw); } catch (e) { return false; }
     if (!data || typeof data !== 'object' || data.version !== STATE_VERSION) return false;
 
-    if (data.cfg && typeof data.cfg === 'object') {
-      cfg.w = clampInt(data.cfg.w, ...BOARD_LIMITS.w, cfg.w);
-      cfg.h = clampInt(data.cfg.h, ...BOARD_LIMITS.h, cfg.h);
-      cfg.circle = clampInt(data.cfg.circle, ...BOARD_LIMITS.circle, cfg.circle);
+    // Feldgroesse aus aelteren Staenden wird ignoriert: das Brett ist immer 48x36.
+    if (data.wahl && typeof data.wahl === 'object' && PRESETS[data.wahl.zone] && MISSIONEN.includes(data.wahl.mission)) {
+      wahlSetzen(data.wahl.zone, data.wahl.mission);
     }
     if (Array.isArray(data.customTypes)) {
       data.customTypes.map(cleanType).filter(Boolean).forEach(t => defaultTypes.push(t));
@@ -1222,6 +1205,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     return !(hasNeg && hasPos);
   }
 
+  const MISSIONEN = ['landmarke', 'schaetze', 'versorgung'];
+  const WAHL_START = { zone: 'standard', mission: 'versorgung' };
   const PRESETS = {
     standard(W, H) {
       const g = emptyGrid();
@@ -1641,22 +1626,13 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   }
 
   function randomizeMap() {
-    const zufallAus = liste => liste[Math.floor(Math.random() * liste.length)];
-    const zonen = angehakt('wahlZone');
-    const chosen = zufallAus(zonen.length ? zonen : Object.keys(PRESETS));
-    const missionen = angehakt('wahlMission');
-    const mission = missionen.length ? zufallAus(missionen) : null;
+    const chosen = gewaehlt('wahlZone');
+    const mission = gewaehlt('wahlMission');
     const landmark = mission === 'landmarke';   // Versorgungswagen: Karte bleibt ohne Zusatz
     pieces = [];
     board.querySelectorAll('.piece').forEach(el => el.remove());
 
     zoneGrid = PRESETS[chosen](cfg.w, cfg.h);
-    const text = sel => document.querySelector(sel).parentElement.textContent.trim();
-    document.getElementById('wurfErgebnis').innerHTML = '';
-    document.getElementById('wurfErgebnis').append('Gewürfelt: ',
-      Object.assign(document.createElement('b'), { textContent: text(`#wahlZone input[value="${chosen}"]`) }),
-      ' · Mission: ',
-      Object.assign(document.createElement('b'), { textContent: mission ? text(`#wahlMission input[value="${mission}"]`) : 'keine' }));
 
     if (Math.random() < 0.5) zoneGrid.forEach(row => row.reverse());
     if (Math.random() < 0.5) zoneGrid.reverse();
@@ -1873,16 +1849,11 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     }
     disarmResetAll();
     clearTimeout(_saveTimer);
-    try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(WAHL_KEY); } catch (e) { /* nicht verfügbar */ }
-    wahlSetzen(Object.keys(PRESETS), ['landmarke', 'schaetze', 'versorgung']);
-    document.getElementById('wurfErgebnis').textContent = '';
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* nicht verfügbar */ }
+    wahlSetzen(WAHL_START.zone, WAHL_START.mission);
     _lastWritten = null;
     defaultTypes.length = INITIAL_TYPE_COUNT;
-    cfg.w = 48; cfg.h = 36; cfg.circle = 16;
     pieces = []; pieceSeq = 1; treasures = [];
-    document.getElementById('setW').value = cfg.w;
-    document.getElementById('setH').value = cfg.h;
-    document.getElementById('setCircle').value = cfg.circle;
     buildPalette();
     computeScale();
     rebuildAll(true);
@@ -1921,28 +1892,21 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
   document.getElementById('randomBtn').addEventListener('click', randomizeMap);
 
-  /* --- Auswahl fuer den Kartenwuerfel (eigener Speicherplatz, Karte bleibt unberuehrt) --- */
-  const WAHL_KEY = 'battleMarchWuerfelWahl';
-  function angehakt(id) {
-    return Array.from(document.querySelectorAll('#' + id + ' input:checked')).map(i => i.value);
-  }
-  function wahlSpeichern() {
-    try {
-      localStorage.setItem(WAHL_KEY, JSON.stringify({ zone: angehakt('wahlZone'), mission: angehakt('wahlMission') }));
-    } catch (e) { /* nicht verfuegbar */ }
+  /* --- Auswahl fuer den Kartenwuerfel: je Gruppe genau ein Haken ---
+     Die Wahl reist mit dem Kartenstand, damit Haken und Karte zusammenpassen. */
+  function gewaehlt(id) {
+    const i = document.querySelector('#' + id + ' input:checked');
+    return i ? i.value : null;
   }
   function wahlSetzen(zone, mission) {
-    document.querySelectorAll('#wahlZone input').forEach(i => { i.checked = zone.includes(i.value); });
-    document.querySelectorAll('#wahlMission input').forEach(i => { i.checked = mission.includes(i.value); });
+    document.querySelectorAll('#wahlZone input').forEach(i => { i.checked = i.value === zone; });
+    document.querySelectorAll('#wahlMission input').forEach(i => { i.checked = i.value === mission; });
   }
-  try {
-    const w = JSON.parse(localStorage.getItem(WAHL_KEY));
-    if (w && Array.isArray(w.zone) && Array.isArray(w.mission) && w.zone.some(z => PRESETS[z])) wahlSetzen(w.zone, w.mission);
-  } catch (e) { /* kaputter oder fehlender Eintrag: Voreinstellung bleibt */ }
   document.querySelectorAll('#wahlZone input, #wahlMission input').forEach(i => {
     i.addEventListener('change', () => {
-      if (!angehakt('wahlZone').length) i.checked = true;   // ohne Zone gaebe es nichts zu wuerfeln
-      wahlSpeichern();
+      if (!i.checked) { i.checked = true; return; }   // der gewaehlte Haken bleibt stehen
+      i.closest('.wahl').querySelectorAll('input').forEach(o => { if (o !== i) o.checked = false; });
+      randomizeMap();
     });
   });
 
@@ -2077,22 +2041,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
   document.getElementById('downloadBtn').addEventListener('click', downloadMap);
 
-  document.getElementById('applySettingsBtn').addEventListener('click', () => {
-    cfg.w = clampInt(parseInt(document.getElementById('setW').value) || 48, ...BOARD_LIMITS.w, 48);
-    cfg.h = clampInt(parseInt(document.getElementById('setH').value) || 36, ...BOARD_LIMITS.h, 36);
-    cfg.circle = clampInt(parseInt(document.getElementById('setCircle').value) || 0, ...BOARD_LIMITS.circle, 0);
-    document.getElementById('setW').value = cfg.w;
-    document.getElementById('setH').value = cfg.h;
-    document.getElementById('setCircle').value = cfg.circle;
-    computeScale();
-    // Gedrehte Stücke brauchen ihre umschließende Box, nicht die Grundmaße.
-    pieces.forEach(p => { [p.x, p.y] = clampPos(p.x, p.y, ...pBox(p)); });
-    rebuildAll(true);
-    // Schätze hängen an Feldmitte und Zonen – beides ist jetzt neu.
-    if (treasures.length) { treasures = computeTreasures(); renderTreasures(); }
-    saveState();
-  });
-
   document.getElementById('addCustomBtn').addEventListener('click', () => {
     // Gleiche Grenzen wie beim Laden, sonst verschwände der Typ nach dem Neuladen.
     const name = document.getElementById('cName').value.trim().slice(0, 40) || 'Gelände';
@@ -2122,9 +2070,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
   const restored = loadState();
   buildPalette();
-  document.getElementById('setW').value = cfg.w;
-  document.getElementById('setH').value = cfg.h;
-  document.getElementById('setCircle').value = cfg.circle;
   computeScale();
   rebuildAll(!restored);
   // Ausgangspunkt für "hat sich etwas geändert?" beim Verlassen der Seite.
