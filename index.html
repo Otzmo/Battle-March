@@ -321,13 +321,17 @@ button:hover{ background:var(--maroon-dark); }
 <nav class="tabnav">
 <div class="tabbar" role="tablist" aria-label="Battle March Werkzeuge">
   <button class="tab-btn" role="tab" id="tab-battlemarch" data-tab="battlemarch" aria-selected="true" tabindex="0">Battle March</button>
+  <button class="tab-btn" role="tab" id="tab-core" data-tab="core" aria-selected="false" tabindex="-1">Core Battle</button>
   <button class="tab-btn" role="tab" id="tab-kartenbau" data-tab="kartenbau" aria-selected="false" tabindex="-1">Kartenbau</button>
-  <button class="tab-btn" role="tab" id="tab-germancomp" data-tab="germancomp" aria-controls="panel-germancomp" aria-selected="false" tabindex="-1">GermanComp</button>
   <button class="tab-btn" role="tab" id="tab-base" data-tab="base" aria-controls="panel-base" aria-selected="false" tabindex="-1">BASE</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Battle March" data-gruppe="battlemarch">
   <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
   <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="false" tabindex="-1">Armee &amp; Magie</button>
+</div>
+<div class="subtabbar" role="tablist" aria-label="Core Battle" data-gruppe="core" hidden="">
+  <button class="tab-btn" role="tab" id="tab-coreleitfaden" data-tab="coreleitfaden" aria-controls="panel-coreleitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
+  <button class="tab-btn" role="tab" id="tab-corearmee" data-tab="corearmee" aria-controls="panel-corearmee" aria-selected="false" tabindex="-1">Armee</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Kartenbau" data-gruppe="kartenbau" hidden="">
   <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="true" tabindex="0">Battle March</button>
@@ -646,8 +650,16 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 <div class="builder" id="coreBuilder"><!-- wird beim Laden aus dem Battle-March-Kartenbau kopiert --></div>
 </div>
 
-<!-- ===================== GERMANCOMP ===================== -->
-<div class="tab-content" id="panel-germancomp" role="tabpanel" aria-labelledby="tab-germancomp" tabindex="0" hidden="">
+<!-- ===================== CORE BATTLE: LEITFADEN ===================== -->
+<div class="tab-content" id="panel-coreleitfaden" role="tabpanel" aria-labelledby="tab-coreleitfaden" tabindex="0" hidden="">
+<div class="guide">
+<h1>Core Battle – Leitfaden</h1>
+<p>Hier entsteht der Leitfaden für Core Battle.</p>
+</div>
+</div>
+
+<!-- ===================== CORE BATTLE: ARMEE (GermanComp) ===================== -->
+<div class="tab-content" id="panel-corearmee" role="tabpanel" aria-labelledby="tab-corearmee" tabindex="0" hidden="">
 <div class="guide">
 
 <div class="version-box"><b>REV 2026-08-30 · Version 1.5.3 (LVO)</b><br>
