@@ -26,12 +26,18 @@ body{
 .page-subtitle{ color:#4a3f2f; font-style:italic; margin:0; font-size:.95rem; }
 
 /* ---------- Tabs ---------- */
-.tabbar{
+.tabnav{
   position:sticky; top:0; z-index:100;
-  display:flex; gap:6px; justify-content:center;
   max-width:1320px; margin:0 auto 18px; padding:8px 0;
   background:#ded2b8;
 }
+.tabbar{ display:flex; gap:6px; justify-content:center; }
+.subtabbar{
+  display:flex; gap:6px; justify-content:center;
+  margin-top:-2px; padding-top:8px; border-top:2px solid var(--maroon);
+}
+.subtabbar[hidden]{ display:none; }
+.subtabbar .tab-btn{ padding:6px 18px; font-size:.92rem; border-radius:0 0 6px 6px; }
 .tab-btn{
   font-family:inherit; font-size:1rem; cursor:pointer;
   padding:10px 24px; border:2px solid var(--maroon);
@@ -229,8 +235,9 @@ button:hover{ background:var(--maroon-dark); }
 @media (max-width:720px){
   body{ padding:12px 12px 24px; }
   .page-header h1{ font-size:1.7rem; }
-  .tabbar{ margin-bottom:12px; }
-  .tab-btn{ flex:1; padding:10px 8px; font-size:.95rem; }
+  .tabnav{ margin-bottom:12px; }
+  .tabbar, .subtabbar{ gap:4px; }
+  .tab-btn{ flex:1; padding:10px 4px; font-size:.9rem; }
 
   .guide{ padding:6px 14px 24px; }
   .guide h1{ font-size:1.3rem; }
@@ -320,13 +327,18 @@ button:hover{ background:var(--maroon-dark); }
   <p class="page-subtitle">Leitfaden für Gefechtsmarsch-Spiele · <span id="pointsSub">600</span> Punkte</p>
 </div>
 
+<nav class="tabnav">
 <div class="tabbar" role="tablist" aria-label="Battle March Werkzeuge">
-  <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="false" tabindex="-1">Leitfaden</button>
-  <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="true" tabindex="0">Armee &amp; Magie</button>
+  <button class="tab-btn" role="tab" id="tab-battlemarch" data-tab="battlemarch" aria-selected="true" tabindex="0">Battle March</button>
   <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="false" tabindex="-1">Kartenbau</button>
   <button class="tab-btn" role="tab" id="tab-germancomp" data-tab="germancomp" aria-controls="panel-germancomp" aria-selected="false" tabindex="-1">GermanComp</button>
   <button class="tab-btn" role="tab" id="tab-base" data-tab="base" aria-controls="panel-base" aria-selected="false" tabindex="-1">BASE</button>
 </div>
+<div class="subtabbar" role="tablist" aria-label="Battle March">
+  <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
+  <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="false" tabindex="-1">Armee &amp; Magie</button>
+</div>
+</nav>
 
 <!-- ===================== LEITFADEN ===================== -->
 <div class="tab-content" id="panel-leitfaden" role="tabpanel" aria-labelledby="tab-leitfaden" tabindex="0" hidden="">
@@ -2150,7 +2162,10 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 
 /* ================= Tab-Navigation ================= */
 (function () {
-  const tabs = Array.from(document.querySelectorAll('.tab-btn'));
+  // "Battle March" ist ein Oberpunkt mit eigener Unterleiste (Leitfaden, Armee & Magie)
+  const haupt = Array.from(document.querySelectorAll('.tabbar .tab-btn'));
+  const unter = Array.from(document.querySelectorAll('.subtabbar .tab-btn'));
+  const unterleiste = document.querySelector('.subtabbar');
   const panels = {
     leitfaden: document.getElementById('panel-leitfaden'),
     armee: document.getElementById('panel-armee'),
@@ -2158,28 +2173,38 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     germancomp: document.getElementById('panel-germancomp'),
     base: document.getElementById('panel-base')
   };
-  function activate(name, focusTab) {
-    tabs.forEach(t => {
+  const istUnter = name => unter.some(t => t.dataset.tab === name);
+  let letzterUnter = 'leitfaden';
+  function markiere(liste, name, fokus) {
+    liste.forEach(t => {
       const sel = t.dataset.tab === name;
       t.setAttribute('aria-selected', sel ? 'true' : 'false');
       t.tabIndex = sel ? 0 : -1;
-      if (sel && focusTab) t.focus();
+      if (sel && fokus) t.focus();
     });
+  }
+  function activate(name, focusTab) {
+    if (name === 'battlemarch') name = letzterUnter;
+    const bm = istUnter(name);
+    if (bm) letzterUnter = name;
+    markiere(haupt, bm ? 'battlemarch' : name, focusTab && !bm);
+    markiere(unter, letzterUnter, focusTab && bm);
+    unterleiste.hidden = !bm;
     Object.keys(panels).forEach(k => { panels[k].hidden = (k !== name); });
     if (name === 'baukasten' && window.__refreshBuilder) window.__refreshBuilder();
     if (name === 'base' && window.__refreshBase) window.__refreshBase();
   }
-  tabs.forEach((t, i) => {
+  [haupt, unter].forEach(liste => liste.forEach((t, i) => {
     t.addEventListener('click', () => activate(t.dataset.tab));
     t.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
         e.preventDefault();
         const dir = e.key === 'ArrowRight' ? 1 : -1;
-        const next = tabs[(i + dir + tabs.length) % tabs.length];
+        const next = liste[(i + dir + liste.length) % liste.length];
         activate(next.dataset.tab, true);
       }
     });
-  });
+  }));
   activate('leitfaden');
 })();
 </script>
