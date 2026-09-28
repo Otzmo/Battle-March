@@ -175,8 +175,8 @@ button:hover{ background:var(--maroon-dark); }
   display:flex; align-items:center; justify-content:center; text-align:center;
   pointer-events:none; z-index:3; overflow:hidden; box-sizing:border-box;
 }
-.no-terrain-circle span{ color:var(--maroon); font-style:italic; font-weight:bold; font-size:.72rem; line-height:1.25; }
-.no-terrain-circle.text-top{ align-items:flex-start; padding-top:calc(var(--scale) * 2.5); }   /* Schatz liegt in der Mitte */
+.no-terrain-circle span{ color:var(--maroon); font-style:italic; font-weight:bold; font-size:clamp(8px, calc(var(--scale) * 0.85), 12px); line-height:1.2; white-space:nowrap; }
+.no-terrain-circle.text-top{ align-items:flex-start; overflow:visible; }   /* Abstand nach oben setzt kreisBeschriftung() */
 
 
 .piece{
@@ -377,7 +377,7 @@ button:hover{ background:var(--maroon-dark); }
 </tbody></table>
 
 <h2>Geländeaufstellung</h2>
-<p>Gespielt wird auf einer Matte von 48×36 Zoll. Setze von jedem Geländestück eins auf die Matte. In der Mitte sollte ein 16 Zoll Kreis frei bleiben. Alternativ nutze den <b>Kartenbau</b>-Reiter oben auf dieser Seite.</p>
+<p>Gespielt wird auf einer Matte von 48×36 Zoll. Setze von jedem Geländestück eins auf die Matte. In der Mitte sollte ein 14 Zoll Kreis frei bleiben. Alternativ nutze den <b>Kartenbau</b>-Reiter oben auf dieser Seite.</p>
 
 <h2>Aufstellungszonen</h2>
 <p>Die Aufstellungszone ist 10 Zoll tief. Alternativ nutze den Kartenbau-Reiter oben auf dieser Seite</p>
@@ -1814,18 +1814,30 @@ function kartenbau(opt) {
   }
 
   /* Liegt etwas auf der Kreismitte (Schatz, Missionsziel oder der Turm als
-     Landmarke), rueckt die Beschriftung nach oben, sonst waere sie verdeckt. */
-  function mitteBelegt() {
+     Landmarke), rueckt die Beschriftung darueber, sonst waere sie verdeckt.
+     Liefert, wie weit (in Zoll) oberhalb der Mitte die Beschriftung frei
+     beginnen muss - 0 heisst: die Mitte ist frei. knopf = Platz ueber einem
+     Stueck (am Bildschirm ragen dort Drehen/Loeschen heraus). */
+  function mitteBelegt(knopf) {
     const mx = cfg.w / 2, my = cfg.h / 2;
-    if (treasures.some(t => Math.abs(t.x - mx) < 4 && Math.abs(t.y - my) < 1.5)) return true;
-    return pieces.some(p => {
+    let frei = 0;
+    if (treasures.some(t => Math.abs(t.x - mx) < 4 && Math.abs(t.y - my) < 1.5)) frei = TREASURE_R + 0.3;
+    pieces.forEach(p => {
       const [bw, bd] = pBox(p);
-      return p.x < mx + 3 && p.x + bw > mx - 3 && p.y < my + 0.6 && p.y + bd > my - 0.6;
+      if (p.x < mx + 3 && p.x + bw > mx - 3 && p.y < my + 0.6 && p.y + bd > my - 0.6) {
+        frei = Math.max(frei, p.y + bd - my + knopf);
+      }
     });
+    return frei;
   }
   function kreisBeschriftung() {
     const circle = board.querySelector('.no-terrain-circle');
-    if (circle) circle.classList.toggle('text-top', mitteBelegt());
+    if (!circle) return;
+    const frei = mitteBelegt(14 / cfg.scale);                                   // Knoepfe ragen 11 px heraus
+    const textH = Math.min(12, Math.max(8, 0.85 * cfg.scale)) * 1.25 / cfg.scale;   // wie im CSS
+    const abstand = cfg.circle / 2 - frei - textH;   // von der Kreisoberkante bis zum Text, darf negativ sein
+    circle.classList.toggle('text-top', frei > 0);
+    circle.querySelector('span').style.marginTop = frei > 0 ? (abstand * cfg.scale).toFixed(1) + 'px' : '';
   }
 
   function randomizeMap() {
@@ -2183,7 +2195,8 @@ function kartenbau(opt) {
       g.strokeStyle = '#7a1f1f'; g.lineWidth = 1.6; g.stroke();
       g.fillStyle = '#7a1f1f'; g.textAlign = 'center'; g.textBaseline = 'middle';
       g.font = 'italic bold ' + F.mass + 'px Georgia, serif';
-      const kreisY = cy(cfg.h / 2) - (mitteBelegt() ? cfg.circle * S * 0.33 : 0);
+      const frei = mitteBelegt(0.3);
+      const kreisY = cy(cfg.h / 2) - (frei > 0 ? frei * S + F.mass * 0.7 : 0);
       g.fillText(cfg.circle + '" Durchmesser', cx(cfg.w / 2), kreisY);
     }
 
@@ -2301,7 +2314,7 @@ function kartenbau(opt) {
   _lastWritten = JSON.stringify(serializeState());
 }
 // zonenTiefe: Offene Feldschlacht und Unerwartete Begegnung; passAbstand: Gebirgspass
-kartenbau({ endung: '', w: 48, h: 36, kreis: 16, zonenTiefe: 10, passAbstand: 16,
+kartenbau({ endung: '', w: 48, h: 36, kreis: 14, zonenTiefe: 10, passAbstand: 16,
             speicher: 'battleMarchBuilderState', datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder',
             marker: { name: 'Schatz', farbe: '#d4a52a', rand: '#6b4a1a', abstand: 3 },
             missionen: [{ wert: 'landmarke', name: 'Landmarke', art: 'turm' },
