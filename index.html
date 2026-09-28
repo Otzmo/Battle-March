@@ -697,7 +697,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 <div class="acc">
 <button type="button" class="acc-head" aria-expanded="false" aria-controls="core-obj-4-body"><span class="acc-title">The Ruin <span class="italic">(End of game)</span></span><span class="acc-icon" aria-hidden="true">▸</span></button>
 <div class="acc-body" id="core-obj-4-body" role="region" hidden="">
-<p>The ruin is a <b>ruin, 8" × 8"</b>, placed in the <b>centre of the battlefield</b>.</p>
+<p>The ruin is a <b>ruin, 7" × 7"</b>, placed in the <b>centre of the battlefield</b>.</p>
 <p><b>Controlling the Ruin:</b> The ruin is controlled by a scoring unit within <b>6"</b> of it.</p>
 <p><b>300 VP</b> per Scoring (300 total).</p>
 </div>
@@ -1138,7 +1138,7 @@ function kartenbau(opt) {
 
   /* Missionen kommen aus den Optionen, in Gruppen (Core Battle: End of player
      turn / End of game). Pro Gruppe wird beim Wuerfeln eine Mission gezogen.
-     art sagt, was auf der Karte passiert: 'turm' = Turm in der Mitte, 'ruine' = Ruine 8x8 in der Mitte,
+     art sagt, was auf der Karte passiert: 'turm' = Turm in der Mitte, 'ruine' = Ruine in der Mitte,
      'schaetze' = drei Schaetze, 'keine' = nichts, oder { varianten: [...] } mit
      festen Missionszielen als Anteile von Breite und Tiefe - eine der Varianten
      wird beim Wuerfeln gewaehlt. */
@@ -1291,7 +1291,7 @@ function kartenbau(opt) {
       pieces = data.pieces.map(cleanPiece).filter(p => p && !seen.has(p.id) && seen.add(p.id));
       /* Die Lage wird immer neu ins Brett gezogen: schräge Stücke aus älteren
          Karten stehen jetzt auf 90 Grad und haben damit eine andere Box. */
-      pieces.forEach(p => { [p.x, p.y] = clampPos(p.x, p.y, ...pBox(p)); });
+      pieces.forEach(p => { [p.x, p.y] = clampPos(p.x, p.y, ...pBox(p), 0.5); });   // halbe Zoll bleiben erhalten (Ruine in der Mitte)
     }
     // Der Zähler muss immer hinter der höchsten vorhandenen Nummer stehen.
     const maxId = pieces.reduce((m, p) => Math.max(m, p.id), 0);
@@ -1558,10 +1558,10 @@ function kartenbau(opt) {
     saveState();
   }
 
-  function clampPos(x, y, w, d) {
+  function clampPos(x, y, w, d, schritt = 1) {
     x = Math.max(0, Math.min(cfg.w - w, x));
     y = Math.max(0, Math.min(cfg.h - d, y));
-    return [Math.round(x), Math.round(y)];
+    return [Math.round(x / schritt) * schritt, Math.round(y / schritt) * schritt];
   }
 
   function createPieceEl(piece) {
@@ -1773,7 +1773,7 @@ function kartenbau(opt) {
     wurf = { zone: chosen, missionen: gezogen };
     zeigeWurf();
     const arten = gezogen.map(missionsArt);
-    // Mittelstueck: Turm (Landmarke) oder Ruine 8x8 (The Ruin); die normale Ruine entfaellt dann
+    // Mittelstueck: Turm (Landmarke) oder Ruine (The Ruin), genau mittig; die normale Ruine entfaellt dann
     const mitteStueck = arten.includes('turm') ? 'Turm' : arten.includes('ruine') ? 'Ruine' : null;
     const landmark = !!mitteStueck;
     pieces = [];
@@ -1800,9 +1800,8 @@ function kartenbau(opt) {
     const MIN_GAP = 6;
 
     const towerType = mitteStueck && defaultTypes.find(t => t.name === mitteStueck);
-    const MITTE_MASS = 8;   // Turm und Ruine in der Mitte sind 8x8 Zoll
     const lmRect = landmark && towerType
-      ? { x: Math.round(cfg.w / 2 - MITTE_MASS / 2), y: Math.round(cfg.h / 2 - MITTE_MASS / 2), w: MITTE_MASS, d: MITTE_MASS }
+      ? { x: cfg.w / 2 - towerType.w / 2, y: cfg.h / 2 - towerType.d / 2, w: towerType.w, d: towerType.d }
       : null;
 
     function attemptPlacement() {
@@ -1865,7 +1864,7 @@ function kartenbau(opt) {
     }
 
     best.results.forEach(r => { if (r) placePieceExact(r.type, r.x, r.y, r.w, r.d, r.ang); });
-    if (lmRect && towerType) placePieceExact(towerType, lmRect.x, lmRect.y, MITTE_MASS, MITTE_MASS, 0);
+    if (lmRect && towerType) placePieceExact(towerType, lmRect.x, lmRect.y, towerType.w, towerType.d, 0);
     renderTreasures();
     saveState();
   }
