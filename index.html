@@ -226,6 +226,8 @@ button:hover{ background:var(--maroon-dark); }
 
 
 .footer-note{ text-align:center; font-size:.72rem; color:#5a4f3f; font-style:italic; margin-top:16px; }
+.karten-info{ text-align:center; font-size:.92rem; margin:10px 0 0; min-height:1.3em; }
+.karten-info b{ color:var(--maroon); }
 .coord-explainer{
   max-width:900px; margin:0 auto 20px; background:var(--beige); border:1.5px solid var(--maroon);
   border-radius:4px; padding:8px 14px; font-size:.78rem; line-height:1.5; color:#4a3f2f; text-align:center;
@@ -616,11 +618,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       </fieldset>
       <fieldset class="wahl-gruppe">
         <legend>Mission</legend>
-        <div class="wahl" id="wahlMission">
-          <label><input type="checkbox" value="landmarke" checked> Landmarke</label>
-          <label><input type="checkbox" value="schaetze" checked> Schätze</label>
-          <label><input type="checkbox" value="versorgung" checked> Versorgungswagen</label>
-        </div>
+        <div class="wahl" id="wahlMission"><!-- wird aus den Optionen gefuellt --></div>
       </fieldset>
       <p class="wurf" id="wurfErgebnis" aria-live="polite"></p>
       <div class="legend">
@@ -648,6 +646,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       </div>
     </div>
 
+    <p class="karten-info" id="kartenInfo" aria-live="polite"></p>
     <p class="footer-note">Ursprung (0,0) = linke untere Ecke der Matte</p>
   </div>
 
@@ -1166,18 +1165,33 @@ function kartenbau(opt) {
   board.closest('.builder').querySelectorAll('.feld-mass').forEach(el => { el.textContent = cfg.w + '×' + cfg.h; });
   board.closest('.builder').querySelectorAll('.kreis-mass').forEach(el => { el.textContent = cfg.circle; });
 
-  /* Missionen kommen aus den Optionen; art sagt, was auf der Karte passiert:
-     'turm' = Turm als Landmarke in der Mitte, 'schaetze' = drei Schaetze, 'keine' = nichts,
-     oder { varianten: [...] } mit festen Missionszielen als Anteile von Breite und Tiefe -
-     eine der Varianten wird beim Wuerfeln gewaehlt. */
-  const MISSIONEN = opt.missionen.map(m => m.wert);
-  const missionsArt = wert => (opt.missionen.find(m => m.wert === wert) || {}).art;
-  $('wahlMission').replaceChildren(...opt.missionen.map(m => {
-    const label = document.createElement('label');
-    const box = Object.assign(document.createElement('input'), { type: 'checkbox', value: m.wert, checked: true });
-    label.append(box, ' ' + m.name);
-    return label;
-  }));
+  /* Missionen kommen aus den Optionen, in Gruppen (Core Battle: End of player
+     turn / End of game). Pro Gruppe wird beim Wuerfeln eine Mission gezogen.
+     art sagt, was auf der Karte passiert: 'turm' = Turm in der Mitte,
+     'schaetze' = drei Schaetze, 'keine' = nichts, oder { varianten: [...] } mit
+     festen Missionszielen als Anteile von Breite und Tiefe - eine der Varianten
+     wird beim Wuerfeln gewaehlt. */
+  const alleMissionen = opt.gruppen.flatMap(g => g.missionen);
+  const MISSIONEN = alleMissionen.map(m => m.wert);
+  const missionsArt = wert => (alleMissionen.find(m => m.wert === wert) || {}).art;
+  const missionsName = wert => (alleMissionen.find(m => m.wert === wert) || {}).name;
+  const vorlageFeld = $('wahlMission').closest('fieldset');
+  const GRUPPEN = opt.gruppen.map((g, gi) => {
+    const feld = gi === 0 ? vorlageFeld : vorlageFeld.cloneNode(true);
+    if (gi > 0) vorlageFeld.parentNode.insertBefore(feld, $('wurfErgebnis'));
+    feld.querySelector('legend').textContent = g.titel;
+    const div = feld.querySelector('.wahl');
+    if (gi > 0) div.id = 'wahlMission' + gi + opt.endung;
+    div.replaceChildren(...g.missionen.map(m => {
+      const label = document.createElement('label');
+      const box = Object.assign(document.createElement('input'), { type: 'checkbox', value: m.wert, checked: true });
+      label.append(box, ' ' + m.name);
+      return label;
+    }));
+    return { kurz: g.kurz, div, werte: g.missionen.map(m => m.wert) };
+  });
+  const missionsBoxen = () => GRUPPEN.flatMap(g => [...g.div.querySelectorAll('input')]);
+  const angehaktIn = div => [...div.querySelectorAll('input:checked')].map(i => i.value);
   board.closest('.builder').querySelectorAll('.missions-hinweis').forEach(el => { el.innerHTML = opt.missionsHinweis; });
   let pieces = [];
   let pieceSeq = 1;
@@ -1205,7 +1219,7 @@ function kartenbau(opt) {
     return {
       version: STATE_VERSION,
       cfg: { w: cfg.w, h: cfg.h, circle: cfg.circle },
-      wahl: { zone: angehakt('wahlZone'), mission: angehakt('wahlMission') },
+      wahl: { zone: angehakt('wahlZone'), missionen: GRUPPEN.map(g => angehaktIn(g.div)) },
       wurf,
       pieces, pieceSeq,
       zoneGrid,
@@ -1283,14 +1297,19 @@ function kartenbau(opt) {
     if (data.wahl && typeof data.wahl === 'object') {
       const liste = v => [].concat(v || []);
       const zonen = liste(data.wahl.zone).filter(z => PRESETS[z]);
-      const missionen = liste(data.wahl.mission).filter(m => MISSIONEN.includes(m));
+      // aeltere Staende kennen nur eine Liste 'mission' ohne Gruppen
+      const roh = Array.isArray(data.wahl.missionen) ? data.wahl.missionen.map(liste)
+                : GRUPPEN.map(() => liste(data.wahl.mission));
+      let missionen = GRUPPEN.map((g, gi) => liste(roh[gi]).filter(m => g.werte.includes(m)));
       // Stand mit Missionen, die es hier nicht (mehr) gibt: alle anhaken
-      const fremd = liste(data.wahl.mission).length > 0 && missionen.length === 0;
-      if (zonen.length) wahlSetzen(zonen, fremd ? MISSIONEN : missionen);
+      if (roh.flat().length > 0 && missionen.flat().length === 0) missionen = GRUPPEN.map(g => g.werte);
+      if (zonen.length) wahlSetzen(zonen, missionen);
     }
-    if (data.wurf && typeof data.wurf === 'object' && PRESETS[data.wurf.zone] &&
-        (data.wurf.mission === null || MISSIONEN.includes(data.wurf.mission))) {
-      wurf = { zone: data.wurf.zone, mission: data.wurf.mission };
+    if (data.wurf && typeof data.wurf === 'object' && PRESETS[data.wurf.zone]) {
+      const gezogen = Array.isArray(data.wurf.missionen) ? data.wurf.missionen : [data.wurf.mission];
+      if (gezogen.every(m => m === null || m === undefined || MISSIONEN.includes(m))) {
+        wurf = { zone: data.wurf.zone, missionen: gezogen.map(m => m || null) };
+      }
     }
     if (Array.isArray(data.customTypes)) {
       data.customTypes.map(cleanType).filter(Boolean).forEach(t => defaultTypes.push(t));
@@ -1379,8 +1398,8 @@ function kartenbau(opt) {
   }
 
   const WAHL_START = { zone: ['standard', 'aufeinandertreffen', 'flanken', 'begegnung', 'gebirgspass', 'ueberfluegeln'],
-                       mission: MISSIONEN };
-  let wurf = null;   // was zuletzt gewuerfelt wurde: { zone, mission }
+                       missionen: GRUPPEN.map(g => g.werte) };
+  let wurf = null;   // was zuletzt gewuerfelt wurde: { zone, missionen: [je Gruppe eine oder null] }
   const PRESETS = {
     standard(W, H) {
       const g = emptyGrid();
@@ -1845,11 +1864,19 @@ function kartenbau(opt) {
   function randomizeMap() {
     const zufallAus = liste => liste[Math.floor(Math.random() * liste.length)];
     const chosen = zufallAus(angehakt('wahlZone'));
-    const missionen = angehakt('wahlMission');
-    const mission = missionen.length ? zufallAus(missionen) : null;
-    wurf = { zone: chosen, mission };
+    // Je Gruppe eine Mission. Ein Ziel genau in der Mitte vertraegt sich nicht
+    // mit dem Turm dort - solche Paare werden neu gezogen, solange es anders geht.
+    const mitteZiel = art => !!(art && art.varianten && art.varianten.every(v => v.some(([fx, fy]) => fx === 0.5 && fy === 0.5)));
+    let gezogen;
+    for (let versuch = 0; versuch < 30; versuch++) {
+      gezogen = GRUPPEN.map(g => { const w = angehaktIn(g.div); return w.length ? zufallAus(w) : null; });
+      const arten = gezogen.map(missionsArt);
+      if (!(arten.includes('turm') && arten.some(mitteZiel))) break;
+    }
+    wurf = { zone: chosen, missionen: gezogen };
     zeigeWurf();
-    const landmark = missionsArt(mission) === 'turm';
+    const arten = gezogen.map(missionsArt);
+    const landmark = arten.includes('turm');
     pieces = [];
     board.querySelectorAll('.piece').forEach(el => el.remove());
 
@@ -1862,10 +1889,14 @@ function kartenbau(opt) {
     drawZones();
     renderCircle();
 
-    const art = missionsArt(mission);
-    const ziele = art && art.varianten ? zufallAus(art.varianten) : null;   // Ausrichtung wird mitgewuerfelt
-    treasures = art === 'schaetze' ? computeTreasures()
-              : ziele ? ziele.map(([fx, fy]) => ({ x: cfg.w * fx, y: cfg.h * fy })) : [];
+    treasures = [];
+    arten.forEach(art => {
+      if (art === 'schaetze') treasures = treasures.concat(computeTreasures());
+      else if (art && art.varianten) {
+        const ziele = zufallAus(art.varianten);   // Ausrichtung wird mitgewuerfelt
+        treasures = treasures.concat(ziele.map(([fx, fy]) => ({ x: cfg.w * fx, y: cfg.h * fy })));
+      }
+    });
 
     const MIN_GAP = 6;
 
@@ -2076,7 +2107,7 @@ function kartenbau(opt) {
     disarmResetAll();
     clearTimeout(_saveTimer);
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* nicht verfügbar */ }
-    wahlSetzen(WAHL_START.zone, WAHL_START.mission);
+    wahlSetzen(WAHL_START.zone, WAHL_START.missionen);
     wurf = null; zeigeWurf();
     _lastWritten = null;
     defaultTypes.length = INITIAL_TYPE_COUNT;
@@ -2126,18 +2157,24 @@ function kartenbau(opt) {
   }
   function wahlSetzen(zonen, missionen) {
     $('wahlZone').querySelectorAll('input').forEach(i => { i.checked = zonen.includes(i.value); });
-    $('wahlMission').querySelectorAll('input').forEach(i => { i.checked = missionen.includes(i.value); });
+    GRUPPEN.forEach((g, gi) => g.div.querySelectorAll('input').forEach(i => { i.checked = (missionen[gi] || []).includes(i.value); }));
+  }
+  /* Was gewuerfelt wurde, als Paare [Bezeichnung, Wert] - fuer die Zeile im
+     Kartenwuerfel, die Zeile unter der Karte und das PNG. */
+  function wurfTeile() {
+    if (!wurf) return [];
+    const zone = $('wahlZone').querySelector(`input[value="${wurf.zone}"]`).parentElement.textContent.trim();
+    return [['Aufstellungszone', zone]].concat(GRUPPEN.map((g, gi) =>
+      [g.kurz, wurf.missionen[gi] ? missionsName(wurf.missionen[gi]) : 'keine']));
   }
   function zeigeWurf() {
-    const ziel = $('wurfErgebnis');
-    ziel.textContent = '';
-    if (!wurf) return;
-    const name = (gruppe, wert) => $(gruppe).querySelector(`input[value="${wert}"]`).parentElement.textContent.trim();
     const fett = t => Object.assign(document.createElement('b'), { textContent: t });
-    ziel.append('Gewürfelt: ', fett(name('wahlZone', wurf.zone)), ' · Mission: ',
-      fett(wurf.mission ? name('wahlMission', wurf.mission) : 'keine'));
+    [$('wurfErgebnis'), $('kartenInfo')].forEach((ziel, i) => {
+      ziel.textContent = '';
+      wurfTeile().forEach(([was, wert], k) => ziel.append(k ? ' · ' : (i ? '' : 'Gewürfelt – '), was + ': ', fett(wert)));
+    });
   }
-  [...$('wahlZone').querySelectorAll('input'), ...$('wahlMission').querySelectorAll('input')].forEach(i => {
+  [...$('wahlZone').querySelectorAll('input'), ...missionsBoxen()].forEach(i => {
     i.addEventListener('change', () => {
       if (!angehakt('wahlZone').length) i.checked = true;   // ohne Zone gaebe es nichts zu wuerfeln
       saveState();
@@ -2150,7 +2187,9 @@ function kartenbau(opt) {
       tag: Math.round(S * 0.62), name: Math.round(S * 0.8),
       mass: Math.round(S * 0.6), achse: Math.round(S * 0.62)
     };
-    const ML = F.achse * 2 + 12, MR = F.achse + 8, MT = 20, MB = F.achse + 18;   // Ränder für Achsen
+    const info = wurfTeile();           // gewuerfelte Zone und Missionen stehen unter der Karte
+    const INFO_H = info.length ? Math.round(F.achse * 2.2) : 0;
+    const ML = F.achse * 2 + 12, MR = F.achse + 8, MT = 20, MB = F.achse + 18 + INFO_H;   // Ränder für Achsen
     const bW = cfg.w * S, bH = cfg.h * S;
     const cv = document.createElement('canvas');
     cv.width = bW + ML + MR;
@@ -2269,6 +2308,21 @@ function kartenbau(opt) {
     g.textAlign = 'right'; g.textBaseline = 'middle';
     for (let j = 0; j <= cfg.h; j += 6) g.fillText(j + '"', ox - 8, cy(j));
 
+    // Zone und Missionen unter der Karte - "Bezeichnung:" normal, Wert fett
+    if (info.length) {
+      const zeileY = oy + bH + F.achse + 18 + INFO_H / 2;
+      const teile = [];
+      info.forEach(([was, wert], k) => { teile.push([(k ? '   ·   ' : '') + was + ': ', false], [wert, true]); });
+      const schrift = fett => (fett ? 'bold ' : '') + F.achse + 'px Georgia, serif';
+      const breite = teile.reduce((sum, [t, fett]) => { g.font = schrift(fett); return sum + g.measureText(t).width; }, 0);
+      let x = ox + bW / 2 - breite / 2;
+      g.textAlign = 'left'; g.textBaseline = 'middle';
+      teile.forEach(([t, fett]) => {
+        g.font = schrift(fett); g.fillStyle = fett ? '#7a1f1f' : '#4a3f2f';
+        g.fillText(t, x, zeileY); x += g.measureText(t).width;
+      });
+    }
+
     // Download auslösen
     const a = document.createElement('a');
     a.download = opt.datei;
@@ -2319,25 +2373,33 @@ function kartenbau(opt) {
 kartenbau({ endung: '', w: 48, h: 36, kreis: 14, zonenTiefe: 10, passAbstand: 16,
             speicher: 'battleMarchBuilderState', datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder',
             marker: { name: 'Schatz', farbe: '#d4a52a', rand: '#6b4a1a', abstand: 3 },
-            missionen: [{ wert: 'landmarke', name: 'Landmarke', art: 'turm' },
-                        { wert: 'schaetze', name: 'Schätze', art: 'schaetze' },
-                        { wert: 'versorgung', name: 'Versorgungswagen', art: 'keine' }],
+            gruppen: [{ titel: 'Mission', kurz: 'Mission', missionen: [
+                          { wert: 'landmarke', name: 'Landmarke', art: 'turm' },
+                          { wert: 'schaetze', name: 'Schätze', art: 'schaetze' },
+                          { wert: 'versorgung', name: 'Versorgungswagen', art: 'keine' }] }],
             missionsHinweis: "Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht." });
 kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstand: 24,
             speicher: 'coreBattleBuilderState', datei: 'core-battle-karte.png', auffrischen: '__refreshCore',
             marker: { name: 'Missionsziel', klasse: 'ziel', farbe: '#1f3a6b', rand: '#0d1b33', abstand: 6 },
             // Ziele jeweils auf halbem Weg zwischen Mitte und Mitte einer Kante
             // Location 3 und 2 gibt es waagerecht und senkrecht
-            missionen: [{ wert: 'location4', name: 'Strategische Location 4',
-                          art: { varianten: [[[0.5, 0.75], [0.5, 0.25], [0.25, 0.5], [0.75, 0.5]]] } },
-                        { wert: 'location3', name: 'Strategische Location 3',
-                          art: { varianten: [[[0.25, 0.5], [0.5, 0.5], [0.75, 0.5]],
-                                             [[0.5, 0.25], [0.5, 0.5], [0.5, 0.75]]] } },
-                        { wert: 'location2', name: 'Strategische Location 2',
-                          art: { varianten: [[[0.5, 0.75], [0.5, 0.25]],
-                                             [[0.25, 0.5], [0.75, 0.5]]] } },
-                        { wert: 'special', name: 'Special Feature', art: 'turm' }],
-            missionsHinweis: 'Missionsziele liegen jeweils auf halbem Weg zwischen Feldmitte und Mitte einer Kante: <b>Strategische Location 4</b> – vier Ziele Richtung aller vier Kanten; <b>3</b> – eines in der Mitte und zwei in einer Reihe, waagerecht oder senkrecht; <b>2</b> – zwei gegenüber, waagerecht oder senkrecht. Die Ausrichtung wird mitgewürfelt. Gelände bleibt mindestens 6 Zoll von jedem Ziel weg. Bei <b>Special Feature</b> steht wie bei der Landmarke ein 8×8-Zoll-Turm in der Mitte.' });
+            gruppen: [
+              { titel: 'Mission – End of player turn', kurz: 'End of player turn', missionen: [
+                { wert: 'location2', name: 'Strategic Locations 2',
+                  art: { varianten: [[[0.5, 0.75], [0.5, 0.25]],
+                                     [[0.25, 0.5], [0.75, 0.5]]] } },
+                { wert: 'location3', name: 'Strategic Locations 3',
+                  art: { varianten: [[[0.25, 0.5], [0.5, 0.5], [0.75, 0.5]],
+                                     [[0.5, 0.25], [0.5, 0.5], [0.5, 0.75]]] } },
+                { wert: 'location4', name: 'Strategic Locations 4',
+                  art: { varianten: [[[0.5, 0.75], [0.5, 0.25], [0.25, 0.5], [0.75, 0.5]]] } },
+                { wert: 'domination', name: 'Domination', art: 'keine' },
+                { wert: 'banners', name: 'Hold the Banners High', art: 'keine' }] },
+              { titel: 'Mission – End of game', kurz: 'End of game', missionen: [
+                { wert: 'special', name: 'Special Feature', art: 'turm' },
+                { wert: 'baggage', name: 'Baggage Train', art: 'keine' },
+                { wert: 'holdline', name: 'Hold the Line', art: 'keine' }] }],
+            missionsHinweis: 'Gewürfelt wird je eine Mission <b>End of player turn</b> und eine <b>End of game</b>. <b>Strategic Locations</b>: Ziele auf halbem Weg zwischen Feldmitte und Mitte einer Kante – 4 Richtung aller Kanten, 3 in einer Reihe durch die Mitte, 2 gegenüber (waagerecht oder senkrecht, wird mitgewürfelt). Gelände bleibt mindestens 6 Zoll von jedem Ziel weg. Bei <b>Special Feature</b> steht ein 8×8-Zoll-Turm in der Mitte. Domination, Hold the Banners High, Baggage Train und Hold the Line verändern die Karte nicht.' });
 
 /* ================= Tab-Navigation ================= */
 (function () {
