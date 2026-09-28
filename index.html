@@ -416,13 +416,12 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 </div>
 </div>
 <div class="acc" data-mission="2">
-<button type="button" class="acc-head" aria-expanded="false" aria-controls="mission-2-body"><span class="acc-title">Mission 2 – Strategische Landmarke</span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="mission-2-body"><span class="acc-title">Mission 2 – Die Ruine</span><span class="acc-icon" aria-hidden="true">▸</span></button>
 <div class="acc-body" id="mission-2-body" role="region" hidden="">
-<p>Eine markante Landschaftsmarke (Statue, arkaner Monolith, Wachturm o. Ä.) – ein Geländestück auf 100-mm-Rundbase, unpassierbar, blockiert keine Sichtlinie.</p>
-<p class="italic"><b>Aufstellung:</b> im Zentrum des Schlachtfelds, jedoch nicht innerhalb von 3" um ein Geländestück oder auf einem niedrigen linearen Hindernis.</p>
+<p>Die Ruine wird durch eine <b>Ruine von 7×7 Zoll in der Mitte</b> des Schlachtfelds dargestellt.</p>
 <p><b>Ungewöhnliche Eigenschaft:</b> Nach der Platzierung, vor der Armeeaufstellung, würfelt ein Spieler auf folgender Tabelle. Die kontrollierende Einheit profitiert davon bis zum Ende des nächsten Zuges:</p>
 <table><tbody><tr><th>W6</th><th>Eigenschaft</th></tr><tr><td>1–2</td><td>Magie in der Luft: Die kontrollierende Einheit erhält Magieresistenz (2).</td></tr><tr><td>3–4</td><td>Rechtschaffener Eifer: Die kontrollierende Einheit erhält die Sonderregel Raserei.</td></tr><tr><td>5–6</td><td>„Wir gehen hier nicht weg“: Die kontrollierende Einheit erhält die Sonderregel Unnachgiebig.</td></tr></tbody></table>
-<p><b>Kontrolle:</b>wie bei Schätzen (Einheitenstärke 5+, innerhalb von 3", nicht fliehend/blöd). Sind zwei Einheiten in Reichweite, kontrolliert die Einheit mit Banner; führen beide (oder keine) ein Banner, entscheidet die höhere Einheitenstärke. Bei Gleichstand ist die Landmarke umkämpft.</p>
+<p><b>Kontrolle:</b>wie bei Schätzen (Einheitenstärke 5+, innerhalb von 3", nicht fliehend/blöd). Sind zwei Einheiten in Reichweite, kontrolliert die Einheit mit Banner; führen beide (oder keine) ein Banner, entscheidet die höhere Einheitenstärke. Bei Gleichstand ist die Ruine umkämpft.</p>
 <p><b>Siegpunkte:</b> Am Ende des Spiels erhält der kontrollierende Spieler <b><span id="m2vp">300</span> Siegpunkte</b>.</p>
 </div>
 </div>
@@ -1732,7 +1731,7 @@ function kartenbau(opt) {
   }
 
   /* Liegt etwas auf der Kreismitte (Schatz, Missionsziel oder der Turm als
-     Landmarke), rueckt die Beschriftung darueber, sonst waere sie verdeckt.
+     Ruine), rueckt die Beschriftung darueber, sonst waere sie verdeckt.
      Liefert, wie weit (in Zoll) oberhalb der Mitte die Beschriftung frei
      beginnen muss - 0 heisst: die Mitte ist frei. knopf = Platz ueber einem
      Stueck (am Bildschirm ragen dort Drehen/Loeschen heraus). */
@@ -1773,7 +1772,7 @@ function kartenbau(opt) {
     wurf = { zone: chosen, missionen: gezogen };
     zeigeWurf();
     const arten = gezogen.map(missionsArt);
-    // Mittelstueck: Turm (Landmarke) oder Ruine (The Ruin), genau mittig; die normale Ruine entfaellt dann
+    // Mittelstueck: Turm oder Ruine (Die Ruine / The Ruin), genau mittig; die normale Ruine entfaellt dann
     const mitteStueck = arten.includes('turm') ? 'Turm' : arten.includes('ruine') ? 'Ruine' : null;
     const landmark = !!mitteStueck;
     pieces = [];
@@ -2272,7 +2271,7 @@ kartenbau({ endung: '', w: 48, h: 36, kreis: 14, zonenTiefe: 10, passAbstand: 16
             speicher: 'battleMarchBuilderState', datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder',
             marker: { name: 'Schatz', farbe: '#d4a52a', rand: '#6b4a1a', abstand: 3 },
             gruppen: [{ titel: 'Mission', kurz: 'Mission', missionen: [
-                          { wert: 'landmarke', name: 'Landmarke', art: 'turm' },
+                          { wert: 'landmarke', name: 'Die Ruine', art: 'ruine' },
                           { wert: 'schaetze', name: 'Schätze', art: 'schaetze' },
                           { wert: 'versorgung', name: 'Versorgungswagen', art: 'keine' }] }] });
 kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstand: 24,
