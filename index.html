@@ -141,19 +141,6 @@ button:hover{ background:var(--maroon-dark); }
 
 .board-outer{ display:inline-block; max-width:100%; overflow-x:auto; background:var(--beige); border:4px solid var(--maroon); padding:14px 16px 30px 16px; position:relative; }
 .board-row{ display:flex; gap:12px; align-items:flex-start; }
-.zone-legend{ position:relative; width:168px; flex-shrink:0; }
-.zone-legend-item{
-  position:absolute; left:0; width:100%;
-  transform:translateY(-50%);
-  background:var(--beige); border:1.3px solid var(--maroon); border-radius:4px;
-  padding:4px 7px; font-size:.68rem; line-height:1.35;
-}
-.zone-legend-item b{ color:var(--maroon); display:block; font-size:.72rem; }
-.zone-legend-item .swatchline{ display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:4px; vertical-align:middle; }
-.zone-legend-item::before{
-  content:""; position:absolute; left:-13px; top:50%; width:12px; height:0;
-  border-top:1.3px dashed var(--maroon);
-}
 .board{
   position:relative;
   background-color:var(--beige);
@@ -252,9 +239,6 @@ button:hover{ background:var(--maroon-dark); }
   .palette-list .chip{ margin-bottom:0; }
 
   .board-row{ flex-direction:column; }
-  .zone-legend{ position:static; width:100%; height:auto !important; display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
-  .zone-legend-item{ position:static !important; top:auto !important; transform:none; width:auto; flex:1 1 44%; }
-  .zone-legend-item::before{ display:none; }
 
   .board-outer{ width:100%; }
 }
@@ -633,7 +617,6 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
       <div class="board-row">
         <div class="board" id="board" style="--scale: 13px; width: 624px; height: 468px;">
           <canvas id="zoneCanvas" class="zone-canvas" width="624" height="468" style="width: 624px; height: 468px; pointer-events: none; cursor: default;"></canvas></div>
-        <div class="zone-legend" id="zoneLegend" style="height: 468px;"><div class="zone-legend-item" style="top: 65px;"><b><span class="swatchline" style="background:#b9c6d6"></span>SPIELER 2</b>Tiefe: 10"<br>16" bis zur gegn. Zone</div><div class="zone-legend-item" style="top: 234px;"><b><span class="swatchline" style="background:#ded6c2"></span>NO MAN'S LAND</b>Breite: 16"</div><div class="zone-legend-item" style="top: 403px;"><b><span class="swatchline" style="background:#e2c48c"></span>SPIELER 1</b>Tiefe: 10"<br>16" bis zur gegn. Zone</div></div>
       </div>
     </div>
 
@@ -1141,7 +1124,6 @@ function kartenbau(opt) {
   const board = $('board');
   const canvas = $('zoneCanvas');
   const ctx = canvas.getContext('2d');
-  const zoneLegend = $('zoneLegend');
   const paletteList = $('paletteList');
 
   // Gelaende-Palette klappt auf und zu (startet zugeklappt)
@@ -1353,8 +1335,6 @@ function kartenbau(opt) {
     const colW = col.clientWidth;
     if (colW <= 0) return; // Tab versteckt -> aktuelle Skalierung behalten
     let avail = colW - 38; // Rand + Innenabstand von .board-outer
-    const legendBeside = window.matchMedia('(min-width: 721px)').matches;
-    if (legendBeside) avail -= (168 + 12); // Seitenlegende + Abstand
     let s = Math.floor(avail / cfg.w);
     s = Math.max(5, Math.min(13, s));
     if (s) cfg.scale = s;
@@ -1368,7 +1348,6 @@ function kartenbau(opt) {
     canvas.height = cfg.h * cfg.scale;
     canvas.style.width = canvas.width + 'px';
     canvas.style.height = canvas.height + 'px';
-    zoneLegend.style.height = canvas.height + 'px';
   }
 
   function emptyGrid() {
@@ -1469,7 +1448,6 @@ function kartenbau(opt) {
     return g;
   }
 
-  const ZONE_NAMES = { p1: 'SPIELER 1', p2: 'SPIELER 2', nml: "NO MAN'S LAND" };
 
   function computeZoneBounds() {
     const bounds = {};
@@ -1494,29 +1472,6 @@ function kartenbau(opt) {
     return result;
   }
 
-  /* Kleinster Abstand zwischen zwei Zonen, gemessen zwischen ihren 1-Zoll-Zellen. */
-  function zellAbstand(k1, k2) {
-    const a = [], b = [];
-    for (let r = 0; r < cfg.h; r++) for (let c = 0; c < cfg.w; c++) {
-      const v = zoneGrid[r] && zoneGrid[r][c];
-      if (v === k1) a.push([c, r]); else if (v === k2) b.push([c, r]);
-    }
-    let best = Infinity;
-    for (const [c1, r1] of a) for (const [c2, r2] of b) {
-      const dx = Math.max(0, Math.abs(c1 - c2) - 1), dy = Math.max(0, Math.abs(r1 - r2) - 1);
-      const d = dx * dx + dy * dy;
-      if (d < best) best = d;
-    }
-    return best === Infinity ? null : Math.round(Math.sqrt(best) * 10) / 10;
-  }
-
-  function zoneDistances(b) {
-    const depth = (z) => z ? Math.min(z.x1 - z.x0, z.y1 - z.y0) : null;
-    const p1 = b.p1, p2 = b.p2;
-    // Echter Abstand zwischen den Zellen - auch bei schraegen Zonen, deren Boxen sich beruehren.
-    const gap = (p1 && p2) ? zellAbstand('p1', 'p2') : null;
-    return { d1: depth(p1), d2: depth(p2), dnml: depth(b.nml), gap: gap };
-  }
 
   function drawZones() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1547,55 +1502,8 @@ function kartenbau(opt) {
       ctx.strokeRect(boxLeft + 0.5, boxTop + 0.5, boxW - 1, boxH - 1);
       ctx.restore();
     });
-
-    renderZoneLegend(bounds);
   }
 
-  function renderZoneLegend(bounds) {
-    zoneLegend.innerHTML = '';
-    const dist = zoneDistances(bounds);
-    const gapTxt = dist.gap == null ? '' : (dist.gap > 0 ? dist.gap + '" bis zur gegn. Zone' : 'grenzt an gegn. Zone');
-    const items = [];
-    Object.keys(bounds).forEach(key => {
-      const b = bounds[key];
-      if (!b) return;
-      const boxTop = (cfg.h - b.y1) * cfg.scale;
-      const boxH = (b.y1 - b.y0) * cfg.scale;
-      items.push({ key, b, center: boxTop + boxH / 2 });
-    });
-    items.sort((a, b) => a.center - b.center);
-    const ITEM_H = 58;   // Hoehe eines dreizeiligen Eintrags plus Luft
-    for (let i = 1; i < items.length; i++) {
-      const minCenter = items[i - 1].center + ITEM_H;
-      if (items[i].center < minCenter) items[i].center = minCenter;
-    }
-    const maxCenter = canvas.height - ITEM_H / 2;
-    for (let i = items.length - 1; i >= 0; i--) {
-      if (items[i].center > maxCenter) items[i].center = maxCenter;
-      if (i > 0 && items[i - 1].center > items[i].center - ITEM_H) {
-        items[i - 1].center = items[i].center - ITEM_H;
-      }
-    }
-    const minCenter0 = ITEM_H / 2;
-    if (items.length && items[0].center < minCenter0) {
-      let shift = minCenter0 - items[0].center;
-      items.forEach(it => { it.center += shift; });
-    }
-    items.forEach(({ key, b, center }) => {
-      const item = document.createElement('div');
-      item.className = 'zone-legend-item';
-      item.style.top = center + 'px';
-      let info;
-      if (key === 'nml') {
-        info = 'Breite: ' + (dist.dnml != null ? dist.dnml : '?') + '"';
-      } else {
-        const dz = key === 'p1' ? dist.d1 : dist.d2;
-        info = 'Tiefe: ' + (dz != null ? dz : '?') + '"' + (gapTxt ? '<br>' + gapTxt : '');
-      }
-      item.innerHTML = `<b><span class="swatchline" style="background:${ZONE_COLORS[key]}"></span>${ZONE_NAMES[key]}</b>${info}`;
-      zoneLegend.appendChild(item);
-    });
-  }
 
 
   /* Der Kreis haelt immer Gelaende fern, eingezeichnet wird er aber nur bei
