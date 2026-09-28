@@ -628,7 +628,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         <span><span class="dot" style="background:var(--p2)"></span>Spieler 2</span>
         <span><span class="dot" style="background:var(--nml)"></span>No Man's Land</span>
       </div>
-      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt unter den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. <span class="missions-hinweis">Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht.</span> Die Karte ist <span class="feld-mass">48×36</span> Zoll groß. Im Kreis von <span class="kreis-mass">16</span> Zoll Durchmesser in der Mitte steht kein Gelände und niemand stellt auf. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
+      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt unter den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. <span class="missions-hinweis">Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht.</span> Die Karte ist <span class="feld-mass">48×36</span> Zoll groß. In einem Kreis von <span class="kreis-mass">16</span> Zoll Durchmesser in der Mitte steht kein Gelände. Eingezeichnet ist er nur bei <b>Aufeinandertreffen</b> – dort darf in ihm auch niemand aufstellen. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
     </div>
 
     <div class="toolbar">
@@ -643,8 +643,7 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
     <div class="board-outer">
       <div class="board-row">
         <div class="board" id="board" style="--scale: 13px; width: 624px; height: 468px;">
-          <canvas id="zoneCanvas" class="zone-canvas" width="624" height="468" style="width: 624px; height: 468px; pointer-events: none; cursor: default;"></canvas>
-        <div class="no-terrain-circle" style="width: 208px; height: 208px; left: 208px; bottom: 130px;"><span>16" Durchmesser</span></div></div>
+          <canvas id="zoneCanvas" class="zone-canvas" width="624" height="468" style="width: 624px; height: 468px; pointer-events: none; cursor: default;"></canvas></div>
         <div class="zone-legend" id="zoneLegend" style="height: 468px;"><div class="zone-legend-item" style="top: 65px;"><b><span class="swatchline" style="background:#b9c6d6"></span>SPIELER 2</b>Tiefe: 10"<br>16" bis zur gegn. Zone</div><div class="zone-legend-item" style="top: 234px;"><b><span class="swatchline" style="background:#ded6c2"></span>NO MAN'S LAND</b>Breite: 16"</div><div class="zone-legend-item" style="top: 403px;"><b><span class="swatchline" style="background:#e2c48c"></span>SPIELER 1</b>Tiefe: 10"<br>16" bis zur gegn. Zone</div></div>
       </div>
     </div>
@@ -1309,7 +1308,7 @@ function kartenbau(opt) {
     const ZONE_VALUES = ['p1', 'p2', 'nml', 'none'];
     if (Array.isArray(data.zoneGrid) && data.zoneGrid.length === cfg.h &&
         data.zoneGrid.every(row => Array.isArray(row) && row.length === cfg.w && row.every(v => ZONE_VALUES.includes(v)))) {
-      zoneGrid = maskCircle(data.zoneGrid);   // aeltere Staende hatten im Kreis ein Loch
+      zoneGrid = data.zoneGrid;
     }
     if (Array.isArray(data.treasures)) {
       treasures = data.treasures
@@ -1589,8 +1588,13 @@ function kartenbau(opt) {
   }
 
 
+  /* Der Kreis haelt immer Gelaende fern, eingezeichnet wird er aber nur bei
+     Aufeinandertreffen - dort ist er zugleich Sperrflaeche fuer die Aufstellung. */
+  function kreisSichtbar() { return !!(wurf && wurf.zone === 'aufeinandertreffen'); }
+
   function renderCircle() {
     board.querySelectorAll('.no-terrain-circle').forEach(el => el.remove());
+    if (!kreisSichtbar()) return;
     const circle = document.createElement('div');
     circle.className = 'no-terrain-circle';
     circle.style.width = px(cfg.circle) + 'px';
@@ -1839,8 +1843,10 @@ function kartenbau(opt) {
 
     if (Math.random() < 0.5) zoneGrid.forEach(row => row.reverse());
     if (Math.random() < 0.5) zoneGrid.reverse();
-    zoneGrid = maskCircle(zoneGrid);
+    // Nur bei Aufeinandertreffen darf im Kreis niemand aufstellen; sonst gilt er nur fuers Gelaende.
+    if (chosen === 'aufeinandertreffen') zoneGrid = maskCircle(zoneGrid);
     drawZones();
+    renderCircle();
 
     const art = missionsArt(mission);
     const ziele = art && art.varianten ? zufallAus(art.varianten) : null;   // Ausrichtung wird mitgewuerfelt
@@ -2032,7 +2038,7 @@ function kartenbau(opt) {
   function rebuildAll(resetZones) {
     setBoardSize();
     if (resetZones || zoneGrid.length !== cfg.h || (zoneGrid[0] && zoneGrid[0].length !== cfg.w)) {
-      zoneGrid = maskCircle(PRESETS.standard(cfg.w, cfg.h));
+      zoneGrid = PRESETS.standard(cfg.w, cfg.h);
     }
     drawZones();
     renderCircle();
@@ -2169,15 +2175,17 @@ function kartenbau(opt) {
     // Rahmen
     g.strokeStyle = '#7a1f1f'; g.lineWidth = 2; g.strokeRect(ox, oy, bW, bH);
 
-    // Kein-Gelände-Kreis
-    g.beginPath();
-    g.arc(cx(cfg.w / 2), cy(cfg.h / 2), (cfg.circle / 2) * S, 0, Math.PI * 2);
-    g.fillStyle = 'rgba(233,217,217,.35)'; g.fill();
-    g.strokeStyle = '#7a1f1f'; g.lineWidth = 1.6; g.stroke();
-    g.fillStyle = '#7a1f1f'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = 'italic bold ' + F.mass + 'px Georgia, serif';
-    const kreisY = cy(cfg.h / 2) - (mitteBelegt() ? cfg.circle * S * 0.33 : 0);
-    g.fillText(cfg.circle + '" Durchmesser', cx(cfg.w / 2), kreisY);
+    // Kein-Gelände-Kreis (nur bei Aufeinandertreffen eingezeichnet)
+    if (kreisSichtbar()) {
+      g.beginPath();
+      g.arc(cx(cfg.w / 2), cy(cfg.h / 2), (cfg.circle / 2) * S, 0, Math.PI * 2);
+      g.fillStyle = 'rgba(233,217,217,.35)'; g.fill();
+      g.strokeStyle = '#7a1f1f'; g.lineWidth = 1.6; g.stroke();
+      g.fillStyle = '#7a1f1f'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.font = 'italic bold ' + F.mass + 'px Georgia, serif';
+      const kreisY = cy(cfg.h / 2) - (mitteBelegt() ? cfg.circle * S * 0.33 : 0);
+      g.fillText(cfg.circle + '" Durchmesser', cx(cfg.w / 2), kreisY);
+    }
 
     // kleiner Koordinaten-Kasten
     function tag(text, centerXi, bottomYi) {
