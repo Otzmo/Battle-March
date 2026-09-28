@@ -695,10 +695,10 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 </div>
 </div>
 <div class="acc">
-<button type="button" class="acc-head" aria-expanded="false" aria-controls="core-obj-4-body"><span class="acc-title">Special Feature <span class="italic">(End of game)</span></span><span class="acc-icon" aria-hidden="true">▸</span></button>
+<button type="button" class="acc-head" aria-expanded="false" aria-controls="core-obj-4-body"><span class="acc-title">The Ruin <span class="italic">(End of game)</span></span><span class="acc-icon" aria-hidden="true">▸</span></button>
 <div class="acc-body" id="core-obj-4-body" role="region" hidden="">
-<p>A special feature is a piece of <b>impassable terrain, 8" × 8"</b>, placed in the <b>centre of the battlefield</b>.</p>
-<p><b>Controlling a Special Feature:</b> A special feature is controlled by a scoring unit within <b>6"</b> of it.</p>
+<p>The ruin is a <b>ruin, 8" × 8"</b>, placed in the <b>centre of the battlefield</b>.</p>
+<p><b>Controlling the Ruin:</b> The ruin is controlled by a scoring unit within <b>6"</b> of it.</p>
 <p><b>300 VP</b> per Scoring (300 total).</p>
 </div>
 </div>
@@ -1138,7 +1138,7 @@ function kartenbau(opt) {
 
   /* Missionen kommen aus den Optionen, in Gruppen (Core Battle: End of player
      turn / End of game). Pro Gruppe wird beim Wuerfeln eine Mission gezogen.
-     art sagt, was auf der Karte passiert: 'turm' = Turm in der Mitte,
+     art sagt, was auf der Karte passiert: 'turm' = Turm in der Mitte, 'ruine' = Ruine 8x8 in der Mitte,
      'schaetze' = drei Schaetze, 'keine' = nichts, oder { varianten: [...] } mit
      festen Missionszielen als Anteile von Breite und Tiefe - eine der Varianten
      wird beim Wuerfeln gewaehlt. */
@@ -1768,12 +1768,14 @@ function kartenbau(opt) {
     for (let versuch = 0; versuch < 30; versuch++) {
       gezogen = GRUPPEN.map(g => { const w = angehaktIn(g.div); return w.length ? zufallAus(w) : null; });
       const arten = gezogen.map(missionsArt);
-      if (!(arten.includes('turm') && arten.some(mitteZiel))) break;
+      if (!((arten.includes('turm') || arten.includes('ruine')) && arten.some(mitteZiel))) break;
     }
     wurf = { zone: chosen, missionen: gezogen };
     zeigeWurf();
     const arten = gezogen.map(missionsArt);
-    const landmark = arten.includes('turm');
+    // Mittelstueck: Turm (Landmarke) oder Ruine 8x8 (The Ruin); die normale Ruine entfaellt dann
+    const mitteStueck = arten.includes('turm') ? 'Turm' : arten.includes('ruine') ? 'Ruine' : null;
+    const landmark = !!mitteStueck;
     pieces = [];
     board.querySelectorAll('.piece').forEach(el => el.remove());
 
@@ -1797,9 +1799,10 @@ function kartenbau(opt) {
 
     const MIN_GAP = 6;
 
-    const towerType = defaultTypes.find(t => t.name === 'Turm');
+    const towerType = mitteStueck && defaultTypes.find(t => t.name === mitteStueck);
+    const MITTE_MASS = 8;   // Turm und Ruine in der Mitte sind 8x8 Zoll
     const lmRect = landmark && towerType
-      ? { x: Math.round(cfg.w / 2 - towerType.w / 2), y: Math.round(cfg.h / 2 - towerType.d / 2), w: towerType.w, d: towerType.d }
+      ? { x: Math.round(cfg.w / 2 - MITTE_MASS / 2), y: Math.round(cfg.h / 2 - MITTE_MASS / 2), w: MITTE_MASS, d: MITTE_MASS }
       : null;
 
     function attemptPlacement() {
@@ -1862,7 +1865,7 @@ function kartenbau(opt) {
     }
 
     best.results.forEach(r => { if (r) placePieceExact(r.type, r.x, r.y, r.w, r.d, r.ang); });
-    if (lmRect && towerType) placePieceExact(towerType, lmRect.x, lmRect.y, towerType.w, towerType.d, 0);
+    if (lmRect && towerType) placePieceExact(towerType, lmRect.x, lmRect.y, MITTE_MASS, MITTE_MASS, 0);
     renderTreasures();
     saveState();
   }
@@ -2291,7 +2294,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
                 { wert: 'domination', name: 'Domination', art: 'keine' },
                 { wert: 'banners', name: 'Hold the Banners High', art: 'keine' }] },
               { titel: 'Mission – End of game', kurz: 'End of game', missionen: [
-                { wert: 'special', name: 'Special Feature', art: 'turm' },
+                { wert: 'special', name: 'The Ruin', art: 'ruine' },
                 { wert: 'baggage', name: 'Baggage Train', art: 'keine' },
                 { wert: 'holdline', name: 'Hold the Line', art: 'keine' }] }] });
 
