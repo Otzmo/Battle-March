@@ -135,8 +135,6 @@ button:hover{ background:var(--maroon-dark); }
 .wahl-gruppe .wahl{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:.8rem; }
 .wahl-gruppe label{ display:flex; align-items:center; gap:5px; cursor:pointer; }
 .wahl-gruppe input{ accent-color:var(--maroon); }
-.wurf{ font-size:.82rem; margin:2px 0 6px; min-height:1.2em; }
-.wurf b{ color:var(--maroon); }
 .legend{ display:flex; gap:14px; font-size:.74rem; margin-top:4px; flex-wrap:wrap; }
 .legend span{ display:inline-flex; align-items:center; gap:5px; }
 .legend .dot{ width:12px; height:12px; border-radius:3px; border:1px solid rgba(0,0,0,.3); }
@@ -620,13 +618,11 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
         <legend>Mission</legend>
         <div class="wahl" id="wahlMission"><!-- wird aus den Optionen gefuellt --></div>
       </fieldset>
-      <p class="wurf" id="wurfErgebnis" aria-live="polite"></p>
       <div class="legend">
         <span><span class="dot" style="background:var(--p1)"></span>Spieler 1</span>
         <span><span class="dot" style="background:var(--p2)"></span>Spieler 2</span>
         <span><span class="dot" style="background:var(--nml)"></span>No Man's Land</span>
       </div>
-      <div class="hint" style="margin-top:8px;"><b>🎲 Zufällige Karte</b> würfelt unter den angehakten Aufstellungszonen und Missionen. Eine Aufstellungszone bleibt immer angehakt. Ist keine Mission angehakt, entsteht eine Karte ohne Mission. <span class="missions-hinweis">Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht.</span> Die Karte ist <span class="feld-mass">48×36</span> Zoll groß. In einem Kreis von <span class="kreis-mass">16</span> Zoll Durchmesser in der Mitte steht kein Gelände. Eingezeichnet ist er nur bei <b>Aufeinandertreffen</b> – dort darf in ihm auch niemand aufstellen. Bei jeder Zone stehen die <b>Tiefe</b> und der <b>Abstand zur gegnerischen Zone</b>.</div>
     </div>
 
     <div class="toolbar">
@@ -1162,8 +1158,6 @@ function kartenbau(opt) {
   });
 
   const cfg = { w: opt.w, h: opt.h, circle: opt.kreis, scale: 13 };   // Feldgroesse und Kreis sind fest
-  board.closest('.builder').querySelectorAll('.feld-mass').forEach(el => { el.textContent = cfg.w + '×' + cfg.h; });
-  board.closest('.builder').querySelectorAll('.kreis-mass').forEach(el => { el.textContent = cfg.circle; });
 
   /* Missionen kommen aus den Optionen, in Gruppen (Core Battle: End of player
      turn / End of game). Pro Gruppe wird beim Wuerfeln eine Mission gezogen.
@@ -1176,9 +1170,10 @@ function kartenbau(opt) {
   const missionsArt = wert => (alleMissionen.find(m => m.wert === wert) || {}).art;
   const missionsName = wert => (alleMissionen.find(m => m.wert === wert) || {}).name;
   const vorlageFeld = $('wahlMission').closest('fieldset');
+  let letztesFeld = vorlageFeld;
   const GRUPPEN = opt.gruppen.map((g, gi) => {
     const feld = gi === 0 ? vorlageFeld : vorlageFeld.cloneNode(true);
-    if (gi > 0) vorlageFeld.parentNode.insertBefore(feld, $('wurfErgebnis'));
+    if (gi > 0) { letztesFeld.after(feld); letztesFeld = feld; }
     feld.querySelector('legend').textContent = g.titel;
     const div = feld.querySelector('.wahl');
     if (gi > 0) div.id = 'wahlMission' + gi + opt.endung;
@@ -1192,7 +1187,6 @@ function kartenbau(opt) {
   });
   const missionsBoxen = () => GRUPPEN.flatMap(g => [...g.div.querySelectorAll('input')]);
   const angehaktIn = div => [...div.querySelectorAll('input:checked')].map(i => i.value);
-  board.closest('.builder').querySelectorAll('.missions-hinweis').forEach(el => { el.innerHTML = opt.missionsHinweis; });
   let pieces = [];
   let pieceSeq = 1;
   let zoneGrid = [];
@@ -2169,10 +2163,9 @@ function kartenbau(opt) {
   }
   function zeigeWurf() {
     const fett = t => Object.assign(document.createElement('b'), { textContent: t });
-    [$('wurfErgebnis'), $('kartenInfo')].forEach((ziel, i) => {
-      ziel.textContent = '';
-      wurfTeile().forEach(([was, wert], k) => ziel.append(k ? ' · ' : (i ? '' : 'Gewürfelt – '), was + ': ', fett(wert)));
-    });
+    const ziel = $('kartenInfo');
+    ziel.textContent = '';
+    wurfTeile().forEach(([was, wert], k) => ziel.append(k ? ' · ' : '', was + ': ', fett(wert)));
   }
   [...$('wahlZone').querySelectorAll('input'), ...missionsBoxen()].forEach(i => {
     i.addEventListener('change', () => {
@@ -2376,8 +2369,7 @@ kartenbau({ endung: '', w: 48, h: 36, kreis: 14, zonenTiefe: 10, passAbstand: 16
             gruppen: [{ titel: 'Mission', kurz: 'Mission', missionen: [
                           { wert: 'landmarke', name: 'Landmarke', art: 'turm' },
                           { wert: 'schaetze', name: 'Schätze', art: 'schaetze' },
-                          { wert: 'versorgung', name: 'Versorgungswagen', art: 'keine' }] }],
-            missionsHinweis: "Bei <b>Landmarke</b> steht ein Turm in der Mitte, bei <b>Schätze</b> liegen drei Schätze im No Man's Land, <b>Versorgungswagen</b> verändert die Karte nicht." });
+                          { wert: 'versorgung', name: 'Versorgungswagen', art: 'keine' }] }] });
 kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstand: 24,
             speicher: 'coreBattleBuilderState', datei: 'core-battle-karte.png', auffrischen: '__refreshCore',
             marker: { name: 'Missionsziel', klasse: 'ziel', farbe: '#1f3a6b', rand: '#0d1b33', abstand: 6 },
@@ -2398,8 +2390,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
               { titel: 'Mission – End of game', kurz: 'End of game', missionen: [
                 { wert: 'special', name: 'Special Feature', art: 'turm' },
                 { wert: 'baggage', name: 'Baggage Train', art: 'keine' },
-                { wert: 'holdline', name: 'Hold the Line', art: 'keine' }] }],
-            missionsHinweis: 'Gewürfelt wird je eine Mission <b>End of player turn</b> und eine <b>End of game</b>. <b>Strategic Locations</b>: Ziele auf halbem Weg zwischen Feldmitte und Mitte einer Kante – 4 Richtung aller Kanten, 3 in einer Reihe durch die Mitte, 2 gegenüber (waagerecht oder senkrecht, wird mitgewürfelt). Gelände bleibt mindestens 6 Zoll von jedem Ziel weg. Bei <b>Special Feature</b> steht ein 8×8-Zoll-Turm in der Mitte. Domination, Hold the Banners High, Baggage Train und Hold the Line verändern die Karte nicht.' });
+                { wert: 'holdline', name: 'Hold the Line', art: 'keine' }] }] });
 
 /* ================= Tab-Navigation ================= */
 (function () {
