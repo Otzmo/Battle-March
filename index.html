@@ -2229,10 +2229,32 @@ function kartenbau(opt) {
       });
     }
 
+    const bild = cv.toDataURL('image/png');
+
+    /* Handys laden data:-Bilder oft nicht herunter. Dort oeffnet sich die
+       Karte in einem neuen Tab; gespeichert wird sie mit langem Druck aufs Bild.
+       Wird der Tab blockiert, bleibt es beim normalen Download. */
+    const handy = window.matchMedia('(pointer: coarse)').matches ||
+                  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (handy) {
+      const tab = window.open('', '_blank');
+      if (tab) {
+        tab.document.write('<!doctype html><html lang="de"><head><meta charset="utf-8">' +
+          '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+          '<title>' + opt.datei + '</title></head>' +
+          '<body style="margin:0;background:#ded2b8;font-family:Georgia,serif;text-align:center">' +
+          '<p style="margin:10px;color:#7a1f1f">Zum Speichern lange auf das Bild drücken.</p>' +
+          '<img src="' + bild + '" alt="Karte" style="max-width:100%;height:auto;display:block;margin:0 auto">' +
+          '</body></html>');
+        tab.document.close();
+        return;
+      }
+    }
+
     // Download auslösen
     const a = document.createElement('a');
     a.download = opt.datei;
-    a.href = cv.toDataURL('image/png');
+    a.href = bild;
     document.body.appendChild(a);
     a.click();
     a.remove();
