@@ -1159,8 +1159,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <div><span class="sr-titel">Entfernung (Zoll)</span><div class="sr-zaehler"><button type="button" data-ar="dist" data-schritt="-0.5" aria-label="Entfernung weniger">−</button><output id="arDist">8</output><button type="button" data-ar="dist" data-schritt="0.5" aria-label="Entfernung mehr">+</button></div></div>
   <div><span class="sr-titel">Sonderregel</span><div class="sr-wahl" id="arSonder">
     <button type="button" data-sonder="keine" aria-pressed="true">Keine</button>
-    <button type="button" data-sonder="klein" aria-pressed="false">Kleines Swiftstride (+1W3)</button>
-    <button type="button" data-sonder="swift" aria-pressed="false">Swiftstride (+1W6)</button>
+    <button type="button" data-sonder="klein" aria-pressed="false">Kleine schnelle Bewegung (+1W3)</button>
+    <button type="button" data-sonder="swift" aria-pressed="false">Schnelle Bewegung (+1W6)</button>
   </div></div>
   <div><span class="sr-titel">Gelände</span><label class="ar-haken"><input type="checkbox" id="arSchwer"> Schweres Gelände (der niedrigere von 2W6 zählt)</label></div>
 </div>
@@ -2710,8 +2710,8 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
 </script>
 <script>
 /* ================= Tools: Angriffsrechner =================
-   Angriffsreichweite = Bewegung + 2W6, der hoehere zaehlt. Swiftstride: zusaetzlich + 1W6,
-   kleines Swiftstride: zusaetzlich + 1W3. Durch schweres Gelaende zaehlt der niedrigere der 2W6.
+   Angriffsreichweite = Bewegung + 2W6, der hoehere zaehlt. Schnelle Bewegung: zusaetzlich + 1W6,
+   kleine schnelle Bewegung: zusaetzlich + 1W3. Durch schweres Gelaende zaehlt der niedrigere der 2W6.
    Die Chance wird exakt aus den Wuerfelwahrscheinlichkeiten berechnet. */
 (function () {
   const feld = id => document.getElementById(id);
@@ -2726,7 +2726,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   const prozent = p => (Math.round(p * 1000) / 10).toLocaleString('de-DE') + ' %';
   const zoll = z => z.toLocaleString('de-DE') + '"';
 
-  // Verteilung des Wurfs: hoeherer (schweres Gelaende: niedrigerer) von 2W6, dazu bei Swiftstride 1W6 bzw. 1W3
+  // Verteilung des Wurfs: hoeherer (schweres Gelaende: niedrigerer) von 2W6, dazu bei schneller Bewegung 1W6 bzw. 1W3
   function verteilung() {
     const v = [], z = zusatz();
     for (let a = 1; a <= 6; a++) for (let b = 1; b <= 6; b++) {
