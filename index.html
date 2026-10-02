@@ -1163,6 +1163,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     <button type="button" data-sonder="swift" aria-pressed="false">Schnelle Bewegung (+1W6)</button>
   </div></div>
   <div><span class="sr-titel">Gelände</span><label class="ar-haken"><input type="checkbox" id="arSchwer"> Schweres Gelände (der niedrigere von 2W6 zählt)</label></div>
+  <div><span class="sr-titel">Wiederholen</span><label class="ar-haken"><input type="checkbox" id="arWdh"> Angriffswurf wiederholen, wenn er nicht reicht</label></div>
 </div>
 <table class="ar-tabelle"><tbody id="arTabelle"></tbody></table>
 <p class="sr-hint" style="margin-top:10px;">Der Angriff gelingt, wenn Bewegung + Wurf mindestens die Entfernung erreicht. Die Tabelle zeigt die Chance für jede Entfernung, die mit dieser Bewegung erreichbar ist.</p>
@@ -2712,11 +2713,12 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
 /* ================= Tools: Angriffsrechner =================
    Angriffsreichweite = Bewegung + 2W6, der hoehere zaehlt. Schnelle Bewegung: zusaetzlich + 1W6,
    kleine schnelle Bewegung: zusaetzlich + 1W3. Durch schweres Gelaende zaehlt der niedrigere der 2W6.
+   Darf der Wurf wiederholt werden, wird nur ein zu kurzer Wurf komplett neu gewuerfelt.
    Die Chance wird exakt aus den Wuerfelwahrscheinlichkeiten berechnet. */
 (function () {
   const feld = id => document.getElementById(id);
   if (!feld('arChance')) return;
-  const st = { bew: 4, dist: 8, sonder: 'keine', schwer: false };
+  const st = { bew: 4, dist: 8, sonder: 'keine', schwer: false, wdh: false };
   try { Object.assign(st, JSON.parse(localStorage.getItem('battleMarchAngriff')) || {}); } catch (e) { /* egal */ }
   if (st.swift) st.sonder = 'swift';   // aelterer Stand kannte nur ein Haekchen
   delete st.swift;
@@ -2743,7 +2745,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     const v = verteilung();
     let p = 0;
     for (let w = Math.max(k, minWurf()); w <= maxWurf(); w++) p += v[w] || 0;
-    return p;
+    return st.wdh ? 1 - (1 - p) * (1 - p) : p;   // zweiter Versuch nur, wenn der erste nicht reicht
   }
   const chance = d => mindestens(Math.ceil(d - st.bew));
   // dativ = "auf dem hoeheren", sonst "(hoeherer von 2W6 + ...)"
@@ -2754,11 +2756,13 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     feld('arChance').textContent = prozent(chance(st.dist));
     feld('arText').textContent = noetig <= minWurf() ? 'Kommt immer an – die Bewegung reicht schon mit dem niedrigsten Wurf.'
       : noetig > maxWurf() ? 'Zu weit – selbst mit dem besten Wurf reicht es nicht (höchstens ' + zoll(st.bew + maxWurf()) + ').'
-      : 'Benötigt ' + noetig + (noetig < maxWurf() ? '+' : '') + ({ keine: ' auf dem ' + wuerfel(true) + '.', klein: ' (' + wuerfel() + ' + 1W3).', swift: ' (' + wuerfel() + ' + 1W6).' })[st.sonder];
+      : 'Benötigt ' + noetig + (noetig < maxWurf() ? '+' : '') + ({ keine: ' auf dem ' + wuerfel(true) + '.', klein: ' (' + wuerfel() + ' + 1W3).', swift: ' (' + wuerfel() + ' + 1W6).' })[st.sonder]
+        + (st.wdh ? ' Ein zu kurzer Wurf wird wiederholt.' : '');
     feld('arBew').textContent = st.bew;
     feld('arDist').textContent = st.dist.toLocaleString('de-DE');
     document.querySelectorAll('#arSonder button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sonder === st.sonder ? 'true' : 'false'));
     feld('arSchwer').checked = st.schwer;
+    feld('arWdh').checked = st.wdh;
     const zeilen = ['<tr><th>Entfernung</th><th>Chance</th></tr>'];
     for (let d = st.bew + minWurf(); d <= st.bew + maxWurf(); d++) {
       zeilen.push('<tr' + (Math.ceil(st.dist) === d ? ' class="ar-ziel"' : '') + '><td>bis ' + zoll(d) + '</td><td>' + prozent(chance(d)) + '</td></tr>');
@@ -2773,6 +2777,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   }));
   document.querySelectorAll('#arSonder button').forEach(b => b.addEventListener('click', () => { st.sonder = b.dataset.sonder; zeige(); }));
   feld('arSchwer').addEventListener('change', e => { st.schwer = e.target.checked; zeige(); });
+  feld('arWdh').addEventListener('change', e => { st.wdh = e.target.checked; zeige(); });
   zeige();
 })();
 </script>
