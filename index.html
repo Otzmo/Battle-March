@@ -237,6 +237,7 @@ button:hover{ background:var(--maroon-dark); }
 .sr-steuer label, .sr-steuer .sr-titel{ display:block; font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; color:#5a4f3f; margin-bottom:4px; }
 .sr-zaehler{ display:inline-flex; align-items:center; border:1.5px solid var(--maroon); border-radius:4px; overflow:hidden; background:#fff; }
 .sr-zaehler button{ border-radius:0; padding:6px 12px; font-size:1rem; line-height:1; }
+.sr-zaehler button:disabled{ opacity:.4; cursor:not-allowed; }
 .sr-zaehler output{ min-width:38px; text-align:center; font-weight:bold; }
 .sr-steuer select{ font:inherit; padding:5px 8px; border:1.5px solid var(--maroon); border-radius:4px; background:#fff; color:var(--text); }
 .sr-steuer select option{ background:#fff; color:var(--text); }
@@ -253,6 +254,7 @@ button:hover{ background:var(--maroon-dark); }
 .ar-steuer label.ar-haken input{ accent-color:var(--maroon); width:18px; height:18px; }
 .ar-tabelle{ width:100%; margin-top:12px; }
 .ar-tabelle td:nth-child(2), .ar-tabelle th:nth-child(2){ text-align:right; }
+.zr-tabelle td:nth-child(3), .zr-tabelle th:nth-child(3){ text-align:right; }
 .ar-tabelle tr.ar-ziel td{ background:#f6e3c6; font-weight:bold; }
 
 /* ---------- Mobil ---------- */
@@ -263,6 +265,7 @@ button:hover{ background:var(--maroon-dark); }
   .tabnav{ margin-bottom:12px; }
   .tabbar, .subtabbar{ gap:4px; }
   .tab-btn{ flex:1; padding:10px 4px; font-size:.9rem; }
+  .subtabbar .tab-btn{ padding:6px 4px; min-width:0; font-size:.85rem; }
 
   .guide{ padding:6px 14px 24px; }
   .guide h1{ font-size:1.3rem; }
@@ -369,8 +372,9 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-corebattle" data-tab="corebattle" aria-controls="panel-corebattle" aria-selected="false" tabindex="-1">Core Battle</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Tools" data-gruppe="tools" hidden="">
-  <button class="tab-btn" role="tab" id="tab-schablone" data-tab="schablone" aria-controls="panel-schablone" aria-selected="true" tabindex="0">Schablonenrechner</button>
-  <button class="tab-btn" role="tab" id="tab-angriff" data-tab="angriff" aria-controls="panel-angriff" aria-selected="false" tabindex="-1">Angriffsrechner</button>
+  <button class="tab-btn" role="tab" id="tab-schablone" data-tab="schablone" aria-controls="panel-schablone" aria-selected="true" tabindex="0">Schablonen&shy;rechner</button>
+  <button class="tab-btn" role="tab" id="tab-angriff" data-tab="angriff" aria-controls="panel-angriff" aria-selected="false" tabindex="-1">Angriffs&shy;rechner</button>
+  <button class="tab-btn" role="tab" id="tab-zauber" data-tab="zauber" aria-controls="panel-zauber" aria-selected="false" tabindex="-1">Zauber&shy;rechner</button>
 </div>
 </nav>
 
@@ -1171,6 +1175,38 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 </div>
 <table class="ar-tabelle"><tbody id="arTabelle"></tbody></table>
 <p class="sr-hint" style="margin-top:10px;">Der Angriff gelingt, wenn Bewegung + Wurf mindestens die Entfernung erreicht. Die Tabelle zeigt die Chance für jede Entfernung, die mit dieser Bewegung erreichbar ist.</p>
+</div>
+</div>
+
+<!-- ===================== TOOLS: ZAUBERRECHNER ===================== -->
+<div class="tab-content" id="panel-zauber" role="tabpanel" aria-labelledby="tab-zauber" tabindex="0" hidden="">
+<div class="guide sr">
+<h1>Zauberrechner</h1>
+<p class="sr-hint">Wie wahrscheinlich kommt der Zauber durch? Zauberwurf = 2W6 + Magierstufe/2 (aufgerundet).</p>
+<div class="ar-ergebnis" aria-live="polite">
+  <span id="zrTitel">Kommt durch</span>
+  <b id="zrChance">–</b>
+  <small id="zrText"></small>
+</div>
+<div class="sr-steuer ar-steuer">
+  <div><span class="sr-titel">Zauberwert</span><div class="sr-wahl" id="zrWert">
+    <button type="button" data-wert="7" aria-pressed="false">7+</button>
+    <button type="button" data-wert="8" aria-pressed="true">8+</button>
+    <button type="button" data-wert="9" aria-pressed="false">9+</button>
+    <button type="button" data-wert="10" aria-pressed="false">10+</button>
+  </div></div>
+  <div><span class="sr-titel">Magierstufe</span><div class="sr-zaehler"><button type="button" data-zr="stufe" data-schritt="-1" aria-label="Magierstufe weniger">−</button><output id="zr_stufe">1</output><button type="button" data-zr="stufe" data-schritt="1" aria-label="Magierstufe mehr">+</button></div></div>
+  <div><span class="sr-titel">Bonus Zauberwurf</span><div class="sr-zaehler"><button type="button" data-zr="bonus" data-schritt="-1" aria-label="Bonus Zauberwurf weniger">−</button><output id="zr_bonus">0</output><button type="button" data-zr="bonus" data-schritt="1" aria-label="Bonus Zauberwurf mehr">+</button></div></div>
+  <div><span class="sr-titel">Zauberwurf</span><label class="ar-haken"><input type="checkbox" id="zrWdh"> Wiederholen, wenn er misslingt</label></div>
+</div>
+<div class="sr-steuer ar-steuer" style="margin-top:10px;">
+  <div><span class="sr-titel">Gegner</span><label class="ar-haken"><input type="checkbox" id="zrBann" checked> Versucht zu bannen</label></div>
+  <div><span class="sr-titel">Stufe des Banners</span><div class="sr-zaehler"><button type="button" data-zr="bStufe" data-schritt="-1" aria-label="Stufe des Banners weniger">−</button><output id="zr_bStufe">0</output><button type="button" data-zr="bStufe" data-schritt="1" aria-label="Stufe des Banners mehr">+</button></div></div>
+  <div><span class="sr-titel">Bonus Bannwurf</span><div class="sr-zaehler"><button type="button" data-zr="bBonus" data-schritt="-1" aria-label="Bonus Bannwurf weniger">−</button><output id="zr_bBonus">0</output><button type="button" data-zr="bBonus" data-schritt="1" aria-label="Bonus Bannwurf mehr">+</button></div></div>
+  <div><span class="sr-titel">Bannwurf</span><label class="ar-haken"><input type="checkbox" id="zrBWdh"> Wiederholen, wenn er misslingt</label></div>
+</div>
+<table class="ar-tabelle zr-tabelle"><tbody id="zrTabelle"></tbody></table>
+<p class="sr-hint" style="margin-top:10px;">Der Zauber gelingt, wenn der Zauberwurf den Zauberwert erreicht. Ein Pasch aus Einsen misslingt immer, ein Pasch aus Sechsen gelingt immer. Gebannt ist er, wenn der Bannwurf (2W6 + Stufe/2 des Banners, aufgerundet) höher ist als der Zauberwurf – ein Pasch aus Sechsen bannt immer. Stufe 0 = Banner ohne Magierstufe.</p>
 </div>
 </div>
 
@@ -2696,7 +2732,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   const los = () => { zug = null; svg.classList.remove('zieht'); };
   svg.addEventListener('pointerup', los); svg.addEventListener('pointercancel', los);
 
-  document.querySelectorAll('.sr-zaehler button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.sr-zaehler button[data-feld]').forEach(b => b.addEventListener('click', () => {
     const feld = b.dataset.feld, alt = einheit();
     st[feld] = Math.max(1, Math.min(feld === 'breite' ? 20 : 12, st[feld] + Number(b.dataset.schritt)));
     const neu = einheit(); st.x += (neu[0] - alt[0]) / 2; st.y += (neu[1] - alt[1]) / 2;   // Schablone bleibt relativ mittig
@@ -2787,6 +2823,94 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   document.querySelectorAll('#arSonder button').forEach(b => b.addEventListener('click', () => { st.sonder = b.dataset.sonder; zeige(); }));
   feld('arSchwer').addEventListener('change', e => { st.schwer = e.target.checked; zeige(); });
   document.querySelectorAll('#arWdh button').forEach(b => b.addEventListener('click', () => { st.wdh = b.dataset.wdh; zeige(); }));
+  zeige();
+})();
+</script>
+<script>
+/* ================= Tools: Zauberrechner =================
+   Zauberwurf = 2W6 + Magierstufe/2 (aufgerundet) + Bonus, muss den Zauberwert
+   erreichen. Pasch 1 misslingt immer, Pasch 6 gelingt immer. Ein misslungener
+   Zauberwurf darf auf Wunsch einmal wiederholt werden.
+   Bannwurf = 2W6 + Stufe/2 des Banners (aufgerundet) + Bonus, muss hoeher sein
+   als der Zauberwurf; Pasch 6 bannt immer. Auch er darf einmal wiederholt werden. */
+(function () {
+  const feld = id => document.getElementById(id);
+  if (!feld('zrChance')) return;
+  const st = { wert: 8, stufe: 1, bonus: 0, wdh: false, bann: true, bStufe: 0, bBonus: 0, bWdh: false };
+  try { Object.assign(st, JSON.parse(localStorage.getItem('battleMarchZauber')) || {}); } catch (e) { /* egal */ }
+  const merke = () => { try { localStorage.setItem('battleMarchZauber', JSON.stringify(st)); } catch (e) { /* egal */ } };
+  const GRENZEN = { stufe: [1, 4], bonus: [-3, 3], bStufe: [0, 4], bBonus: [-3, 3] };
+  Object.keys(GRENZEN).forEach(k => {   // gespeicherte Werte koennen veraltet sein
+    const [min, max] = GRENZEN[k], n = Math.round(Number(st[k]));
+    st[k] = Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : min;
+  });
+  if (![7, 8, 9, 10].includes(st.wert)) st.wert = 8;
+  const prozent = p => (Math.round(p * 1000) / 10).toLocaleString('de-DE') + ' %';
+  const mitVz = n => (n > 0 ? '+' : '') + n;
+
+  // Alle 36 Wuerfelpaare eines 2W6-Wurfs
+  const PAARE = [];
+  for (let a = 1; a <= 6; a++) for (let b = 1; b <= 6; b++) PAARE.push([a, b]);
+
+  /* Ausgang des Zauberwurfs: Liste von { erg, p } fuer gelungene Wuerfe
+     (erg = Zauberergebnis, gegen das gebannt wird). */
+  function zauberwurf(wert) {
+    const mod = Math.ceil(st.stufe / 2) + st.bonus;
+    const einmal = PAARE.map(([a, b]) => {
+      const erg = a + b + mod;
+      const ok = a === 6 && b === 6 ? true : a === 1 && b === 1 ? false : erg >= wert;
+      return { erg, ok, p: 1 / 36 };
+    });
+    const pFehl = einmal.filter(w => !w.ok).reduce((s, w) => s + w.p, 0);
+    const gelungen = einmal.filter(w => w.ok);
+    // Wiederholt wird nur ein misslungener Wurf; der zweite Versuch gilt, wie er faellt.
+    return st.wdh ? gelungen.concat(gelungen.map(w => ({ erg: w.erg, p: w.p * pFehl }))) : gelungen;
+  }
+
+  // Chance, dass der Bann gegen ein Zauberergebnis erg gelingt
+  function bannChance(erg) {
+    if (!st.bann) return 0;
+    const mod = Math.ceil(st.bStufe / 2) + st.bBonus;
+    const q = PAARE.filter(([a, b]) => (a === 6 && b === 6) || a + b + mod > erg).length / 36;
+    return st.bWdh ? 1 - (1 - q) * (1 - q) : q;
+  }
+
+  function rechne(wert) {
+    const wuerfe = zauberwurf(wert);
+    const gewirkt = wuerfe.reduce((s, w) => s + w.p, 0);
+    const durch = wuerfe.reduce((s, w) => s + w.p * (1 - bannChance(w.erg)), 0);
+    return { gewirkt, durch };
+  }
+
+  function zeige() {
+    const r = rechne(st.wert), mod = Math.ceil(st.stufe / 2) + st.bonus;
+    feld('zrTitel').textContent = st.bann ? 'Kommt durch' : 'Wird gewirkt';
+    feld('zrChance').textContent = prozent(st.bann ? r.durch : r.gewirkt);
+    feld('zrText').textContent = 'Zauberwurf 2W6 ' + mitVz(mod) + ' gegen ' + st.wert + '+: gewirkt in ' + prozent(r.gewirkt)
+      + (st.bann ? ', gebannt in ' + prozent(r.gewirkt ? (r.gewirkt - r.durch) / r.gewirkt : 0) + ' der gewirkten Zauber.' : '.');
+    Object.keys(GRENZEN).forEach(k => { feld('zr_' + k).textContent = st[k]; });
+    document.querySelectorAll('#zrWert button').forEach(b => b.setAttribute('aria-pressed', Number(b.dataset.wert) === st.wert ? 'true' : 'false'));
+    feld('zrWdh').checked = st.wdh;
+    feld('zrBann').checked = st.bann;
+    feld('zrBWdh').checked = st.bWdh;
+    document.querySelectorAll('#panel-zauber [data-zr^="b"], #zrBWdh').forEach(el => { el.disabled = !st.bann; });
+    const zeilen = ['<tr><th>Zauberwert</th><th>Gewirkt</th><th>' + (st.bann ? 'Kommt durch' : '–') + '</th></tr>'];
+    [7, 8, 9, 10].forEach(w => {
+      const x = rechne(w);
+      zeilen.push('<tr' + (w === st.wert ? ' class="ar-ziel"' : '') + '><td>' + w + '+</td><td>' + prozent(x.gewirkt) + '</td><td>' + (st.bann ? prozent(x.durch) : '–') + '</td></tr>');
+    });
+    feld('zrTabelle').innerHTML = zeilen.join('');
+    merke();
+  }
+  document.querySelectorAll('[data-zr]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.zr, [min, max] = GRENZEN[k];
+    st[k] = Math.max(min, Math.min(max, st[k] + Number(b.dataset.schritt)));
+    zeige();
+  }));
+  document.querySelectorAll('#zrWert button').forEach(b => b.addEventListener('click', () => { st.wert = Number(b.dataset.wert); zeige(); }));
+  feld('zrWdh').addEventListener('change', e => { st.wdh = e.target.checked; zeige(); });
+  feld('zrBann').addEventListener('change', e => { st.bann = e.target.checked; zeige(); });
+  feld('zrBWdh').addEventListener('change', e => { st.bWdh = e.target.checked; zeige(); });
   zeige();
 })();
 </script>
