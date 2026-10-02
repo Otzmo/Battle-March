@@ -1163,7 +1163,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     <button type="button" data-sonder="swift" aria-pressed="false">Schnelle Bewegung (+1W6)</button>
   </div></div>
   <div><span class="sr-titel">Gelände</span><label class="ar-haken"><input type="checkbox" id="arSchwer"> Schweres Gelände (der niedrigere von 2W6 zählt)</label></div>
-  <div><span class="sr-titel">Wiederholen</span><label class="ar-haken"><input type="checkbox" id="arWdh"> Angriffswurf wiederholen, wenn er nicht reicht</label></div>
+  <div><span class="sr-titel">Wiederholen</span><label class="ar-haken"><input type="checkbox" id="arWdh"> Angriffswurf (2W6) wiederholen, wenn er nicht reicht</label></div>
 </div>
 <table class="ar-tabelle"><tbody id="arTabelle"></tbody></table>
 <p class="sr-hint" style="margin-top:10px;">Der Angriff gelingt, wenn Bewegung + Wurf mindestens die Entfernung erreicht. Die Tabelle zeigt die Chance für jede Entfernung, die mit dieser Bewegung erreichbar ist.</p>
@@ -2713,7 +2713,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
 /* ================= Tools: Angriffsrechner =================
    Angriffsreichweite = Bewegung + 2W6, der hoehere zaehlt. Schnelle Bewegung: zusaetzlich + 1W6,
    kleine schnelle Bewegung: zusaetzlich + 1W3. Durch schweres Gelaende zaehlt der niedrigere der 2W6.
-   Darf der Wurf wiederholt werden, wird nur ein zu kurzer Wurf komplett neu gewuerfelt.
+   Darf der Angriffswurf wiederholt werden, werden bei zu kurzem Ergebnis nur die 2W6 neu gewuerfelt.
    Die Chance wird exakt aus den Wuerfelwahrscheinlichkeiten berechnet. */
 (function () {
   const feld = id => document.getElementById(id);
@@ -2728,24 +2728,24 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   const prozent = p => (Math.round(p * 1000) / 10).toLocaleString('de-DE') + ' %';
   const zoll = z => z.toLocaleString('de-DE') + '"';
 
-  // Verteilung des Wurfs: hoeherer (schweres Gelaende: niedrigerer) von 2W6, dazu bei schneller Bewegung 1W6 bzw. 1W3
-  function verteilung() {
-    const v = [], z = zusatz();
-    for (let a = 1; a <= 6; a++) for (let b = 1; b <= 6; b++) {
-      const h = st.schwer ? Math.min(a, b) : Math.max(a, b);
-      if (z) for (let c = 1; c <= z; c++) v[h + c] = (v[h + c] || 0) + 1 / (36 * z);
-      else v[h] = (v[h] || 0) + 1 / 36;
-    }
-    return v;
-  }
+  /* Angriffswurf = 2W6, der hoehere zaehlt (schweres Gelaende: der niedrigere).
+     Schnelle Bewegung legt einen eigenen Wuerfel dazu (1W6 bzw. 1W3), der beim
+     Wiederholen liegen bleibt - wiederholt wird nur der Angriffswurf. */
+  const pWurf = k => {   // Wahrscheinlichkeit, dass der Angriffswurf mindestens k zeigt
+    if (k <= 1) return 1;
+    if (k > 6) return 0;
+    const unter = (k - 1) / 6, ueber = (7 - k) / 6;
+    return st.schwer ? ueber * ueber : 1 - unter * unter;
+  };
   const maxWurf = () => 6 + zusatz();
   const minWurf = () => zusatz() ? 2 : 1;
-  // Wahrscheinlichkeit, mindestens k zu wuerfeln (k ganzzahlig)
+  // Wahrscheinlichkeit, mit Angriffswurf und Zusatzwuerfel mindestens k zu erreichen (k ganzzahlig)
   function mindestens(k) {
-    const v = verteilung();
-    let p = 0;
-    for (let w = Math.max(k, minWurf()); w <= maxWurf(); w++) p += v[w] || 0;
-    return st.wdh ? 1 - (1 - p) * (1 - p) : p;   // zweiter Versuch nur, wenn der erste nicht reicht
+    const z = zusatz(), werte = z ? Array.from({ length: z }, (_, i) => i + 1) : [0];
+    return werte.reduce((summe, c) => {
+      const p = pWurf(k - c);
+      return summe + (st.wdh ? 1 - (1 - p) * (1 - p) : p) / werte.length;   // zweiter Versuch nur, wenn der erste nicht reicht
+    }, 0);
   }
   const chance = d => mindestens(Math.ceil(d - st.bew));
   // dativ = "auf dem hoeheren", sonst "(hoeherer von 2W6 + ...)"
@@ -2757,7 +2757,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     feld('arText').textContent = noetig <= minWurf() ? 'Kommt immer an – die Bewegung reicht schon mit dem niedrigsten Wurf.'
       : noetig > maxWurf() ? 'Zu weit – selbst mit dem besten Wurf reicht es nicht (höchstens ' + zoll(st.bew + maxWurf()) + ').'
       : 'Benötigt ' + noetig + (noetig < maxWurf() ? '+' : '') + ({ keine: ' auf dem ' + wuerfel(true) + '.', klein: ' (' + wuerfel() + ' + 1W3).', swift: ' (' + wuerfel() + ' + 1W6).' })[st.sonder]
-        + (st.wdh ? ' Ein zu kurzer Wurf wird wiederholt.' : '');
+        + (st.wdh ? (zusatz() ? ' Reicht es nicht, werden die 2W6 wiederholt.' : ' Reicht es nicht, wird wiederholt.') : '');
     feld('arBew').textContent = st.bew;
     feld('arDist').textContent = st.dist.toLocaleString('de-DE');
     document.querySelectorAll('#arSonder button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sonder === st.sonder ? 'true' : 'false'));
