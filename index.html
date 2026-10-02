@@ -244,6 +244,7 @@ button:hover{ background:var(--maroon-dark); }
 .sr-wahl button{ background:#fff; color:var(--maroon); border:1.5px solid var(--maroon); padding:6px 12px; }
 .sr-wahl button[aria-pressed="true"]{ background:var(--maroon); color:#fff; }
 .sr-steuer input[type=range]{ width:160px; accent-color:var(--maroon); }
+#srMitte{ padding:7px 14px; }
 
 /* ---------- Mobil ---------- */
 @media (max-width:720px){
@@ -1127,6 +1128,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     <button type="button" data-art="flamme" aria-pressed="false">Flammen</button>
   </div></div>
   <div id="srDrehBox" hidden><label for="srDreh">Drehung Flammen</label><input type="range" id="srDreh" min="0" max="355" step="5" value="0"></div>
+  <div><button type="button" id="srMitte">⌖ Schablone zentrieren</button></div>
 </div>
 <p class="sr-hint" style="margin-top:10px;">Breite = Modelle pro Glied (Reihen), Tiefe = Anzahl Glieder. Erwartete Treffer = automatische Treffer + die Hälfte der Treffer bei 4+. Die Flammenschablone ist 8" lang, vorne 0,5" und hinten 2,5" breit.</p>
 </div>
@@ -2667,6 +2669,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     zeichne();
   }));
   document.getElementById('srDreh').addEventListener('input', e => { st.dreh = Number(e.target.value); zeichne(); });
+  document.getElementById('srMitte').addEventListener('click', () => { st.x = null; zeichne(); });   // null = Mitte der Einheit
   zeichne();
 })();
 </script>
