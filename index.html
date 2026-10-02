@@ -1148,7 +1148,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <div class="tab-content" id="panel-angriff" role="tabpanel" aria-labelledby="tab-angriff" tabindex="0" hidden="">
 <div class="guide sr">
 <h1>Angriffsrechner</h1>
-<p class="sr-hint">Wie wahrscheinlich kommt der Angriff an? Angriffsreichweite = Bewegung + W6.</p>
+<p class="sr-hint">Wie wahrscheinlich kommt der Angriff an? Angriffsreichweite = Bewegung + 2W6, der höhere Würfel zählt.</p>
 <div class="ar-ergebnis" aria-live="polite">
   <span>Erfolgschance</span>
   <b id="arChance">–</b>
@@ -1157,7 +1157,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <div class="sr-steuer ar-steuer">
   <div><span class="sr-titel">Bewegung</span><div class="sr-zaehler"><button type="button" data-ar="bew" data-schritt="-1" aria-label="Bewegung weniger">−</button><output id="arBew">4</output><button type="button" data-ar="bew" data-schritt="1" aria-label="Bewegung mehr">+</button></div></div>
   <div><span class="sr-titel">Entfernung (Zoll)</span><div class="sr-zaehler"><button type="button" data-ar="dist" data-schritt="-0.5" aria-label="Entfernung weniger">−</button><output id="arDist">8</output><button type="button" data-ar="dist" data-schritt="0.5" aria-label="Entfernung mehr">+</button></div></div>
-  <div><span class="sr-titel">Sonderregel</span><label class="ar-haken"><input type="checkbox" id="arSwift"> Swiftstride (2W6, der niedrigere zählt nicht)</label></div>
+  <div><span class="sr-titel">Sonderregel</span><label class="ar-haken"><input type="checkbox" id="arSwift"> Swiftstride (zusätzlich + 1W6)</label></div>
 </div>
 <table class="ar-tabelle"><tbody id="arTabelle"></tbody></table>
 <p class="sr-hint" style="margin-top:10px;">Der Angriff gelingt, wenn Bewegung + Wurf mindestens die Entfernung erreicht. Die Tabelle zeigt die Chance für jede Entfernung, die mit dieser Bewegung erreichbar ist.</p>
@@ -2705,7 +2705,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
 </script>
 <script>
 /* ================= Tools: Angriffsrechner =================
-   Angriffsreichweite = Bewegung + W6. Swiftstride: zwei W6, der hoehere zaehlt.
+   Angriffsreichweite = Bewegung + 2W6, der hoehere zaehlt. Swiftstride: zusaetzlich + 1W6.
    Die Chance wird exakt aus den Wuerfelwahrscheinlichkeiten berechnet. */
 (function () {
   const feld = id => document.getElementById(id);
@@ -2716,26 +2716,38 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   const prozent = p => (Math.round(p * 1000) / 10).toLocaleString('de-DE') + ' %';
   const zoll = z => z.toLocaleString('de-DE') + '"';
 
+  // Verteilung des Wurfs: hoeherer von 2W6, bei Swiftstride + 1W6
+  function verteilung() {
+    const v = [];
+    for (let a = 1; a <= 6; a++) for (let b = 1; b <= 6; b++) {
+      const h = Math.max(a, b);
+      if (st.swift) for (let c = 1; c <= 6; c++) v[h + c] = (v[h + c] || 0) + 1 / 216;
+      else v[h] = (v[h] || 0) + 1 / 36;
+    }
+    return v;
+  }
+  const maxWurf = () => st.swift ? 12 : 6;
+  const minWurf = () => st.swift ? 2 : 1;
   // Wahrscheinlichkeit, mindestens k zu wuerfeln (k ganzzahlig)
   function mindestens(k) {
-    if (k <= 1) return 1;
-    if (k > 6) return 0;
-    const einzeln = (7 - k) / 6;
-    return st.swift ? 1 - Math.pow(1 - einzeln, 2) : einzeln;
+    const v = verteilung();
+    let p = 0;
+    for (let w = Math.max(k, minWurf()); w <= maxWurf(); w++) p += v[w] || 0;
+    return p;
   }
   const chance = d => mindestens(Math.ceil(d - st.bew));
 
   function zeige() {
     const noetig = Math.ceil(st.dist - st.bew);
     feld('arChance').textContent = prozent(chance(st.dist));
-    feld('arText').textContent = noetig <= 1 ? 'Kommt immer an – die Bewegung reicht schon mit einer 1.'
-      : noetig > 6 ? 'Zu weit – selbst mit einer 6 reicht es nicht (höchstens ' + zoll(st.bew + 6) + ').'
-      : 'Benötigt ' + noetig + (noetig < 6 ? '+' : '') + ' auf ' + (st.swift ? 'einem der beiden W6' : 'dem W6') + '.';
+    feld('arText').textContent = noetig <= minWurf() ? 'Kommt immer an – die Bewegung reicht schon mit dem niedrigsten Wurf.'
+      : noetig > maxWurf() ? 'Zu weit – selbst mit dem besten Wurf reicht es nicht (höchstens ' + zoll(st.bew + maxWurf()) + ').'
+      : 'Benötigt ' + noetig + (noetig < maxWurf() ? '+' : '') + (st.swift ? ' (höherer von 2W6 + 1W6).' : ' auf dem höheren von 2W6.');
     feld('arBew').textContent = st.bew;
     feld('arDist').textContent = st.dist.toLocaleString('de-DE');
     feld('arSwift').checked = st.swift;
     const zeilen = ['<tr><th>Entfernung</th><th>Chance</th></tr>'];
-    for (let d = st.bew + 1; d <= st.bew + 6; d++) {
+    for (let d = st.bew + minWurf(); d <= st.bew + maxWurf(); d++) {
       zeilen.push('<tr' + (Math.ceil(st.dist) === d ? ' class="ar-ziel"' : '') + '><td>bis ' + zoll(d) + '</td><td>' + prozent(chance(d)) + '</td></tr>');
     }
     feld('arTabelle').innerHTML = zeilen.join('');
