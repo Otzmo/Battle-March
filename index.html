@@ -13,6 +13,9 @@
   --scale:13px;
 }
 *{ box-sizing:border-box; }
+/* Die Seite ist immer hell - sonst faerbt ein dunkles Handy-Design Auswahllisten und Felder um. */
+:root{ color-scheme:light; }
+select, input, textarea{ color:var(--text); }
 html{ -webkit-text-size-adjust:100%; }
 body{
   font-family:"Georgia","DejaVu Serif",serif;
@@ -235,7 +238,8 @@ button:hover{ background:var(--maroon-dark); }
 .sr-zaehler{ display:flex; align-items:center; border:1.5px solid var(--maroon); border-radius:4px; overflow:hidden; background:#fff; }
 .sr-zaehler button{ border-radius:0; padding:6px 12px; font-size:1rem; line-height:1; }
 .sr-zaehler output{ min-width:38px; text-align:center; font-weight:bold; }
-.sr-steuer select{ font:inherit; padding:5px 8px; border:1.5px solid var(--maroon); border-radius:4px; background:#fff; }
+.sr-steuer select{ font:inherit; padding:5px 8px; border:1.5px solid var(--maroon); border-radius:4px; background:#fff; color:var(--text); }
+.sr-steuer select option{ background:#fff; color:var(--text); }
 .sr-wahl{ display:flex; gap:6px; flex-wrap:wrap; }
 .sr-wahl button{ background:#fff; color:var(--maroon); border:1.5px solid var(--maroon); padding:6px 12px; }
 .sr-wahl button[aria-pressed="true"]{ background:var(--maroon); color:#fff; }
