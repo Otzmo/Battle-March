@@ -1157,7 +1157,11 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <div class="sr-steuer ar-steuer">
   <div><span class="sr-titel">Bewegung</span><div class="sr-zaehler"><button type="button" data-ar="bew" data-schritt="-1" aria-label="Bewegung weniger">−</button><output id="arBew">4</output><button type="button" data-ar="bew" data-schritt="1" aria-label="Bewegung mehr">+</button></div></div>
   <div><span class="sr-titel">Entfernung (Zoll)</span><div class="sr-zaehler"><button type="button" data-ar="dist" data-schritt="-0.5" aria-label="Entfernung weniger">−</button><output id="arDist">8</output><button type="button" data-ar="dist" data-schritt="0.5" aria-label="Entfernung mehr">+</button></div></div>
-  <div><span class="sr-titel">Sonderregel</span><label class="ar-haken"><input type="checkbox" id="arSwift"> Swiftstride (zusätzlich + 1W6)</label></div>
+  <div><span class="sr-titel">Sonderregel</span><div class="sr-wahl" id="arSonder">
+    <button type="button" data-sonder="keine" aria-pressed="true">Keine</button>
+    <button type="button" data-sonder="klein" aria-pressed="false">Kleines Swiftstride (+1W3)</button>
+    <button type="button" data-sonder="swift" aria-pressed="false">Swiftstride (+1W6)</button>
+  </div></div>
 </div>
 <table class="ar-tabelle"><tbody id="arTabelle"></tbody></table>
 <p class="sr-hint" style="margin-top:10px;">Der Angriff gelingt, wenn Bewegung + Wurf mindestens die Entfernung erreicht. Die Tabelle zeigt die Chance für jede Entfernung, die mit dieser Bewegung erreichbar ist.</p>
@@ -2705,29 +2709,34 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
 </script>
 <script>
 /* ================= Tools: Angriffsrechner =================
-   Angriffsreichweite = Bewegung + 2W6, der hoehere zaehlt. Swiftstride: zusaetzlich + 1W6.
+   Angriffsreichweite = Bewegung + 2W6, der hoehere zaehlt. Swiftstride: zusaetzlich + 1W6,
+   kleines Swiftstride: zusaetzlich + 1W3.
    Die Chance wird exakt aus den Wuerfelwahrscheinlichkeiten berechnet. */
 (function () {
   const feld = id => document.getElementById(id);
   if (!feld('arChance')) return;
-  const st = { bew: 4, dist: 8, swift: false };
+  const st = { bew: 4, dist: 8, sonder: 'keine' };
   try { Object.assign(st, JSON.parse(localStorage.getItem('battleMarchAngriff')) || {}); } catch (e) { /* egal */ }
+  if (st.swift) st.sonder = 'swift';   // aelterer Stand kannte nur ein Haekchen
+  delete st.swift;
+  if (!['keine', 'klein', 'swift'].includes(st.sonder)) st.sonder = 'keine';
+  const zusatz = () => ({ keine: 0, klein: 3, swift: 6 })[st.sonder];   // Seiten des Zusatzwuerfels
   const merke = () => { try { localStorage.setItem('battleMarchAngriff', JSON.stringify(st)); } catch (e) { /* egal */ } };
   const prozent = p => (Math.round(p * 1000) / 10).toLocaleString('de-DE') + ' %';
   const zoll = z => z.toLocaleString('de-DE') + '"';
 
-  // Verteilung des Wurfs: hoeherer von 2W6, bei Swiftstride + 1W6
+  // Verteilung des Wurfs: hoeherer von 2W6, dazu bei Swiftstride 1W6 bzw. 1W3
   function verteilung() {
-    const v = [];
+    const v = [], z = zusatz();
     for (let a = 1; a <= 6; a++) for (let b = 1; b <= 6; b++) {
       const h = Math.max(a, b);
-      if (st.swift) for (let c = 1; c <= 6; c++) v[h + c] = (v[h + c] || 0) + 1 / 216;
+      if (z) for (let c = 1; c <= z; c++) v[h + c] = (v[h + c] || 0) + 1 / (36 * z);
       else v[h] = (v[h] || 0) + 1 / 36;
     }
     return v;
   }
-  const maxWurf = () => st.swift ? 12 : 6;
-  const minWurf = () => st.swift ? 2 : 1;
+  const maxWurf = () => 6 + zusatz();
+  const minWurf = () => zusatz() ? 2 : 1;
   // Wahrscheinlichkeit, mindestens k zu wuerfeln (k ganzzahlig)
   function mindestens(k) {
     const v = verteilung();
@@ -2742,10 +2751,10 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     feld('arChance').textContent = prozent(chance(st.dist));
     feld('arText').textContent = noetig <= minWurf() ? 'Kommt immer an – die Bewegung reicht schon mit dem niedrigsten Wurf.'
       : noetig > maxWurf() ? 'Zu weit – selbst mit dem besten Wurf reicht es nicht (höchstens ' + zoll(st.bew + maxWurf()) + ').'
-      : 'Benötigt ' + noetig + (noetig < maxWurf() ? '+' : '') + (st.swift ? ' (höherer von 2W6 + 1W6).' : ' auf dem höheren von 2W6.');
+      : 'Benötigt ' + noetig + (noetig < maxWurf() ? '+' : '') + ({ keine: ' auf dem höheren von 2W6.', klein: ' (höherer von 2W6 + 1W3).', swift: ' (höherer von 2W6 + 1W6).' })[st.sonder];
     feld('arBew').textContent = st.bew;
     feld('arDist').textContent = st.dist.toLocaleString('de-DE');
-    feld('arSwift').checked = st.swift;
+    document.querySelectorAll('#arSonder button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sonder === st.sonder ? 'true' : 'false'));
     const zeilen = ['<tr><th>Entfernung</th><th>Chance</th></tr>'];
     for (let d = st.bew + minWurf(); d <= st.bew + maxWurf(); d++) {
       zeilen.push('<tr' + (Math.ceil(st.dist) === d ? ' class="ar-ziel"' : '') + '><td>bis ' + zoll(d) + '</td><td>' + prozent(chance(d)) + '</td></tr>');
@@ -2758,7 +2767,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     st[k] = k === 'bew' ? Math.max(1, Math.min(12, st.bew + schritt)) : Math.max(0.5, Math.min(30, st.dist + schritt));
     zeige();
   }));
-  feld('arSwift').addEventListener('change', e => { st.swift = e.target.checked; zeige(); });
+  document.querySelectorAll('#arSonder button').forEach(b => b.addEventListener('click', () => { st.sonder = b.dataset.sonder; zeige(); }));
   zeige();
 })();
 </script>
