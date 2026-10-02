@@ -235,7 +235,7 @@ button:hover{ background:var(--maroon-dark); }
 .sr-zahl b{ font-size:1.5rem; color:var(--maroon); }
 .sr-steuer{ background:var(--beige); border:1.5px solid var(--maroon); border-radius:4px; padding:12px 14px; display:flex; flex-wrap:wrap; gap:14px 22px; align-items:flex-end; }
 .sr-steuer label, .sr-steuer .sr-titel{ display:block; font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; color:#5a4f3f; margin-bottom:4px; }
-.sr-zaehler{ display:flex; align-items:center; border:1.5px solid var(--maroon); border-radius:4px; overflow:hidden; background:#fff; }
+.sr-zaehler{ display:inline-flex; align-items:center; border:1.5px solid var(--maroon); border-radius:4px; overflow:hidden; background:#fff; }
 .sr-zaehler button{ border-radius:0; padding:6px 12px; font-size:1rem; line-height:1; }
 .sr-zaehler output{ min-width:38px; text-align:center; font-weight:bold; }
 .sr-steuer select{ font:inherit; padding:5px 8px; border:1.5px solid var(--maroon); border-radius:4px; background:#fff; color:var(--text); }
@@ -245,6 +245,15 @@ button:hover{ background:var(--maroon-dark); }
 .sr-wahl button[aria-pressed="true"]{ background:var(--maroon); color:#fff; }
 .sr-steuer input[type=range]{ width:160px; accent-color:var(--maroon); }
 #srMitte{ padding:7px 14px; }
+.ar-ergebnis{ text-align:center; background:var(--beige); border:2px solid var(--maroon); border-radius:4px; padding:14px; margin-bottom:12px; }
+.ar-ergebnis span{ display:block; font-size:.75rem; letter-spacing:.04em; text-transform:uppercase; color:#5a4f3f; }
+.ar-ergebnis b{ display:block; font-size:2.4rem; color:var(--maroon); line-height:1.2; }
+.ar-ergebnis small{ font-size:.9rem; color:#4a3f2f; }
+.ar-steuer label.ar-haken{ display:flex; align-items:center; gap:6px; text-transform:none; letter-spacing:0; font-size:.92rem; color:var(--text); cursor:pointer; }
+.ar-steuer label.ar-haken input{ accent-color:var(--maroon); width:18px; height:18px; }
+.ar-tabelle{ width:100%; margin-top:12px; }
+.ar-tabelle td:nth-child(2), .ar-tabelle th:nth-child(2){ text-align:right; }
+.ar-tabelle tr.ar-ziel td{ background:#f6e3c6; font-weight:bold; }
 
 /* ---------- Mobil ---------- */
 @media (max-width:720px){
@@ -361,6 +370,7 @@ button:hover{ background:var(--maroon-dark); }
 </div>
 <div class="subtabbar" role="tablist" aria-label="Tools" data-gruppe="tools" hidden="">
   <button class="tab-btn" role="tab" id="tab-schablone" data-tab="schablone" aria-controls="panel-schablone" aria-selected="true" tabindex="0">Schablonenrechner</button>
+  <button class="tab-btn" role="tab" id="tab-angriff" data-tab="angriff" aria-controls="panel-angriff" aria-selected="false" tabindex="-1">Angriffsrechner</button>
 </div>
 </nav>
 
@@ -1131,6 +1141,26 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <div><button type="button" id="srMitte">⌖ Schablone zentrieren</button></div>
 </div>
 <p class="sr-hint" style="margin-top:10px;">Breite = Modelle pro Glied (Reihen), Tiefe = Anzahl Glieder. Erwartete Treffer = automatische Treffer + die Hälfte der Treffer bei 4+. Die Flammenschablone ist 8" lang, vorne 0,5" und hinten 2,5" breit.</p>
+</div>
+</div>
+
+<!-- ===================== TOOLS: ANGRIFFSRECHNER ===================== -->
+<div class="tab-content" id="panel-angriff" role="tabpanel" aria-labelledby="tab-angriff" tabindex="0" hidden="">
+<div class="guide sr">
+<h1>Angriffsrechner</h1>
+<p class="sr-hint">Wie wahrscheinlich kommt der Angriff an? Angriffsreichweite = Bewegung + W6.</p>
+<div class="ar-ergebnis" aria-live="polite">
+  <span>Erfolgschance</span>
+  <b id="arChance">–</b>
+  <small id="arText"></small>
+</div>
+<div class="sr-steuer ar-steuer">
+  <div><span class="sr-titel">Bewegung</span><div class="sr-zaehler"><button type="button" data-ar="bew" data-schritt="-1" aria-label="Bewegung weniger">−</button><output id="arBew">4</output><button type="button" data-ar="bew" data-schritt="1" aria-label="Bewegung mehr">+</button></div></div>
+  <div><span class="sr-titel">Entfernung (Zoll)</span><div class="sr-zaehler"><button type="button" data-ar="dist" data-schritt="-0.5" aria-label="Entfernung weniger">−</button><output id="arDist">8</output><button type="button" data-ar="dist" data-schritt="0.5" aria-label="Entfernung mehr">+</button></div></div>
+  <div><span class="sr-titel">Sonderregel</span><label class="ar-haken"><input type="checkbox" id="arSwift"> Swiftstride (2W6, der niedrigere zählt nicht)</label></div>
+</div>
+<table class="ar-tabelle"><tbody id="arTabelle"></tbody></table>
+<p class="sr-hint" style="margin-top:10px;">Der Angriff gelingt, wenn Bewegung + Wurf mindestens die Entfernung erreicht. Die Tabelle zeigt die Chance für jede Entfernung, die mit dieser Bewegung erreichbar ist.</p>
 </div>
 </div>
 
@@ -2671,6 +2701,53 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   document.getElementById('srDreh').addEventListener('input', e => { st.dreh = Number(e.target.value); zeichne(); });
   document.getElementById('srMitte').addEventListener('click', () => { st.x = null; zeichne(); });   // null = Mitte der Einheit
   zeichne();
+})();
+</script>
+<script>
+/* ================= Tools: Angriffsrechner =================
+   Angriffsreichweite = Bewegung + W6. Swiftstride: zwei W6, der hoehere zaehlt.
+   Die Chance wird exakt aus den Wuerfelwahrscheinlichkeiten berechnet. */
+(function () {
+  const feld = id => document.getElementById(id);
+  if (!feld('arChance')) return;
+  const st = { bew: 4, dist: 8, swift: false };
+  try { Object.assign(st, JSON.parse(localStorage.getItem('battleMarchAngriff')) || {}); } catch (e) { /* egal */ }
+  const merke = () => { try { localStorage.setItem('battleMarchAngriff', JSON.stringify(st)); } catch (e) { /* egal */ } };
+  const prozent = p => (Math.round(p * 1000) / 10).toLocaleString('de-DE') + ' %';
+  const zoll = z => z.toLocaleString('de-DE') + '"';
+
+  // Wahrscheinlichkeit, mindestens k zu wuerfeln (k ganzzahlig)
+  function mindestens(k) {
+    if (k <= 1) return 1;
+    if (k > 6) return 0;
+    const einzeln = (7 - k) / 6;
+    return st.swift ? 1 - Math.pow(1 - einzeln, 2) : einzeln;
+  }
+  const chance = d => mindestens(Math.ceil(d - st.bew));
+
+  function zeige() {
+    const noetig = Math.ceil(st.dist - st.bew);
+    feld('arChance').textContent = prozent(chance(st.dist));
+    feld('arText').textContent = noetig <= 1 ? 'Kommt immer an – die Bewegung reicht schon mit einer 1.'
+      : noetig > 6 ? 'Zu weit – selbst mit einer 6 reicht es nicht (höchstens ' + zoll(st.bew + 6) + ').'
+      : 'Benötigt ' + noetig + (noetig < 6 ? '+' : '') + ' auf ' + (st.swift ? 'einem der beiden W6' : 'dem W6') + '.';
+    feld('arBew').textContent = st.bew;
+    feld('arDist').textContent = st.dist.toLocaleString('de-DE');
+    feld('arSwift').checked = st.swift;
+    const zeilen = ['<tr><th>Entfernung</th><th>Chance</th></tr>'];
+    for (let d = st.bew + 1; d <= st.bew + 6; d++) {
+      zeilen.push('<tr' + (Math.ceil(st.dist) === d ? ' class="ar-ziel"' : '') + '><td>bis ' + zoll(d) + '</td><td>' + prozent(chance(d)) + '</td></tr>');
+    }
+    feld('arTabelle').innerHTML = zeilen.join('');
+    merke();
+  }
+  document.querySelectorAll('[data-ar]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.ar, schritt = Number(b.dataset.schritt);
+    st[k] = k === 'bew' ? Math.max(1, Math.min(12, st.bew + schritt)) : Math.max(0.5, Math.min(30, st.dist + schritt));
+    zeige();
+  }));
+  feld('arSwift').addEventListener('change', e => { st.swift = e.target.checked; zeige(); });
+  zeige();
 })();
 </script>
 <script>
