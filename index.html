@@ -219,8 +219,31 @@ button:hover{ background:var(--maroon-dark); }
 }
 .coord-explainer b{ color:var(--maroon); }
 
+/* ---------- Schablonenrechner ---------- */
+.sr{ max-width:760px; margin:0 auto; }
+.sr-hint{ text-align:center; font-size:.9rem; color:#4a3f2f; margin:0 0 10px; }
+.sr-feld{ background:#fff; border:2px solid var(--maroon); border-radius:4px; touch-action:none; cursor:grab; display:block; width:100%; height:auto; }
+.sr-feld.zieht{ cursor:grabbing; }
+.sr-legende{ display:flex; justify-content:center; flex-wrap:wrap; gap:6px 18px; font-size:.82rem; margin:10px 0 12px; }
+.sr-legende i{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:5px; vertical-align:-1px; border:1px solid rgba(0,0,0,.25); }
+.sr-zahlen{ display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:12px; }
+.sr-zahl{ background:var(--beige); border:1.5px solid var(--maroon); border-radius:4px; padding:8px 10px; }
+.sr-zahl span{ display:block; font-size:.7rem; letter-spacing:.04em; text-transform:uppercase; color:#5a4f3f; }
+.sr-zahl b{ font-size:1.5rem; color:var(--maroon); }
+.sr-steuer{ background:var(--beige); border:1.5px solid var(--maroon); border-radius:4px; padding:12px 14px; display:flex; flex-wrap:wrap; gap:14px 22px; align-items:flex-end; }
+.sr-steuer label, .sr-steuer .sr-titel{ display:block; font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; color:#5a4f3f; margin-bottom:4px; }
+.sr-zaehler{ display:flex; align-items:center; border:1.5px solid var(--maroon); border-radius:4px; overflow:hidden; background:#fff; }
+.sr-zaehler button{ border-radius:0; padding:6px 12px; font-size:1rem; line-height:1; }
+.sr-zaehler output{ min-width:38px; text-align:center; font-weight:bold; }
+.sr-steuer select{ font:inherit; padding:5px 8px; border:1.5px solid var(--maroon); border-radius:4px; background:#fff; }
+.sr-wahl{ display:flex; gap:6px; flex-wrap:wrap; }
+.sr-wahl button{ background:#fff; color:var(--maroon); border:1.5px solid var(--maroon); padding:6px 12px; }
+.sr-wahl button[aria-pressed="true"]{ background:var(--maroon); color:#fff; }
+.sr-steuer input[type=range]{ width:160px; accent-color:var(--maroon); }
+
 /* ---------- Mobil ---------- */
 @media (max-width:720px){
+  .sr-zahlen{ grid-template-columns:repeat(2, 1fr); }
   body{ padding:12px 12px 24px; }
   .page-header h1{ font-size:1.7rem; }
   .tabnav{ margin-bottom:12px; }
@@ -317,6 +340,7 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-core" data-tab="core" aria-selected="false" tabindex="-1">Core Battle</button>
   <button class="tab-btn" role="tab" id="tab-kartenbau" data-tab="kartenbau" aria-selected="false" tabindex="-1">Kartenbau</button>
   <button class="tab-btn" role="tab" id="tab-base" data-tab="base" aria-controls="panel-base" aria-selected="false" tabindex="-1">BASE</button>
+  <button class="tab-btn" role="tab" id="tab-tools" data-tab="tools" aria-selected="false" tabindex="-1">Tools</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Battle March" data-gruppe="battlemarch">
   <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
@@ -329,6 +353,9 @@ button:hover{ background:var(--maroon-dark); }
 <div class="subtabbar" role="tablist" aria-label="Kartenbau" data-gruppe="kartenbau" hidden="">
   <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="true" tabindex="0">Battle March</button>
   <button class="tab-btn" role="tab" id="tab-corebattle" data-tab="corebattle" aria-controls="panel-corebattle" aria-selected="false" tabindex="-1">Core Battle</button>
+</div>
+<div class="subtabbar" role="tablist" aria-label="Tools" data-gruppe="tools" hidden="">
+  <button class="tab-btn" role="tab" id="tab-schablone" data-tab="schablone" aria-controls="panel-schablone" aria-selected="true" tabindex="0">Schablonenrechner</button>
 </div>
 </nav>
 
@@ -1055,6 +1082,49 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 </div>
 </div>
 
+</div>
+</div>
+
+<!-- ===================== TOOLS: SCHABLONENRECHNER ===================== -->
+<div class="tab-content" id="panel-schablone" role="tabpanel" aria-labelledby="tab-schablone" tabindex="0" hidden="">
+<div class="guide sr">
+<h1>Schablonenrechner</h1>
+<p class="sr-hint">Zieh die Schablone über die Einheit, um zu sehen, wen sie trifft.</p>
+<svg class="sr-feld" id="srFeld" role="img" aria-label="Einheit mit Schablone"></svg>
+<div class="sr-legende">
+  <span><i style="background:#c0392b"></i>Automatisch getroffen (ganz unter der Schablone)</span>
+  <span><i style="background:#d68a1e"></i>Getroffen bei 4+ (teilweise darunter)</span>
+  <span><i style="background:#cfc6b4"></i>Nicht berührt</span>
+</div>
+<div class="sr-zahlen" aria-live="polite">
+  <div class="sr-zahl"><span>Automatisch</span><b id="srAuto">0</b></div>
+  <div class="sr-zahl"><span>Bei 4+</span><b id="srVier">0</b></div>
+  <div class="sr-zahl"><span>Gefährdete Modelle</span><b id="srAlle">0</b></div>
+  <div class="sr-zahl"><span>Erwartete Treffer</span><b id="srErw">0</b></div>
+</div>
+<div class="sr-steuer">
+  <div><span class="sr-titel">Reihen</span><div class="sr-zaehler"><button type="button" data-feld="breite" data-schritt="-1" aria-label="Reihen weniger">−</button><output id="srBreite">6</output><button type="button" data-feld="breite" data-schritt="1" aria-label="Reihen mehr">+</button></div></div>
+  <div><span class="sr-titel">Glieder</span><div class="sr-zaehler"><button type="button" data-feld="tiefe" data-schritt="-1" aria-label="Glieder weniger">−</button><output id="srTiefe">4</output><button type="button" data-feld="tiefe" data-schritt="1" aria-label="Glieder mehr">+</button></div></div>
+  <div><label for="srBase">Basegröße</label><select id="srBase">
+    <option value="20x20">20 × 20 mm</option>
+    <option value="25x25" selected>25 × 25 mm</option>
+    <option value="30x30">30 × 30 mm</option>
+    <option value="40x40">40 × 40 mm</option>
+    <option value="50x50">50 × 50 mm</option>
+    <option value="25x50">25 × 50 mm</option>
+    <option value="30x60">30 × 60 mm</option>
+    <option value="50x75">50 × 75 mm</option>
+    <option value="50x100">50 × 100 mm</option>
+    <option value="60x100">60 × 100 mm</option>
+  </select></div>
+  <div><span class="sr-titel">Schablone</span><div class="sr-wahl" id="srArt">
+    <button type="button" data-art="r3" aria-pressed="true">Rund 3"</button>
+    <button type="button" data-art="r5" aria-pressed="false">Rund 5"</button>
+    <button type="button" data-art="flamme" aria-pressed="false">Flammen</button>
+  </div></div>
+  <div id="srDrehBox" hidden><label for="srDreh">Drehung Flammen</label><input type="range" id="srDreh" min="0" max="355" step="5" value="0"></div>
+</div>
+<p class="sr-hint" style="margin-top:10px;">Breite = Modelle pro Glied (Reihen), Tiefe = Anzahl Glieder. Erwartete Treffer = automatische Treffer + die Hälfte der Treffer bei 4+. Die Flammenschablone ist 8" lang, vorne 0,5" und hinten 2,5" breit.</p>
 </div>
 </div>
 
@@ -2452,6 +2522,148 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     upd();
   }
 
+})();
+</script>
+<script>
+/* ================= Tools: Schablonenrechner =================
+   Alle Masse in mm. Eine Base ist automatisch getroffen, wenn sie ganz unter
+   der Schablone liegt, und bei 4+, wenn sie die Schablone nur teilweise
+   beruehrt. Beide Schablonenformen sind konvex: liegen alle vier Ecken einer
+   Base darin, liegt die ganze Base darin. */
+(function () {
+  const ZOLL = 25.4;
+  const svg = document.getElementById('srFeld');
+  if (!svg) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  // Platz um die Einheit - so viel, dass die Schablone ganz neben die Einheit passt
+  const rand = () => (st.art === 'r3' ? 2 : st.art === 'r5' ? 3 : 4.5) * ZOLL;
+  const st = { breite: 6, tiefe: 4, base: '25x25', art: 'r3', dreh: 0, x: null, y: null };
+  try { Object.assign(st, JSON.parse(localStorage.getItem('battleMarchSchablone')) || {}); } catch (e) { /* egal */ }
+  const merke = () => { try { localStorage.setItem('battleMarchSchablone', JSON.stringify(st)); } catch (e) { /* egal */ } };
+
+  const baseMass = () => st.base.split('x').map(Number);   // [Breite, Tiefe]
+  const einheit = () => { const [bw, bt] = baseMass(); return [st.breite * bw, st.tiefe * bt]; };
+
+  /* Flamme: konvexe Huelle zweier Kreise - hinten (am Anker) schmal, vorne breit. */
+  const FLAMME = { lang: 8 * ZOLL, rKlein: 0.25 * ZOLL, rGross: 1.25 * ZOLL };
+  function form() {
+    if (st.art !== 'flamme') {
+      const r = (st.art === 'r3' ? 3 : 5) * ZOLL / 2;
+      return { rund: true, r, innen: (px, py) => Math.hypot(px - st.x, py - st.y) <= r };
+    }
+    const w = st.dreh * Math.PI / 180, ux = Math.cos(w), uy = Math.sin(w);
+    const abst = FLAMME.lang - FLAMME.rKlein - FLAMME.rGross;   // Abstand der Kreismitten
+    // Mitte der Schablone liegt bei (st.x, st.y); a = kleiner Kreis, b = grosser Kreis
+    const ax = st.x - ux * (FLAMME.lang / 2 - FLAMME.rKlein), ay = st.y - uy * (FLAMME.lang / 2 - FLAMME.rKlein);
+    const bx = ax + ux * abst, by = ay + uy * abst;
+    // Tangentenpunkte der Huelle; innen = in einem der Kreise oder im Viereck dazwischen
+    const al = Math.asin((FLAMME.rGross - FLAMME.rKlein) / abst), wink = Math.atan2(uy, ux);
+    const pkt = (cx, cy, r, w2) => [cx + r * Math.cos(w2), cy + r * Math.sin(w2)];
+    const ecken = [pkt(ax, ay, FLAMME.rKlein, wink + Math.PI / 2 + al), pkt(bx, by, FLAMME.rGross, wink + Math.PI / 2 + al),
+                   pkt(bx, by, FLAMME.rGross, wink - Math.PI / 2 - al), pkt(ax, ay, FLAMME.rKlein, wink - Math.PI / 2 - al)];
+    const imViereck = (px, py) => {
+      let vz = 0;
+      for (let k = 0; k < 4; k++) {
+        const [x1, y1] = ecken[k], [x2, y2] = ecken[(k + 1) % 4];
+        const kr = (x2 - x1) * (py - y1) - (y2 - y1) * (px - x1);
+        if (kr !== 0) { if (vz && Math.sign(kr) !== vz) return false; vz = Math.sign(kr); }
+      }
+      return true;
+    };
+    const innen = (px, py) => Math.hypot(px - ax, py - ay) <= FLAMME.rKlein ||
+      Math.hypot(px - bx, py - by) <= FLAMME.rGross || imViereck(px, py);
+    return { rund: false, ax, ay, bx, by, ecken, innen };
+  }
+
+  function treffer(f, x0, y0, w, h) {
+    const ecken = [[x0, y0], [x0 + w, y0], [x0, y0 + h], [x0 + w, y0 + h]];
+    if (ecken.every(([x, y]) => f.innen(x, y))) return 'auto';
+    if (f.rund) {   // Kreis gegen Rechteck exakt
+      const nx = Math.max(x0, Math.min(st.x, x0 + w)), ny = Math.max(y0, Math.min(st.y, y0 + h));
+      return Math.hypot(nx - st.x, ny - st.y) < f.r ? 'vier' : 'nein';
+    }
+    const schritt = 1;   // 1 mm Raster ueber die Base
+    for (let x = x0; x <= x0 + w + 1e-6; x += schritt)
+      for (let y = y0; y <= y0 + h + 1e-6; y += schritt)
+        if (f.innen(x, y)) return 'vier';
+    return 'nein';
+  }
+
+  const FARBE = { auto: '#c0392b', vier: '#d68a1e', nein: '#cfc6b4' };
+  function zeichne() {
+    const [bw, bt] = baseMass(), [ew, et] = einheit();
+    const RAND = rand(), breite = ew + 2 * RAND, hoehe = et + 2 * RAND;
+    if (st.x === null) { st.x = breite / 2; st.y = hoehe / 2; }
+    st.x = Math.max(0, Math.min(breite, st.x)); st.y = Math.max(0, Math.min(hoehe, st.y));
+    svg.setAttribute('viewBox', '0 0 ' + breite + ' ' + hoehe);
+    svg.replaceChildren();
+    const f = form();
+    const n = { auto: 0, vier: 0, nein: 0 };
+    for (let r = 0; r < st.tiefe; r++) for (let c = 0; c < st.breite; c++) {
+      const x0 = RAND + c * bw, y0 = RAND + r * bt;
+      const t = treffer(f, x0, y0, bw, bt); n[t]++;
+      const re = document.createElementNS(NS, 'rect');
+      Object.entries({ x: x0, y: y0, width: bw, height: bt, fill: FARBE[t], stroke: '#5a4f3f', 'stroke-width': 0.8 })
+        .forEach(([k, v]) => re.setAttribute(k, v));
+      svg.appendChild(re);
+    }
+    // Schablone
+    let s;
+    if (f.rund) {
+      s = document.createElementNS(NS, 'circle');
+      Object.entries({ cx: st.x, cy: st.y, r: f.r }).forEach(([k, v]) => s.setAttribute(k, v));
+    } else {
+      // Umriss: Tangenten an beide Kreise
+      const [p1, p2, p3, p4] = f.ecken;
+      s = document.createElementNS(NS, 'path');
+      s.setAttribute('d', `M${p1} L${p2} A${FLAMME.rGross} ${FLAMME.rGross} 0 1 0 ${p3} L${p4} A${FLAMME.rKlein} ${FLAMME.rKlein} 0 0 0 ${p1} Z`);
+    }
+    Object.entries({ fill: 'rgba(230,120,30,.12)', stroke: '#e07020', 'stroke-width': 1.6 }).forEach(([k, v]) => s.setAttribute(k, v));
+    svg.appendChild(s);
+    const m = document.createElementNS(NS, 'circle');
+    Object.entries({ cx: st.x, cy: st.y, r: 2.2, fill: '#e07020' }).forEach(([k, v]) => m.setAttribute(k, v));
+    svg.appendChild(m);
+
+    document.getElementById('srAuto').textContent = n.auto;
+    document.getElementById('srVier').textContent = n.vier;
+    document.getElementById('srAlle').textContent = n.auto + n.vier;
+    document.getElementById('srErw').textContent = (n.auto + n.vier / 2).toLocaleString('de-DE');
+    document.getElementById('srBreite').textContent = st.breite;
+    document.getElementById('srTiefe').textContent = st.tiefe;
+    document.getElementById('srBase').value = st.base;
+    document.querySelectorAll('#srArt button').forEach(b => b.setAttribute('aria-pressed', b.dataset.art === st.art ? 'true' : 'false'));
+    document.getElementById('srDrehBox').hidden = st.art !== 'flamme';
+    document.getElementById('srDreh').value = st.dreh;
+    merke();
+  }
+
+  // Schablone ziehen: der Griffpunkt bleibt unter dem Finger
+  let zug = null;
+  const punkt = e => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
+  svg.addEventListener('pointerdown', e => {
+    const p = punkt(e);
+    zug = { dx: st.x - p.x, dy: st.y - p.y };
+    if (!form().innen(p.x, p.y)) { zug = { dx: 0, dy: 0 }; st.x = p.x; st.y = p.y; zeichne(); }   // daneben getippt: Schablone springt hin
+    svg.setPointerCapture(e.pointerId); svg.classList.add('zieht');
+  });
+  svg.addEventListener('pointermove', e => { if (!zug) return; const p = punkt(e); st.x = p.x + zug.dx; st.y = p.y + zug.dy; zeichne(); });
+  const los = () => { zug = null; svg.classList.remove('zieht'); };
+  svg.addEventListener('pointerup', los); svg.addEventListener('pointercancel', los);
+
+  document.querySelectorAll('.sr-zaehler button').forEach(b => b.addEventListener('click', () => {
+    const feld = b.dataset.feld, alt = einheit();
+    st[feld] = Math.max(1, Math.min(feld === 'breite' ? 20 : 12, st[feld] + Number(b.dataset.schritt)));
+    const neu = einheit(); st.x += (neu[0] - alt[0]) / 2; st.y += (neu[1] - alt[1]) / 2;   // Schablone bleibt relativ mittig
+    zeichne();
+  }));
+  document.getElementById('srBase').addEventListener('change', e => { st.base = e.target.value; st.x = null; zeichne(); });
+  document.querySelectorAll('#srArt button').forEach(b => b.addEventListener('click', () => {
+    const alt = rand(); st.art = b.dataset.art;
+    if (st.x !== null) { st.x += rand() - alt; st.y += rand() - alt; }   // gleiche Lage zur Einheit
+    zeichne();
+  }));
+  document.getElementById('srDreh').addEventListener('input', e => { st.dreh = Number(e.target.value); zeichne(); });
+  zeichne();
 })();
 </script>
 <script>
