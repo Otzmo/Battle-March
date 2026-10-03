@@ -1146,7 +1146,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <div id="srDrehBox" hidden><label for="srDreh">Drehung Flammen</label><input type="range" id="srDreh" min="0" max="355" step="5" value="0"></div>
   <div><button type="button" id="srMitte">⌖ Schablone zentrieren</button></div>
 </div>
-<p class="sr-hint" style="margin-top:10px;">Breite = Modelle pro Glied (Reihen), Tiefe = Anzahl Glieder. Die Base unter der Mitte der Schablone ist immer voll getroffen – liegt die Mitte zwischen mehreren Bases, zählt nur eine. Erwartete Treffer = automatische Treffer + die Hälfte der Treffer bei 4+. Die Flammenschablone ist 8" lang, vorne 0,5" und hinten 2,5" breit.</p>
+<p class="sr-hint" style="margin-top:10px;">Breite = Modelle pro Glied (Reihen), Tiefe = Anzahl Glieder. Jede Base unter der Mitte der Schablone ist immer voll getroffen – liegt die Mitte auf mehreren Bases, gilt das für alle. Erwartete Treffer = automatische Treffer + die Hälfte der Treffer bei 4+. Die Flammenschablone ist 8" lang, vorne 0,5" und hinten 2,5" breit.</p>
 </div>
 </div>
 
@@ -2613,9 +2613,9 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
    Alle Masse in mm. Eine Base ist automatisch getroffen, wenn sie ganz unter
    der Schablone liegt, und bei 4+, wenn sie die Schablone nur teilweise
    beruehrt. Beide Schablonenformen sind konvex: liegen alle vier Ecken einer
-   Base darin, liegt die ganze Base darin. Die Base unter der Mitte der
-   Schablone ist immer voll getroffen; liegt die Mitte genau auf einer
-   Grenze zwischen mehreren Bases, zaehlt nur eine davon. */
+   Base darin, liegt die ganze Base darin. Jede Base unter der Mitte der
+   Schablone ist immer voll getroffen - liegt die Mitte genau auf einer
+   Grenze, also alle Bases, die sie beruehrt. */
 (function () {
   const ZOLL = 25.4;
   const svg = document.getElementById('srFeld');
@@ -2685,13 +2685,10 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     svg.replaceChildren();
     const f = form();
     const n = { auto: 0, vier: 0, nein: 0 };
-    let mitteGefunden = false;
     for (let r = 0; r < st.tiefe; r++) for (let c = 0; c < st.breite; c++) {
       const x0 = RAND + c * bw, y0 = RAND + r * bt;
       let t = treffer(f, x0, y0, bw, bt);
-      if (!mitteGefunden && st.x >= x0 && st.x <= x0 + bw && st.y >= y0 && st.y <= y0 + bt) {
-        t = 'auto'; mitteGefunden = true;   // Base unter der Mitte: immer voll getroffen, nur eine
-      }
+      if (st.x >= x0 && st.x <= x0 + bw && st.y >= y0 && st.y <= y0 + bt) t = 'auto';   // unter der Mitte: immer voll getroffen
       n[t]++;
       const re = document.createElementNS(NS, 'rect');
       Object.entries({ x: x0, y: y0, width: bw, height: bt, fill: FARBE[t], stroke: '#5a4f3f', 'stroke-width': 0.8 })
