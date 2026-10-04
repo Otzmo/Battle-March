@@ -6,8 +6,8 @@
 <title>OTZMO-TOW</title>
 <style>
 :root{
-  --maroon:#7a1f1f; --maroon-dark:#591414;
-  --tan:#eee0c8; --beige:#f4ecd8;
+  --maroon:#4a7c59; --maroon-dark:#3a6347;
+  --tan:#e3ebdf; --beige:#f5f3ed;
   --p1:#e2c48c; --p2:#b9c6d6; --nml:#ded6c2;
   --grey-line:#999; --text:#1a1a1a;
   --scale:13px;
@@ -18,10 +18,13 @@
 select, input, textarea{ color:var(--text); }
 html{ -webkit-text-size-adjust:100%; }
 body{
-  font-family:"Georgia","DejaVu Serif",serif;
-  background:#ded2b8; color:var(--text);
+  font-family:"DejaVu Sans",Verdana,"Helvetica Neue",Arial,sans-serif;
+  background:#e7e4da; color:var(--text);
   margin:0; padding:20px 24px; line-height:1.5;
 }
+
+/* Ueberschriften: Serifenschrift, Fliesstext: serifenlos (Theme Botanical Garden) */
+h1, h2, h3, .acc-head{ font-family:"DejaVu Serif",Georgia,serif; font-weight:bold; }
 
 /* ---------- Seitenkopf ---------- */
 .page-header{ text-align:center; max-width:1320px; margin:0 auto 10px; }
@@ -31,7 +34,7 @@ body{
 .tabnav{
   position:sticky; top:0; z-index:100;
   max-width:1320px; margin:0 auto 18px; padding:8px 0;
-  background:#ded2b8;
+  background:#e7e4da;
 }
 .tabbar{ display:flex; gap:6px; justify-content:center; }
 .subtabbar{
@@ -47,7 +50,7 @@ body{
 }
 .tab-btn[aria-selected="true"]{ background:var(--maroon); color:#fff; }
 .tab-btn:hover{ background:var(--maroon); color:#fff; }
-.tab-btn:focus-visible{ outline:3px solid #c98a2f; outline-offset:2px; }
+.tab-btn:focus-visible{ outline:3px solid #f9a620; outline-offset:2px; }
 
 .tab-content{ max-width:1320px; margin:0 auto; }
 .tab-content[hidden]{ display:none; }
@@ -76,12 +79,12 @@ body{
 .guide .zones{ display:grid; grid-template-columns:1fr 1fr; gap:0 2rem; }
 .guide .zone-block{ margin-bottom:1.2rem; }
 .guide .zone-block svg{ display:block; margin-top:4px; }
-.guide .note{ background:#fff8e1; border:1px solid #e0c060; padding:8px 12px; font-size:.9rem; margin:1rem 0; }
+.guide .note{ background:#fdf3dc; border:1px solid #f9a620; padding:8px 12px; font-size:.9rem; margin:1rem 0; }
 .guide caption,.guide figcaption{ font-style:italic; font-size:.85rem; color:#444; }
 
 /* ---------- Baukasten ---------- */
 .builder h2.section-title{ text-align:center; color:var(--maroon); letter-spacing:.06em; margin:0 0 4px; font-size:1.6rem; border:none; }
-.builder .subtitle{ text-align:center; font-style:italic; color:#4a3f2f; margin:0 0 18px; font-size:.9rem; }
+.builder .subtitle{ text-align:center; font-style:italic; color:#3d4a40; margin:0 0 18px; font-size:.9rem; }
 
 .layout{ display:flex; gap:22px; align-items:flex-start; margin:0 auto; flex-wrap:wrap; }
 .panel{ background:var(--beige); border:2.5px solid var(--maroon); border-radius:4px; padding:14px 16px; }
@@ -91,7 +94,7 @@ body{
   background:none; border:0; border-radius:0; padding:0; margin:0; font:inherit; font-weight:bold; font-size:1.02rem;
   color:var(--maroon); text-align:left; cursor:pointer; }
 .palette-kopf:hover{ background:none; color:var(--maroon-dark); }
-.palette-kopf:focus-visible{ outline:3px solid #c98a2f; outline-offset:2px; }
+.palette-kopf:focus-visible{ outline:3px solid #f9a620; outline-offset:2px; }
 .palette-kopf .acc-icon{ transition:transform .18s ease; }
 .palette.offen .palette-kopf{ border-bottom:2px solid var(--maroon); padding-bottom:6px; margin-bottom:10px; }
 .palette.offen .palette-kopf .acc-icon{ transform:rotate(90deg); }
@@ -111,13 +114,13 @@ body{
   border:1px solid #2b2620; background:#fff; color:#1a1a1a; font-size:.8rem; line-height:1;
 }
 .chip .chip-del:hover{ background:var(--maroon); color:#fff; }
-#resetAllBtn.confirm{ background:#b3261e; }
+#resetAllBtn.confirm{ background:#b7472a; }
 
-.hint{ font-size:.72rem; color:#5a4f3f; font-style:italic; margin-top:8px; line-height:1.4; }
+.hint{ font-size:.72rem; color:#55605a; font-style:italic; margin-top:8px; line-height:1.4; }
 
 .custom-form{ margin-top:14px; border-top:1px dashed var(--maroon); padding-top:10px; }
-.custom-form label{ display:block; font-size:.72rem; margin:6px 0 2px; color:#4a3f2f; }
-.custom-form input{ width:100%; padding:4px 6px; font-size:.8rem; border:1px solid #9a8f7a; border-radius:3px; font-family:inherit; }
+.custom-form label{ display:block; font-size:.72rem; margin:6px 0 2px; color:#3d4a40; }
+.custom-form input{ width:100%; padding:4px 6px; font-size:.8rem; border:1px solid #a3ab9f; border-radius:3px; font-family:inherit; }
 .custom-form input[type=color]{ padding:1px; height:28px; }
 button{
   font-family:inherit; cursor:pointer; border:none; border-radius:4px;
@@ -133,7 +136,7 @@ button:hover{ background:var(--maroon-dark); }
 
 .zone-panel{ margin-bottom:12px; }
 .zone-panel .row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px; align-items:center; }
-.wahl-gruppe{ border:1px solid #9a8f7a; border-radius:4px; background:#fff; padding:6px 10px 8px; margin:0 0 8px; }
+.wahl-gruppe{ border:1px solid #a3ab9f; border-radius:4px; background:#fff; padding:6px 10px 8px; margin:0 0 8px; }
 .wahl-gruppe legend{ font-weight:bold; color:var(--maroon); font-size:.8rem; padding:0 4px; }
 .wahl-gruppe .wahl{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:.8rem; }
 .wahl-gruppe label{ display:flex; align-items:center; gap:5px; cursor:pointer; }
@@ -159,7 +162,7 @@ button:hover{ background:var(--maroon-dark); }
 
 .no-terrain-circle{
   position:absolute; border-radius:50%; border:1.6px solid var(--maroon);
-  background:repeating-linear-gradient(45deg, rgba(122,31,31,.22) 0 4px, transparent 4px 9px), rgba(233,217,217,.35);
+  background:repeating-linear-gradient(45deg, rgba(74,124,89,.22) 0 4px, transparent 4px 9px), rgba(233,217,217,.35);
   display:flex; align-items:center; justify-content:center; text-align:center;
   pointer-events:none; z-index:3; overflow:hidden; box-sizing:border-box;
 }
@@ -193,7 +196,7 @@ button:hover{ background:var(--maroon-dark); }
 .coord-dot{
   position:absolute; bottom:0; transform:translate(-50%, 50%);
   width:9px; height:9px; border-radius:50%;
-  background:#d40000; border:1.5px solid #fff; box-shadow:0 0 0 1px #7a1f1f;
+  background:#d40000; border:1.5px solid #fff; box-shadow:0 0 0 1px #4a7c59;
   z-index:6; pointer-events:none;
 }
 
@@ -213,28 +216,28 @@ button:hover{ background:var(--maroon-dark); }
 .tex-water{ background-color:#4c85b8; background-image:repeating-linear-gradient(to bottom, rgba(219,233,245,.55) 0 2px, transparent 2px calc(1.6 * var(--scale))); }
 
 
-.footer-note{ text-align:center; font-size:.72rem; color:#5a4f3f; font-style:italic; margin-top:16px; }
+.footer-note{ text-align:center; font-size:.72rem; color:#55605a; font-style:italic; margin-top:16px; }
 .karten-info{ text-align:center; font-size:.92rem; margin:10px 0 0; min-height:1.3em; }
 .karten-info b{ color:var(--maroon); }
 .coord-explainer{
   max-width:900px; margin:0 auto 20px; background:var(--beige); border:1.5px solid var(--maroon);
-  border-radius:4px; padding:8px 14px; font-size:.78rem; line-height:1.5; color:#4a3f2f; text-align:center;
+  border-radius:4px; padding:8px 14px; font-size:.78rem; line-height:1.5; color:#3d4a40; text-align:center;
 }
 .coord-explainer b{ color:var(--maroon); }
 
 /* ---------- Schablonenrechner ---------- */
 .sr{ max-width:760px; margin:0 auto; }
-.sr-hint{ text-align:center; font-size:.9rem; color:#4a3f2f; margin:0 0 10px; }
+.sr-hint{ text-align:center; font-size:.9rem; color:#3d4a40; margin:0 0 10px; }
 .sr-feld{ background:#fff; border:2px solid var(--maroon); border-radius:4px; touch-action:none; cursor:grab; display:block; width:100%; height:auto; }
 .sr-feld.zieht{ cursor:grabbing; }
 .sr-legende{ display:flex; justify-content:center; flex-wrap:wrap; gap:6px 18px; font-size:.82rem; margin:10px 0 12px; }
 .sr-legende i{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:5px; vertical-align:-1px; border:1px solid rgba(0,0,0,.25); }
 .sr-zahlen{ display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-bottom:12px; }
 .sr-zahl{ background:var(--beige); border:1.5px solid var(--maroon); border-radius:4px; padding:8px 10px; }
-.sr-zahl span{ display:block; font-size:.7rem; letter-spacing:.04em; text-transform:uppercase; color:#5a4f3f; }
+.sr-zahl span{ display:block; font-size:.7rem; letter-spacing:.04em; text-transform:uppercase; color:#55605a; }
 .sr-zahl b{ font-size:1.5rem; color:var(--maroon); }
 .sr-steuer{ background:var(--beige); border:1.5px solid var(--maroon); border-radius:4px; padding:12px 14px; display:flex; flex-wrap:wrap; gap:14px 22px; align-items:flex-end; }
-.sr-steuer label, .sr-steuer .sr-titel{ display:block; font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; color:#5a4f3f; margin-bottom:4px; }
+.sr-steuer label, .sr-steuer .sr-titel{ display:block; font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; color:#55605a; margin-bottom:4px; }
 .sr-zaehler{ display:inline-flex; align-items:center; border:1.5px solid var(--maroon); border-radius:4px; overflow:hidden; background:#fff; }
 .sr-zaehler button{ border-radius:0; padding:6px 12px; font-size:1rem; line-height:1; }
 .sr-zaehler button:disabled{ opacity:.4; cursor:not-allowed; }
@@ -247,15 +250,15 @@ button:hover{ background:var(--maroon-dark); }
 .sr-steuer input[type=range]{ width:160px; accent-color:var(--maroon); }
 #srMitte{ padding:7px 14px; }
 .ar-ergebnis{ text-align:center; background:var(--beige); border:2px solid var(--maroon); border-radius:4px; padding:14px; margin-bottom:12px; }
-.ar-ergebnis span{ display:block; font-size:.75rem; letter-spacing:.04em; text-transform:uppercase; color:#5a4f3f; }
+.ar-ergebnis span{ display:block; font-size:.75rem; letter-spacing:.04em; text-transform:uppercase; color:#55605a; }
 .ar-ergebnis b{ display:block; font-size:2.4rem; color:var(--maroon); line-height:1.2; }
-.ar-ergebnis small{ font-size:.9rem; color:#4a3f2f; }
+.ar-ergebnis small{ font-size:.9rem; color:#3d4a40; }
 .ar-steuer label.ar-haken{ display:flex; align-items:center; gap:6px; text-transform:none; letter-spacing:0; font-size:.92rem; color:var(--text); cursor:pointer; }
 .ar-steuer label.ar-haken input{ accent-color:var(--maroon); width:18px; height:18px; }
 .ar-tabelle{ width:100%; margin-top:12px; }
 .ar-tabelle td:nth-child(2), .ar-tabelle th:nth-child(2){ text-align:right; }
 .zr-tabelle td:nth-child(3), .zr-tabelle th:nth-child(3){ text-align:right; }
-.ar-tabelle tr.ar-ziel td{ background:#f6e3c6; font-weight:bold; }
+.ar-tabelle tr.ar-ziel td{ background:#fde6b8; font-weight:bold; }
 
 /* ---------- Mobil ---------- */
 @media (max-width:720px){
@@ -288,8 +291,8 @@ button:hover{ background:var(--maroon-dark); }
 
 .acc{ border:1.4px solid var(--maroon); border-radius:4px; margin:.7rem 0; overflow:hidden; background:#fff; scroll-margin-top:72px; }
 .acc-head{ width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; font-family:inherit; text-align:left; cursor:pointer; background:var(--tan); color:var(--maroon); border:none; border-radius:0; padding:11px 14px; font-size:1.02rem; font-weight:bold; }
-.acc-head:hover{ background:#e6d6b6; }
-.acc-head:focus-visible{ outline:3px solid #c98a2f; outline-offset:-3px; }
+.acc-head:hover{ background:#d6e3d2; }
+.acc-head:focus-visible{ outline:3px solid #f9a620; outline-offset:-3px; }
 .acc-icon{ transition:transform .18s ease; font-size:.8rem; flex-shrink:0; }
 .acc.open .acc-icon{ transform:rotate(90deg); }
 .acc-body{ padding:4px 14px 12px; }
@@ -302,46 +305,46 @@ button:hover{ background:var(--maroon-dark); }
 .points-slider{ background:#fff; border:1.5px solid var(--maroon); border-left:5px solid var(--maroon); border-radius:4px; padding:12px 16px; margin:.4rem 0 1.2rem; }
 .points-slider label{ display:block; color:var(--maroon); font-size:1rem; margin-bottom:8px; }
 .points-slider input[type=range]{ width:100%; accent-color:var(--maroon); cursor:pointer; }
-.points-ticks{ display:flex; justify-content:space-between; font-size:.72rem; color:#5a4f3f; margin-top:2px; }
-.version-box{ background:#fff; border:1.5px solid var(--maroon); border-left:5px solid var(--maroon); border-radius:4px; padding:9px 14px; margin:.4rem 0 1.2rem; font-size:.85rem; color:#4a3f2f; }
+.points-ticks{ display:flex; justify-content:space-between; font-size:.72rem; color:#55605a; margin-top:2px; }
+.version-box{ background:#fff; border:1.5px solid var(--maroon); border-left:5px solid var(--maroon); border-radius:4px; padding:9px 14px; margin:.4rem 0 1.2rem; font-size:.85rem; color:#3d4a40; }
 .version-box b{ color:var(--maroon); }
 .guide .gc-table td:first-child{ font-weight:bold; }
 .guide .gc-table th{ background:var(--maroon); color:#fff; }
-.guide .gc-pct{ color:#7a6f5a; font-size:.85em; }
+.guide .gc-pct{ color:#6b756d; font-size:.85em; }
 .version-box .version-link{ margin:8px 0 0; display:flex; flex-wrap:wrap; gap:6px; }
 .version-box a{ display:inline-block; color:var(--maroon); font-weight:bold; text-decoration:none; border:1.4px solid var(--maroon); border-radius:4px; padding:6px 11px; font-size:.85rem; }
 .version-box a:hover{ background:var(--maroon); color:#fff; }
-.version-box a:focus-visible{ outline:3px solid #c98a2f; outline-offset:2px; }
+.version-box a:focus-visible{ outline:3px solid #f9a620; outline-offset:2px; }
 /* ---------- BASE ---------- */
 .basegen{ max-width:900px; margin:0 auto; }
 .basegen h2.section-title{ text-align:center; color:var(--maroon); letter-spacing:.06em; margin:0 0 4px; font-size:1.6rem; border:none; }
-.basegen .subtitle{ text-align:center; font-style:italic; color:#4a3f2f; margin:0 0 18px; font-size:.9rem; }
+.basegen .subtitle{ text-align:center; font-style:italic; color:#3d4a40; margin:0 0 18px; font-size:.9rem; }
 .basegen .layout{ display:flex; gap:16px; align-items:flex-start; }
 .basegen .layout > .panel{ flex:1; min-width:0; }
 .basegen .view{ display:flex; flex-direction:column; gap:10px; }
-.basegen canvas{ display:block; width:100%; max-width:260px; height:auto; margin:0 auto; background:#fdfaf2; border:1.5px solid #9a8f7a; border-radius:3px; }
+.basegen canvas{ display:block; width:100%; max-width:260px; height:auto; margin:0 auto; background:#fdfaf2; border:1.5px solid #a3ab9f; border-radius:3px; }
 .bg-field{ margin-bottom:12px; }
 .bg-field label{ display:block; color:var(--maroon); font-size:.95rem; margin-bottom:4px; }
-.bg-field input{ width:100%; padding:6px 8px; font-size:1rem; font-family:inherit; border:1px solid #9a8f7a; border-radius:3px; background:#fff; color:var(--text); }
-.bg-field input:focus-visible{ outline:3px solid #c98a2f; outline-offset:1px; }
-.bg-field input.invalid{ border-color:var(--maroon); box-shadow:0 0 0 2px rgba(122,31,31,.18); }
-.bg-field .range{ font-size:.72rem; color:#5a4f3f; margin-top:3px; }
+.bg-field input{ width:100%; padding:6px 8px; font-size:1rem; font-family:inherit; border:1px solid #a3ab9f; border-radius:3px; background:#fff; color:var(--text); }
+.bg-field input:focus-visible{ outline:3px solid #f9a620; outline-offset:1px; }
+.bg-field input.invalid{ border-color:var(--maroon); box-shadow:0 0 0 2px rgba(74,124,89,.18); }
+.bg-field .range{ font-size:.72rem; color:#55605a; margin-top:3px; }
 .bg-check{ display:flex; align-items:center; gap:8px; margin:2px 0 10px; }
 .bg-check input{ width:16px; height:16px; accent-color:var(--maroon); cursor:pointer; flex:none; }
 .bg-check label{ margin:0; color:var(--maroon); font-size:.95rem; cursor:pointer; }
-.bg-check input:focus-visible{ outline:3px solid #c98a2f; outline-offset:2px; }
+.bg-check input:focus-visible{ outline:3px solid #f9a620; outline-offset:2px; }
 .bg-link{ text-align:center; margin:18px 0 0; }
 .bg-link a{ display:inline-block; color:var(--maroon); font-weight:bold; text-decoration:none; border:1.4px solid var(--maroon); border-radius:4px; padding:6px 11px; font-size:.85rem; }
 .bg-link a:hover{ background:var(--maroon); color:#fff; }
-.bg-link a:focus-visible{ outline:3px solid #c98a2f; outline-offset:2px; }
-.bg-viewlabel{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#5a4f3f; align-self:flex-start; margin-top:2px; }
-.bg-magnets{ font-size:.8rem; color:#4a3f2f; text-align:center; }
-.bg-dims{ font-size:.95rem; color:#4a3f2f; text-align:center; font-variant-numeric:tabular-nums; }
+.bg-link a:focus-visible{ outline:3px solid #f9a620; outline-offset:2px; }
+.bg-viewlabel{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#55605a; align-self:flex-start; margin-top:2px; }
+.bg-magnets{ font-size:.8rem; color:#3d4a40; text-align:center; }
+.bg-dims{ font-size:.95rem; color:#3d4a40; text-align:center; font-variant-numeric:tabular-nums; }
 .bg-dl{ width:100%; font-family:inherit; font-size:1rem; font-weight:bold; cursor:pointer; padding:10px 12px; border:2px solid var(--maroon); border-radius:4px; background:var(--maroon); color:#fff; }
 .bg-dl:hover:not(:disabled){ background:var(--maroon-dark); }
-.bg-dl:disabled{ background:#c9bfa8; border-color:#9a8f7a; color:#6b6252; cursor:not-allowed; }
-.bg-dl:focus-visible{ outline:3px solid #c98a2f; outline-offset:2px; }
-.bg-note{ font-size:.78rem; color:#5a4f3f; text-align:center; line-height:1.4; }
+.bg-dl:disabled{ background:#cfd4c8; border-color:#a3ab9f; color:#5f665f; cursor:not-allowed; }
+.bg-dl:focus-visible{ outline:3px solid #f9a620; outline-offset:2px; }
+.bg-note{ font-size:.78rem; color:#55605a; text-align:center; line-height:1.4; }
 .bg-note.error{ color:var(--maroon); font-weight:bold; font-style:normal; }
 @media (max-width:760px){ .basegen .layout{ flex-direction:column; } }
 </style>
@@ -1112,9 +1115,9 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <p class="sr-hint">Zieh die Schablone über die Einheit, um zu sehen, wen sie trifft.</p>
 <svg class="sr-feld" id="srFeld" role="img" aria-label="Einheit mit Schablone"></svg>
 <div class="sr-legende">
-  <span><i style="background:#c0392b"></i>Automatisch getroffen (ganz darunter oder unter der Mitte)</span>
-  <span><i style="background:#d68a1e"></i>Getroffen bei 4+ (teilweise darunter)</span>
-  <span><i style="background:#cfc6b4"></i>Nicht berührt</span>
+  <span><i style="background:#b7472a"></i>Automatisch getroffen (ganz darunter oder unter der Mitte)</span>
+  <span><i style="background:#f9a620"></i>Getroffen bei 4+ (teilweise darunter)</span>
+  <span><i style="background:#d9dccf"></i>Nicht berührt</span>
 </div>
 <div class="sr-zahlen" aria-live="polite">
   <div class="sr-zahl"><span>Automatisch</span><b id="srAuto">0</b></div>
@@ -1658,7 +1661,7 @@ function kartenbau(opt) {
       const boxW = (b.x1 - b.x0) * cfg.scale;
       const boxH = (b.y1 - b.y0) * cfg.scale;
       ctx.save();
-      ctx.strokeStyle = '#7a1f1f';
+      ctx.strokeStyle = '#4a7c59';
       ctx.lineWidth = 1.1;
       ctx.setLineDash([5, 3]);
       ctx.strokeRect(boxLeft + 0.5, boxTop + 0.5, boxW - 1, boxH - 1);
@@ -2260,8 +2263,8 @@ function kartenbau(opt) {
     const cy = (yi) => oy + (cfg.h - yi) * S;   // Ursprung unten links -> y invertiert
 
     // Hintergründe
-    g.fillStyle = '#ded2b8'; g.fillRect(0, 0, cv.width, cv.height);
-    g.fillStyle = '#f4ecd8'; g.fillRect(ox, oy, bW, bH);
+    g.fillStyle = '#e7e4da'; g.fillRect(0, 0, cv.width, cv.height);
+    g.fillStyle = '#f5f3ed'; g.fillRect(ox, oy, bW, bH);
 
     // Zonen
     const ZC = { p1: '#e2c48c', p2: '#b9c6d6', nml: '#ded6c2' };
@@ -2286,16 +2289,16 @@ function kartenbau(opt) {
     }
 
     // Rahmen
-    g.strokeStyle = '#7a1f1f'; g.lineWidth = 2; g.strokeRect(ox, oy, bW, bH);
+    g.strokeStyle = '#4a7c59'; g.lineWidth = 2; g.strokeRect(ox, oy, bW, bH);
 
     // Kein-Gelände-Kreis (nur bei Aufeinandertreffen eingezeichnet)
     if (kreisSichtbar()) {
       g.beginPath();
       g.arc(cx(cfg.w / 2), cy(cfg.h / 2), (cfg.circle / 2) * S, 0, Math.PI * 2);
       g.fillStyle = 'rgba(233,217,217,.35)'; g.fill();
-      g.strokeStyle = '#7a1f1f'; g.lineWidth = 1.6; g.stroke();
-      g.fillStyle = '#7a1f1f'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.font = 'italic bold ' + F.mass + 'px Georgia, serif';
+      g.strokeStyle = '#4a7c59'; g.lineWidth = 1.6; g.stroke();
+      g.fillStyle = '#4a7c59'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.font = 'italic bold ' + F.mass + 'px "DejaVu Sans", Verdana, sans-serif';
       const frei = mitteBelegt(0.3);
       const kreisY = cy(cfg.h / 2) - (frei > 0 ? frei * S + F.mass * 0.7 : 0);
       g.fillText(cfg.circle + '" Durchmesser', cx(cfg.w / 2), kreisY);
@@ -2303,7 +2306,7 @@ function kartenbau(opt) {
 
     // kleiner Koordinaten-Kasten
     function tag(text, centerXi, bottomYi) {
-      g.font = 'bold ' + F.tag + 'px Georgia, serif';
+      g.font = 'bold ' + F.tag + 'px "DejaVu Sans", Verdana, sans-serif';
       const th = Math.round(F.tag * 1.45);
       const tw = Math.ceil(g.measureText(text).width) + 12;
       let tx = cx(centerXi) - tw / 2;
@@ -2311,9 +2314,9 @@ function kartenbau(opt) {
       if (ty + th > oy + bH) ty = cy(bottomYi) - th - 2;
       if (tx < ox + 1) tx = ox + 1;
       if (tx + tw > ox + bW) tx = ox + bW - tw - 1;
-      g.fillStyle = '#f4ecd8'; g.fillRect(tx, ty, tw, th);
-      g.strokeStyle = '#7a1f1f'; g.lineWidth = 1.5; g.strokeRect(tx, ty, tw, th);
-      g.fillStyle = '#7a1f1f'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillStyle = '#f5f3ed'; g.fillRect(tx, ty, tw, th);
+      g.strokeStyle = '#4a7c59'; g.lineWidth = 1.5; g.strokeRect(tx, ty, tw, th);
+      g.fillStyle = '#4a7c59'; g.textAlign = 'center'; g.textBaseline = 'middle';
       g.fillText(text, tx + tw / 2, ty + th / 2 + 0.5);
     }
 
@@ -2333,9 +2336,9 @@ function kartenbau(opt) {
       // lange eigene Namen schrumpfen, bis sie ins Stück passen
       const platz = bw * S - 8;
       const passend = (stil, px, text) => {
-        g.font = stil + px + 'px Georgia, serif';
+        g.font = stil + px + 'px "DejaVu Sans", Verdana, sans-serif';
         const b = g.measureText(text).width;
-        if (b > platz) g.font = stil + Math.max(8, Math.floor(px * platz / b)) + 'px Georgia, serif';
+        if (b > platz) g.font = stil + Math.max(8, Math.floor(px * platz / b)) + 'px "DejaVu Sans", Verdana, sans-serif';
       };
       passend('bold ', F.name, p.name);
       g.fillText(p.name, ccx, ccy - S * 0.42);
@@ -2361,8 +2364,8 @@ function kartenbau(opt) {
     treasures.forEach(t => tag('(' + (Math.round(t.x * 10) / 10) + ', ' + (Math.round(t.y * 10) / 10) + ')', t.x, t.y - TREASURE_R));
 
     // Achsenbeschriftung (alle 6 Zoll)
-    g.fillStyle = '#4a3f2f';
-    g.font = 'bold ' + F.achse + 'px Georgia, serif';
+    g.fillStyle = '#3d4a40';
+    g.font = 'bold ' + F.achse + 'px "DejaVu Sans", Verdana, sans-serif';
     g.textAlign = 'center'; g.textBaseline = 'top';
     for (let i = 0; i <= cfg.w; i += 6) g.fillText(i + '"', cx(i), oy + bH + 8);
     g.textAlign = 'right'; g.textBaseline = 'middle';
@@ -2373,12 +2376,12 @@ function kartenbau(opt) {
       const zeileY = oy + bH + F.achse + 18 + INFO_H / 2;
       const teile = [];
       info.forEach(([was, wert], k) => { teile.push([(k ? '   ·   ' : '') + was + ': ', false], [wert, true]); });
-      const schrift = fett => (fett ? 'bold ' : '') + F.achse + 'px Georgia, serif';
+      const schrift = fett => (fett ? 'bold ' : '') + F.achse + 'px "DejaVu Sans", Verdana, sans-serif';
       const breite = teile.reduce((sum, [t, fett]) => { g.font = schrift(fett); return sum + g.measureText(t).width; }, 0);
       let x = ox + bW / 2 - breite / 2;
       g.textAlign = 'left'; g.textBaseline = 'middle';
       teile.forEach(([t, fett]) => {
-        g.font = schrift(fett); g.fillStyle = fett ? '#7a1f1f' : '#4a3f2f';
+        g.font = schrift(fett); g.fillStyle = fett ? '#4a7c59' : '#3d4a40';
         g.fillText(t, x, zeileY); x += g.measureText(t).width;
       });
     }
@@ -2396,8 +2399,8 @@ function kartenbau(opt) {
         tab.document.write('<!doctype html><html lang="de"><head><meta charset="utf-8">' +
           '<meta name="viewport" content="width=device-width, initial-scale=1">' +
           '<title>' + opt.datei + '</title></head>' +
-          '<body style="margin:0;background:#ded2b8;font-family:Georgia,serif;text-align:center">' +
-          '<p style="margin:10px;color:#7a1f1f">Zum Speichern lange auf das Bild drücken.</p>' +
+          '<body style="margin:0;background:#e7e4da;font-family:DejaVu Sans,Verdana,sans-serif;text-align:center">' +
+          '<p style="margin:10px;color:#4a7c59">Zum Speichern lange auf das Bild drücken.</p>' +
           '<img src="' + bild + '" alt="Karte" style="max-width:100%;height:auto;display:block;margin:0 auto">' +
           '</body></html>');
         tab.document.close();
@@ -2675,7 +2678,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     return 'nein';
   }
 
-  const FARBE = { auto: '#c0392b', vier: '#d68a1e', nein: '#cfc6b4' };
+  const FARBE = { auto: '#b7472a', vier: '#f9a620', nein: '#d9dccf' };
   function zeichne() {
     const [bw, bt] = baseMass(), [ew, et] = einheit();
     const RAND = rand(), breite = ew + 2 * RAND, hoehe = et + 2 * RAND;
@@ -2691,7 +2694,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
       if (st.x >= x0 && st.x <= x0 + bw && st.y >= y0 && st.y <= y0 + bt) t = 'auto';   // unter der Mitte: immer voll getroffen
       n[t]++;
       const re = document.createElementNS(NS, 'rect');
-      Object.entries({ x: x0, y: y0, width: bw, height: bt, fill: FARBE[t], stroke: '#5a4f3f', 'stroke-width': 0.8 })
+      Object.entries({ x: x0, y: y0, width: bw, height: bt, fill: FARBE[t], stroke: '#55605a', 'stroke-width': 0.8 })
         .forEach(([k, v]) => re.setAttribute(k, v));
       svg.appendChild(re);
     }
@@ -2706,10 +2709,10 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
       s = document.createElementNS(NS, 'path');
       s.setAttribute('d', `M${p1} L${p2} A${FLAMME.rGross} ${FLAMME.rGross} 0 1 0 ${p3} L${p4} A${FLAMME.rKlein} ${FLAMME.rKlein} 0 0 0 ${p1} Z`);
     }
-    Object.entries({ fill: 'rgba(230,120,30,.12)', stroke: '#e07020', 'stroke-width': 1.6 }).forEach(([k, v]) => s.setAttribute(k, v));
+    Object.entries({ fill: 'rgba(74,124,89,.15)', stroke: '#4a7c59', 'stroke-width': 1.6 }).forEach(([k, v]) => s.setAttribute(k, v));
     svg.appendChild(s);
     const m = document.createElementNS(NS, 'circle');
-    Object.entries({ cx: st.x, cy: st.y, r: 2.2, fill: '#e07020' }).forEach(([k, v]) => m.setAttribute(k, v));
+    Object.entries({ cx: st.x, cy: st.y, r: 2.2, fill: '#4a7c59' }).forEach(([k, v]) => m.setAttribute(k, v));
     svg.appendChild(m);
 
     // Pfeil von der Mitte der Einheit zur Mitte der Schablone, mit Abstand in Zoll
