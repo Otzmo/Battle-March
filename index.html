@@ -265,6 +265,8 @@ button:hover{ background:var(--maroon-dark); }
 .ar-tabelle{ width:100%; margin-top:12px; }
 .ar-tabelle td:nth-child(2), .ar-tabelle th:nth-child(2){ text-align:right; }
 .zr-tabelle td:nth-child(3), .zr-tabelle th:nth-child(3){ text-align:right; }
+.guide .patzer-tabelle td:nth-child(-n+2){ white-space:nowrap; vertical-align:top; }
+.sr a{ color:var(--maroon); font-weight:600; }
 .ar-tabelle tr.ar-ziel td{ background:#e8d9b5; font-weight:bold; }
 
 /* ---------- Mobil ---------- */
@@ -386,6 +388,7 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-schablone" data-tab="schablone" aria-controls="panel-schablone" aria-selected="true" tabindex="0">Schablonen&shy;rechner</button>
   <button class="tab-btn" role="tab" id="tab-angriff" data-tab="angriff" aria-controls="panel-angriff" aria-selected="false" tabindex="-1">Angriffs&shy;rechner</button>
   <button class="tab-btn" role="tab" id="tab-zauber" data-tab="zauber" aria-controls="panel-zauber" aria-selected="false" tabindex="-1">Zauber&shy;rechner</button>
+  <button class="tab-btn" role="tab" id="tab-patzer" data-tab="patzer" aria-controls="panel-patzer" aria-selected="false" tabindex="-1">Patzer</button>
 </div>
 </nav>
 
@@ -1218,7 +1221,24 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <div><span class="sr-titel">Bannwurf</span><label class="ar-haken"><input type="checkbox" id="zrBWdh"> Wiederholen, wenn er misslingt</label></div>
 </div>
 <table class="ar-tabelle zr-tabelle"><tbody id="zrTabelle"></tbody></table>
-<p class="sr-hint" style="margin-top:10px;">Der Zauber gelingt, wenn der Zauberwurf den Zauberwert erreicht. Ein Pasch aus Einsen misslingt immer, ein Pasch aus Sechsen gelingt immer. Gebannt ist er, wenn der Bannwurf (2W6 + Stufe/2 des Banners, aufgerundet) höher ist als der Zauberwurf – ein Pasch aus Sechsen bannt immer. Stufe 0 = Banner ohne Magierstufe.</p>
+<p class="sr-hint" style="margin-top:10px;">Der Zauber gelingt, wenn der Zauberwurf den Zauberwert erreicht. Ein Pasch aus Einsen misslingt immer und ist ein Patzer (<a href="#" id="zrZuPatzer">zur Patzer-Tabelle</a>), ein Pasch aus Sechsen gelingt immer. Gebannt ist er, wenn der Bannwurf (2W6 + Stufe/2 des Banners, aufgerundet) höher ist als der Zauberwurf – ein Pasch aus Sechsen bannt immer. Stufe 0 = Banner ohne Magierstufe.</p>
+</div>
+</div>
+
+<!-- ===================== TOOLS: PATZER ===================== -->
+<div class="tab-content" id="panel-patzer" role="tabpanel" aria-labelledby="tab-patzer" tabindex="0" hidden="">
+<div class="guide sr">
+<h1>Patzer</h1>
+<p>Wird beim Zauberwurf ein Pasch aus Einsen gewürfelt, ist der Zauber unabhängig vom Ergebnis <b>gepatzt</b> und wird, sofern nicht anders angegeben, nicht gewirkt. Würfle sofort mit 2W6 auf der folgenden Tabelle, um zu sehen, welches Schicksal den unglückseligen Magier ereilt.</p>
+<table class="patzer-tabelle"><tbody>
+<tr><th>2W6</th><th>%</th><th>Ergebnis</th></tr>
+<tr><td><b>2–4</b></td><td>16,7</td><td><b>Dimensionskaskade:</b> Die beschworene Magie bricht los und erzeugt einen ätherischen Wirbelsturm. Lege eine 5"-Schablone mittig über den Magier. Jedes Modell (Freund oder Feind), dessen Base unter der Schablone liegt, läuft Gefahr, getroffen zu werden, und erleidet einen Treffer mit S10, DS -4.</td></tr>
+<tr><td><b>5–6</b></td><td>25,0</td><td><b>Verheerende Detonation:</b> Tosende Magie explodiert in einem Lichtblitz aus dem Magier. Lege eine 3"-Schablone mittig über den Magier. Jedes Modell (Freund oder Feind), dessen Base unter der Schablone liegt, läuft Gefahr, getroffen zu werden, und erleidet einen Treffer mit S6, DS -2.</td></tr>
+<tr><td><b>7</b></td><td>16,7</td><td><b>Leichtsinnige Beschwörung:</b> Der Magier verspricht sich bei einer Silbe, der Zauber schlägt zurück und wirft ihn zu Boden. Der Magier erleidet einen Treffer mit S4, DS -1.</td></tr>
+<tr><td><b>8–9</b></td><td>25,0</td><td><b>Knapp beherrschte Macht:</b> Der Magier bändigt die Magie, aber um einen hohen Preis. Der Zauber wird gewirkt (für Bannversuche mit seinem Zauberwert). Der Magier kann für den Rest des aktuellen Zuges jedoch keine weiteren Zauber mehr wirken.</td></tr>
+<tr><td><b>10–12</b></td><td>16,7</td><td><b>Kraftentzug:</b> Mit ohrenbetäubendem Knall entlädt sich die beschworene Magie, danach kehrt eine unnatürliche Stille ein. Der Zauber wird mit perfekter Anrufung gewirkt. Für den Rest des aktuellen Zuges kannst du jedoch keine weiteren Zauber mehr wirken.</td></tr>
+</tbody></table>
+<p class="sr-hint">Regelbuch S. 109</p>
 </div>
 </div>
 
@@ -2945,6 +2965,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   feld('zrWdh').addEventListener('change', e => { st.wdh = e.target.checked; zeige(); });
   feld('zrBann').addEventListener('change', e => { st.bann = e.target.checked; zeige(); });
   feld('zrBWdh').addEventListener('change', e => { st.bWdh = e.target.checked; zeige(); });
+  feld('zrZuPatzer').addEventListener('click', e => { e.preventDefault(); feld('tab-patzer').click(); });
   zeige();
 })();
 </script>
