@@ -311,7 +311,6 @@ button:hover{ background:var(--maroon-dark); }
 
 .treasure{ position:absolute; border-radius:50%; border:1.6px solid #6b4a1a; background:radial-gradient(circle at 35% 30%, #f6db82, #d4a52a 65%, #a3781a); box-shadow:0 1px 2px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.25); z-index:5; pointer-events:none; }
 .treasure.ziel{ border-color:#0d1b33; background:radial-gradient(circle at 35% 30%, #6f8fc4, #1f3a6b 65%, #0d1b33); }
-.guide .magic-table td:nth-child(2){ text-align:center; white-space:nowrap; }
 .points-slider{ background:#fff; border:1.5px solid var(--maroon); border-left:5px solid var(--maroon); border-radius:4px; padding:12px 16px; margin:.4rem 0 1.2rem; }
 .points-slider label{ display:block; color:var(--maroon); font-size:1rem; margin-bottom:8px; }
 .points-slider input[type=range]{ width:100%; accent-color:var(--maroon); cursor:pointer; }
@@ -375,7 +374,7 @@ button:hover{ background:var(--maroon-dark); }
 </div>
 <div class="subtabbar" role="tablist" aria-label="Battle March" data-gruppe="battlemarch">
   <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
-  <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="false" tabindex="-1">Armeebau &amp; Magische Items</button>
+  <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="false" tabindex="-1">Armeebau</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Core Battle" data-gruppe="core" hidden="">
   <button class="tab-btn" role="tab" id="tab-coreleitfaden" data-tab="coreleitfaden" aria-controls="panel-coreleitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
@@ -507,12 +506,12 @@ Wenn sich die Einheit zu Beginn ihrer nächsten Unterphase „Beginn des Zuges" 
 </div>
 </div>
 
-<!-- ===================== ARMEE & MAGIE ===================== -->
+<!-- ===================== ARMEEBAU ===================== -->
 <div class="tab-content" id="panel-armee" role="tabpanel" aria-labelledby="tab-armee" tabindex="0">
 <div class="guide">
 
 <div class="version-box"><b>Armeeliste erstellen</b><br>
-Deine Armeeliste kannst du online mit dem Armeebuilder zusammenstellen. Die <b>Legends-Fraktionen</b> wurden durch das <b>Renegade-Projekt</b> aktualisiert.<p class="version-link"><a href="https://oldworldrankings.com/builder" target="_blank" rel="noopener noreferrer">↗ Armeebuilder (oldworldrankings.com)</a> <a href="https://docs.google.com/document/d/16kAE-p_CWbsH0XatDPuRao6TngSw-KSweUnJa81kOXE/edit?tab=t.0" target="_blank" rel="noopener noreferrer">↗ Renegade-Fraktionen (Google Doc)</a></p></div>
+Deine Armeeliste kannst du online mit dem Armeebuilder zusammenstellen. Die <b>Legends-Fraktionen</b> wurden durch das <b>Renegade-Projekt</b> aktualisiert.<p class="version-link"><a href="https://oldworldrankings.com/builder" target="_blank" rel="noopener noreferrer">↗ Armeebuilder (oldworldrankings.com)</a> <a href="https://docs.google.com/document/d/16kAE-p_CWbsH0XatDPuRao6TngSw-KSweUnJa81kOXE/edit?tab=t.0" target="_blank" rel="noopener noreferrer">↗ Renegade-Fraktionen (Google Doc)</a> <a href="https://drive.google.com/file/d/172mG0ep6EgJClJiGijulksZSr1eDLZl5/view?usp=drive_link" target="_blank" rel="noopener noreferrer">↗ GermanComp (PDF)</a></p></div>
 
 <h1>1. Armeeaufbau</h1>
 <div class="points-slider">
@@ -539,75 +538,6 @@ Deine Armeeliste kannst du online mit dem Armeebuilder zusammenstellen. Die <b>L
 <tr><td>Elite-Einheiten</td><td>0-1</td><td>25 % (<span id="elitePU">150</span> Punkte)</td></tr>
 <tr><td>Seltene Einheiten</td><td>0-1</td><td>20 % (<span id="selPU">120</span> Punkte)</td></tr>
 </tbody></table>
-
-<h1>2. Magische Gegenstände</h1>
-<p>Diese Gegenstände ergänzen die allgemeinen Magischen Gegenstände (Warhammer: The Old World) und dürfen von Modellen aller Gefechtsmarsch-Aufmarschlisten genommen werden – jedoch nur in Gefechtsmarsch-Spielen, nicht in regulären Spielen. Ein Gegenstand mit Sternchen (*) gilt als besonders häufig.</p>
-<div class="acc" data-magic="1">
-<button type="button" class="acc-head" aria-expanded="false" aria-controls="mi-1-body"><span class="acc-title">Magische Waffen</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="mi-1-body" role="region" hidden="">
-<table class="magic-table"><tbody>
-<tr><th>Gegenstand</th><th>Punkte</th><th>Regeln</th></tr>
-<tr><td>Plänklerklinge</td><td>25</td><td>Nahkampf, DS -1. Magische Attacken, Zusatzattacken (+1). Im Flanken- oder Rückenbereich darf der Träger misslungene Verwundungswürfe wiederholen.</td></tr>
-<tr><td>Dornspeierstab</td><td>20</td><td>Zwei Profile – Fernkampf: 24", S4, Gewichtig, Magische Attacken, Rüstungsfluch (1). Nahkampf: S+1, Magische Attacken, Rüstungsfluch (1).</td></tr>
-<tr><td>Pionierbeil</td><td>15</td><td>Nahkampf, S+1, DS -1. Durch Deckung bewegen, Flammenattacken, Magische Attacken. Nur Infanterie. Einmal pro Spiel zu „Beginn des Zuges“: Träger und Einheit erhalten bis Zugende Durch Deckung bewegen.</td></tr>
-<tr><td>Diestros Klinge</td><td>10</td><td>Nahkampf, DS -1. Magische Attacken. +1 auf den Initiativewert.</td></tr>
-</tbody></table>
-</div>
-</div>
-<div class="acc" data-magic="2">
-<button type="button" class="acc-head" aria-expanded="false" aria-controls="mi-2-body"><span class="acc-title">Magische Rüstung</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="mi-2-body" role="region" hidden="">
-<table class="magic-table"><tbody>
-<tr><th>Gegenstand</th><th>Punkte</th><th>Regeln</th></tr>
-<tr><td>Helm des Mutes</td><td>25</td><td>Mit anderer Rüstung kombinierbar. +1 Rüstungswert; einmal pro Spiel einen misslungenen Aufriebtest wiederholen.</td></tr>
-<tr><td>Wattiertes Kettenhemd</td><td>20</td><td>Schwere Rüstung. +1 Rüstungswert gegenüber dem üblichen Modifikator (max. 2+).</td></tr>
-<tr><td>Schild mit Eisenrand</td><td>15</td><td>Zählt als Schild. +1 Attackenwert; diese Zusatzattacke muss mit einer gewöhnlichen Handwaffe ausgeführt werden.</td></tr>
-<tr><td>Schattenmantel</td><td>10</td><td>Nur Infanterie. Kann nicht Ziel feindlicher Fernkampfattacken oder Zauber sein, solange er sich innerhalb von 3" um eine befreundete Einheit befindet – außer er ist das nächstgelegene Ziel.</td></tr>
-</tbody></table>
-</div>
-</div>
-<div class="acc" data-magic="3">
-<button type="button" class="acc-head" aria-expanded="false" aria-controls="mi-3-body"><span class="acc-title">Talismane</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="mi-3-body" role="region" hidden="">
-<table class="magic-table"><tbody>
-<tr><th>Gegenstand</th><th>Punkte</th><th>Regeln</th></tr>
-<tr><td>Talisman der Autorität</td><td>30</td><td>Beschränkt. Feindliche Modelle müssen vor einem Nahkampfangriff gegen den Träger einen Moralwerttest bestehen – sonst dürfen sie nicht attackieren.</td></tr>
-<tr><td>Behütender Talisman</td><td>15</td><td>6+-Rettung gegen alle erlittenen Verwundungen.</td></tr>
-</tbody></table>
-</div>
-</div>
-<div class="acc" data-magic="4">
-<button type="button" class="acc-head" aria-expanded="false" aria-controls="mi-4-body"><span class="acc-title">Magische Standarten</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="mi-4-body" role="region" hidden="">
-<table class="magic-table"><tbody>
-<tr><th>Gegenstand</th><th>Punkte</th><th>Regeln</th></tr>
-<tr><td>Banner der Berühmtheit</td><td>15</td><td>Beschränkt. Die tragende Einheit erhält beim Kampfergebnis +1 Kampfergebnispunkt.</td></tr>
-<tr><td>Banner der Tapferen</td><td>10</td><td>Die tragende Einheit erhält die Sonderregel Veteranen.</td></tr>
-</tbody></table>
-</div>
-</div>
-<div class="acc" data-magic="5">
-<button type="button" class="acc-head" aria-expanded="false" aria-controls="mi-5-body"><span class="acc-title">Verzauberte Gegenstände</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="mi-5-body" role="region" hidden="">
-<table class="magic-table"><tbody>
-<tr><th>Gegenstand</th><th>Punkte</th><th>Regeln</th></tr>
-<tr><td>Fernglas des Kundschafters</td><td>20</td><td>Trägt der General das Fernglas, addiert er +2 auf seinen Wurf um den ersten Zug.</td></tr>
-<tr><td>Numas’ allsehendes Auge</td><td>15</td><td>Der Träger ignoriert Deckungsmodifikatoren und ignoriert beim Schießen Wälder für die Sichtlinie.</td></tr>
-</tbody></table>
-</div>
-</div>
-<div class="acc" data-magic="6">
-<button type="button" class="acc-head" aria-expanded="false" aria-controls="mi-6-body"><span class="acc-title">Arkane Artefakte</span><span class="acc-icon" aria-hidden="true">▸</span></button>
-<div class="acc-body" id="mi-6-body" role="region" hidden="">
-<table class="magic-table"><tbody>
-<tr><th>Gegenstand</th><th>Punkte</th><th>Regeln</th></tr>
-<tr><td>Schriftrolle feuriger Beschwörung*</td><td>15</td><td>Beschränkt. Statt eines bekannten Zaubers wirkt der Träger Feuerball (Lehre der Kampfmagie).</td></tr>
-<tr><td>Schriftrolle tödlichen Flüsterns*</td><td>10</td><td>Beschränkt. Statt eines bekannten Zaubers wirkt der Träger Totenkabale (Lehre der Nekromantie).</td></tr>
-<tr><td>Wyrdsteinsplitter</td><td>5</td><td>Beschränkt. Direkt vor einem Zauber- oder Bannwurf ansagbar: +1 auf diesen Wurf.</td></tr>
-<tr><td>Schriftrolle der Verschleierung*</td><td>5</td><td>Beschränkt. Statt eines bekannten Zaubers wirkt der Träger Überwältigendes Blendwerk (Lehre der Illusion).</td></tr>
-</tbody></table>
-</div>
-</div>
 
 </div>
 </div>
