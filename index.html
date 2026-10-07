@@ -1246,7 +1246,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <div class="sr-zahl"><span id="nkVerlTitelA">Verluste bei A</span><b id="nkVerlA">0</b></div>
   <div class="sr-zahl"><span id="nkVerlTitelB">Verluste bei B</span><b id="nkVerlB">0</b></div>
 </div>
-<p class="sr-hint" style="margin:0 0 6px;">Verteilung des Kampfergebnisses A minus B (Punkte):</p>
+<p class="sr-hint" style="margin:0 0 6px;">Verteilung des Kampfergebnisses A minus B (Punkte) – Balken antippen:</p>
 <svg class="nk-grafik" id="nkGrafik" role="img" aria-label="Balkengrafik: Verteilung des Kampfergebnisses A minus B"></svg>
 <div class="sr-legende">
   <span><i style="background:#4a3b28"></i>A vorn</span>
@@ -3245,9 +3245,14 @@ const nahkampf = (function () {
     });
     const r = { a: 0, b: 0, unentschieden: 0 }, D = new Map(), bA = A.bonus || 0, bB = B.bonus || 0;
     const e = { verwA: erw.cA, verwB: erw.cB, lpA: 0, lpB: 0, verlusteA: 0, verlusteB: 0 };
+    const proD = new Map();   // je Kampfergebnis D: Wahrscheinlichkeit und Summen fuer bedingte Erwartungswerte
     zust.forEach(z => {
       const aWeg = z.eA >= TA, bWeg = z.eB >= TB, d = z.d + bA - bB;
       D.set(d, (D.get(d) || 0) + z.p);
+      if (!proD.has(d)) proD.set(d, { p: 0, lpA: 0, lpB: 0, verlusteA: 0, verlusteB: 0 });
+      const g = proD.get(d);
+      g.p += z.p; g.lpA += z.p * z.eA; g.lpB += z.p * z.eB;
+      g.verlusteA += z.p * Math.floor(z.eA / A.lpModell); g.verlusteB += z.p * Math.floor(z.eB / B.lpModell);
       const erg = (aWeg || bWeg) ? (aWeg && bWeg ? 0 : bWeg ? 1 : -1) : d;
       if (erg > 0) r.a += z.p; else if (erg < 0) r.b += z.p; else r.unentschieden += z.p;
       e.lpA += z.p * z.eA; e.lpB += z.p * z.eB;
@@ -3257,6 +3262,9 @@ const nahkampf = (function () {
     D.forEach((p, d) => { werte[d - min] = p; });
     r.D = { min, werte };
     r.erw = e;
+    // Erwartungswerte unter der Bedingung, dass das Kampfergebnis genau d ist
+    r.beiD = d => { const g = proD.get(d); return g && g.p > 0
+      ? { lpA: g.lpA / g.p, lpB: g.lpB / g.p, verlusteA: g.verlusteA / g.p, verlusteB: g.verlusteB / g.p } : null; };
     return r;
   }
   /* Kurzform mit einem Profil pro Seite: A, B = { att(L), p, lpModell, modelle, regen, bonus, ini } */
@@ -3311,6 +3319,9 @@ function nahkampfTests() {
   const k15 = N.gefecht({ modelle: 1, lpModell: 5, regen: 0, bonus: 0, profile: [einzeln(3, 1, 5), einzeln(2, 1, 0)] },
                         { modelle: 10, lpModell: 1, regen: 0, bonus: 0, profile: [einzeln(0, 0, 3)] });
   pruefe(15, 'Zwei Profile (3 Attacken + 2 Stampfen, sicher) → Kampfergebnis A = 5', 5, k15.erw.verwA, nah(k15.erw.verwA, 5));
+  const k17 = N.gefecht({ modelle: 10, lpModell: 1, regen: 0, bonus: 0, profile: [einzeln(4, 0.5, 3)] },
+                        { modelle: 10, lpModell: 1, regen: 0, bonus: 0, profile: [einzeln(0, 0, 3)] }), b17 = k17.beiD(3);
+  pruefe(17, 'Bei Kampfergebnis +3 hat B genau 3 Verluste', 3, b17 && b17.verlusteB, b17 && nah(b17.verlusteB, 3));
   const k16 = N.gefecht({ modelle: 5, lpModell: 1, regen: 0, bonus: 0, profile: [einzeln(2, 1, 1)] },
                         { modelle: 10, lpModell: 1, regen: 0, bonus: 0, profile: [einzeln(4, 1, 5)] });
   pruefe(16, 'Einzelprofil behält Attacken trotz 4 Verlusten, verliert sie erst beim Auslöschen', [2, 4], [k16.erw.verwA, k16.erw.verwB],
@@ -3331,6 +3342,7 @@ function nahkampfTests() {
   const SEITE = () => ({ typ: 'modelle', modelle: 20, basekontakt: 5, unterstuetzer: 5, lp: 1, w: 3, ruestung: 5, schutz: 0, regen: 0,
                          bonus: 0, m: ANGRIFF(), r: ANGRIFF() });
   const st = { A: SEITE(), B: SEITE() };
+  let gewaehlt = null;   // im Diagramm angeklicktes Kampfergebnis, null = alle
   const holen = pfad => pfad.split('.').reduce((o, k) => o[k], st);
   const setzen = (pfad, v) => { const t = pfad.split('.'), k = t.pop(); t.reduce((o, x) => o[x], st)[k] = v; };
   const id = pfad => 'nk_' + pfad.replace(/\./g, '_');
@@ -3419,7 +3431,10 @@ function nahkampfTests() {
       const wert = d.min + i, p = d.werte[i], x = 10 + (i - lo) * bw;
       const h = (H - oben - unten) * p / maxP;
       neu('rect', { x: x + bw * 0.1, y: H - unten - h, width: bw * 0.8, height: Math.max(h, 0),
-                    fill: wert > 0 ? '#4a3b28' : wert < 0 ? '#1f3f6b' : '#b9a77f' });
+                    fill: wert > 0 ? '#4a3b28' : wert < 0 ? '#1f3f6b' : '#b9a77f',
+                    opacity: gewaehlt === null || gewaehlt === wert ? 1 : 0.3 });
+      // unsichtbare Spalte ueber die ganze Hoehe, damit auch kleine Balken leicht zu treffen sind
+      neu('rect', { x, y: 0, width: bw, height: H, fill: 'transparent', 'data-d': wert, style: 'cursor:pointer' });
       if ((i - lo) % schritt === 0 || wert === 0)
         neu('text', { x: x + bw / 2, y: H - unten + 20, 'text-anchor': 'middle', 'font-size': 16, fill: '#2b2116' }, (wert > 0 ? '+' : '') + wert);
       if (n <= 14 && p >= 0.005)
@@ -3437,14 +3452,17 @@ function nahkampfTests() {
     panel.querySelectorAll('[data-typ]').forEach(el => { el.hidden = st[el.dataset.seite].typ !== el.dataset.typ; });
     ['A', 'B'].forEach(x => { feld('nkTitelM' + x).textContent = st[x].typ === 'reittier' ? 'Reiter' : 'Modell'; });
     const r = N.gefecht(seite('A', 'B'), seite('B', 'A'));
+    if (gewaehlt !== null && !r.beiD(gewaehlt)) gewaehlt = null;   // gibt es nach einer Aenderung nicht mehr
+    const verl = gewaehlt === null ? r.erw : r.beiD(gewaehlt);
+    const bei = gewaehlt === null ? '' : ` (bei ${gewaehlt > 0 ? '+' : ''}${gewaehlt})`;
     feld('nkSiegA').textContent = prozent(r.a);
     feld('nkSiegU').textContent = prozent(r.unentschieden);
     feld('nkSiegB').textContent = prozent(r.b);
     // Bei mehreren Lebenspunkten pro Modell zaehlen verlorene Wunden statt Modelle
     ['A', 'B'].forEach(x => {
       const wunden = st[x].lp > 1;
-      feld('nkVerlTitel' + x).textContent = (wunden ? 'Verlust Wunden bei ' : 'Verluste bei ') + x;
-      feld('nkVerl' + x).textContent = zahl(wunden ? r.erw['lp' + x] : r.erw['verluste' + x]);
+      feld('nkVerlTitel' + x).textContent = (wunden ? 'Verlust Wunden bei ' : 'Verluste bei ') + x + bei;
+      feld('nkVerl' + x).textContent = zahl(wunden ? verl['lp' + x] : verl['verluste' + x]);
     });
     grafik(r.D);
   }
@@ -3452,6 +3470,8 @@ function nahkampfTests() {
   const klemme = (pfad, v) => { const [lo, hi] = GRENZEN[pfad.split('.').pop()]; return Math.max(lo, Math.min(hi, v)); };
   const aendere = (pfad, v) => { setzen(pfad, v); passeAn(pfad[0]); zeige(); };
   panel.addEventListener('click', e => {
+    const balken = e.target.closest('[data-d]');
+    if (balken) { const d = Number(balken.getAttribute('data-d')); gewaehlt = gewaehlt === d ? null : d; zeige(); return; }
     const k = e.target.closest('[data-nk]');
     if (k) { aendere(k.dataset.nk, klemme(k.dataset.nk, holen(k.dataset.nk) + Number(k.dataset.schritt))); return; }
     const w = e.target.closest('[data-nkwahl] button');
