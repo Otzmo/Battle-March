@@ -534,7 +534,7 @@ Deine Armeeliste kannst du online mit dem Armeebuilder zusammenstellen. Die <b>L
 <li>Max. Einheitenstärke 25 pro Einheit.</li>
 <li>Formationen max. 12 Spalten breit und max. 12 Reihen tief.</li>
 <li>Max. 2 Charaktere dürfen einer Einheit beitreten.</li>
-<li>Max. 40 Punkte magische Gegenstände pro Charakter.</li>
+<li>Max. 40 Punkte magische Gegenstände pro Charakter oder Einheit.</li>
 </ul>
 
 <h2>Begrenzungen</h2>
@@ -545,7 +545,10 @@ Deine Armeeliste kannst du online mit dem Armeebuilder zusammenstellen. Die <b>L
 <tr><td>Einheiten mit Fliegen (X) oder Körperlos</td><td>0-1</td></tr>
 </tbody></table>
 <ul>
+<li><b>Magierstufen:</b> Jeder gebundene Zauber und jeder magische Gegenstand, der die Zahl der bekannten Zauber erhöht, zählt als 0,5 Magierstufen.</li>
+<li><b>Magische Geschosse:</b> Werden zu viele erwürfelt, zuerst eines gegen den Signaturzauber tauschen, sofern dieser kein magisches Geschoss ist. Reicht das nicht, neu würfeln.</li>
 <li><b>Kriegsmaschinen:</b> Ausgenommen sind Speerschleudern und der Amboss des Schicksals.</li>
+<li><b>Fliegen (X) oder Körperlos:</b> Einheiten bis 70 Punkte zählen als 0,5 Einheiten.</li>
 </ul>
 
 <h2>Nicht erlaubt</h2>
@@ -1424,7 +1427,7 @@ function kartenbau(opt) {
     // Feldgroesse aus aelteren Staenden wird ignoriert: das Brett ist immer 48x36.
     if (data.wahl && typeof data.wahl === 'object') {
       const liste = v => [].concat(v || []);
-      const zonen = liste(data.wahl.zone).filter(z => PRESETS[z]);
+      const zonen = liste(data.wahl.zone).filter(z => Object.hasOwn(PRESETS, z));
       // aeltere Staende kennen nur eine Liste 'mission' ohne Gruppen
       const roh = Array.isArray(data.wahl.missionen) ? data.wahl.missionen.map(liste)
                 : GRUPPEN.map(() => liste(data.wahl.mission));
@@ -1433,7 +1436,7 @@ function kartenbau(opt) {
       if (roh.flat().length > 0 && missionen.flat().length === 0) missionen = GRUPPEN.map(g => g.werte);
       if (zonen.length) wahlSetzen(zonen, missionen);
     }
-    if (data.wurf && typeof data.wurf === 'object' && PRESETS[data.wurf.zone]) {
+    if (data.wurf && typeof data.wurf === 'object' && Object.hasOwn(PRESETS, data.wurf.zone)) {
       const gezogen = Array.isArray(data.wurf.missionen) ? data.wurf.missionen : [data.wurf.mission];
       if (gezogen.every(m => m === null || m === undefined || MISSIONEN.includes(m))) {
         wurf = { zone: data.wurf.zone, missionen: gezogen.map(m => m || null) };
@@ -1801,7 +1804,7 @@ function kartenbau(opt) {
   }
 
   function addPiece(type, xIn, yIn) {
-    const [x, y] = clampPos(xIn, yIn, type.w, type.d);
+    const [x, y] = freiePos(null, type.w, type.d, ...clampPos(xIn, yIn, type.w, type.d)) || clampPos(xIn, yIn, type.w, type.d);
     const piece = { id: pieceSeq++, name: type.name, w: type.w, d: type.d, x, y, ang: 0, tex: type.tex, color: type.color, dark: type.dark };
     pieces.push(piece);
     board.appendChild(createPieceEl(piece));
@@ -2036,22 +2039,39 @@ function kartenbau(opt) {
   function rotatePiece(id) {
     const piece = pieces.find(p => p.id === id);
     if (!piece) return;
+    const alt = { ang: piece.ang, x: piece.x, y: piece.y };
     piece.ang = ((piece.ang || 0) + 90) % 180;
     const [bw, bd] = pBox(piece);
-    [piece.x, piece.y] = clampPos(piece.x, piece.y, bw, bd);
+    const pos = freiePos(piece.id, bw, bd, ...clampPos(piece.x, piece.y, bw, bd));
+    if (!pos) { Object.assign(piece, alt); return; }   // kein Platz: Drehung entfaellt
+    [piece.x, piece.y] = pos;
     rerenderPiece(piece);
     saveState();
   }
 
-  /* Wuerde das Stueck an (nx, ny) ein anderes ueberlappen? */
-  function overlapsOthers(piece, nx, ny) {
-    const [bw, bd] = pBox(piece);
+  /* Wuerde ein Stueck der Groesse bw x bd an (nx, ny) ein anderes ueberlappen? */
+  function ueberlappt(id, bw, bd, nx, ny) {
     for (const o of pieces) {
-      if (o.id === piece.id) continue;
+      if (o.id === id) continue;
       const [ow, od] = pBox(o);
       if (rectsOverlap(nx, ny, bw, bd, o.x, o.y, ow, od)) return true;
     }
     return false;
+  }
+  function overlapsOthers(piece, nx, ny) { return ueberlappt(piece.id, ...pBox(piece), nx, ny); }
+
+  /* Naechste ganzzahlige Lage ab (x, y), an der das Stueck niemanden
+     ueberlappt - oder null, wenn auf dem Brett keine frei ist. */
+  function freiePos(id, bw, bd, x, y) {
+    if (!ueberlappt(id, bw, bd, x, y)) return [x, y];
+    let best = null, bestD = Infinity;
+    for (let nx = 0; nx <= cfg.w - bw; nx++) {
+      for (let ny = 0; ny <= cfg.h - bd; ny++) {
+        const dist = Math.hypot(nx - x, ny - y);
+        if (dist < bestD && !ueberlappt(id, bw, bd, nx, ny)) { best = [nx, ny]; bestD = dist; }
+      }
+    }
+    return best;
   }
 
   function boardRect() { return board.getBoundingClientRect(); }
@@ -2078,8 +2098,8 @@ function kartenbau(opt) {
     }
     // Auch ein abgebrochenes Ziehen (z. B. Systemgeste am Handy) beendet sauber.
     function onUp() {
-      piece.x = Math.round(piece.x);
-      piece.y = Math.round(piece.y);
+      const rx = Math.round(piece.x), ry = Math.round(piece.y);
+      if (!overlapsOthers(piece, rx, ry)) { piece.x = rx; piece.y = ry; }   // sonst bleibt der halbe Zoll
       rerenderPiece(piece);
       el.classList.remove('dragging');
       el.removeEventListener('pointermove', onMove);
@@ -2619,7 +2639,17 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   // Platz um die Einheit - so viel, dass die Schablone ganz neben die Einheit passt
   const rand = () => (st.art === 'r3' ? 2 : st.art === 'r5' ? 3 : 4.5) * ZOLL;
   const st = { breite: 6, tiefe: 4, base: '25x25', art: 'r3', dreh: 0, x: null, y: null };
-  try { Object.assign(st, JSON.parse(localStorage.getItem('battleMarchSchablone')) || {}); } catch (e) { /* egal */ }
+  try {
+    const g = JSON.parse(localStorage.getItem('battleMarchSchablone')) || {};
+    const ganz = (v, min, max) => Number.isInteger(v) && v >= min && v <= max;
+    const zahl = v => typeof v === 'number' && Number.isFinite(v);
+    if (ganz(g.breite, 1, 20)) st.breite = g.breite;
+    if (ganz(g.tiefe, 1, 12)) st.tiefe = g.tiefe;
+    if ([...document.getElementById('srBase').options].some(o => o.value === g.base)) st.base = g.base;
+    if (['r3', 'r5', 'flamme'].includes(g.art)) st.art = g.art;
+    if (ganz(g.dreh, 0, 355)) st.dreh = g.dreh;
+    if (zahl(g.x) && zahl(g.y)) { st.x = g.x; st.y = g.y; }   // zeichne() zieht sie ins Feld
+  } catch (e) { /* egal */ }
   const merke = () => { try { localStorage.setItem('battleMarchSchablone', JSON.stringify(st)); } catch (e) { /* egal */ } };
 
   const baseMass = () => st.base.split('x').map(Number);   // [Breite, Tiefe]
@@ -2780,6 +2810,10 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   if (!feld('arChance')) return;
   const st = { bew: 4, dist: 8, sonder: 'keine', schwer: false, wdh: 'nein' };
   try { Object.assign(st, JSON.parse(localStorage.getItem('battleMarchAngriff')) || {}); } catch (e) { /* egal */ }
+  // Nur Zahlen im erlaubten Bereich - die Werte landen auch in der Tabelle.
+  st.bew = Number.isInteger(st.bew) && st.bew >= 1 && st.bew <= 12 ? st.bew : 4;
+  st.dist = typeof st.dist === 'number' && st.dist >= 0.5 && st.dist <= 30 && Number.isInteger(st.dist * 2) ? st.dist : 8;
+  st.schwer = st.schwer === true;
   if (st.swift) st.sonder = 'swift';   // aelterer Stand kannte nur ein Haekchen
   delete st.swift;
   if (!['keine', 'klein', 'swift'].includes(st.sonder)) st.sonder = 'keine';
