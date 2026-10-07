@@ -367,7 +367,11 @@ button:hover{ background:var(--maroon-dark); }
 .nk-seiten .sr-steuer{ align-items:flex-start; align-content:flex-start; }
 .guide h2.nk-kopf{ flex-basis:100%; margin:0; font-size:1.1rem; color:var(--maroon); }
 .guide h3.nk-unterkopf{ flex-basis:100%; margin:6px 0 -6px; padding-top:8px; border-top:1px dashed #b9a77f; font-size:.95rem; color:var(--maroon); }
-.nk-block:not([hidden]){ display:contents; }   /* Felder des Reittiers stehen im selben Raster wie die anderen */
+.nk-block:not([hidden]){ display:contents; }
+.nk-imp{ max-width:100%; }
+.nk-imp-zeile{ flex-basis:100%; display:flex; align-items:center; flex-wrap:wrap; gap:6px 12px; }
+.nk-imp-knopf{ padding:7px 14px; font-size:.9rem; }
+.nk-imp-status{ font-size:.85rem; color:#5a4a36; font-style:italic; }   /* Felder des Reittiers stehen im selben Raster wie die anderen */
 .nk-zahl{ width:52px; text-align:center; font:inherit; font-weight:bold; border:0; border-radius:0; background:#fff; color:var(--text); padding:6px 0; -moz-appearance:textfield; appearance:textfield; }
 .nk-zahl::-webkit-outer-spin-button, .nk-zahl::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
 .nk-zahl:focus-visible{ outline:3px solid #8a6a3b; outline-offset:-3px; }
@@ -3372,7 +3376,12 @@ function nahkampfTests() {
     zaehler(`${q}.aufprall`, 'Aufpralltreffer pro Modell (Ø aufgerundet)', koerperTyp) +
     zaehler(`${q}.stampfen`, 'Stampfen pro Modell (Ø aufgerundet)', koerperTyp);
   function seiteHtml(x) {
+    const imp = (name, titel, typ) => `<div${nur(x, typ)}><label for="nkImp_${x}_${name}">${titel}</label><select id="nkImp_${x}_${name}" class="nk-imp"></select></div>`;
     return `<h2 class="nk-kopf">Seite ${x}</h2>` + knoepfe(`${x}.typ`, 'Art', [['modelle', 'Modelle'], ['reittier', 'Modelle mit Reittier']]) +
+      `<h3 class="nk-unterkopf">Werte von tow.whfb.app</h3>` + imp('armee', 'Armee') + imp('einheit', 'Einheit') +
+      imp('zeile', 'Profil (Modell bzw. Reiter)') + imp('reittier', 'Reittier', 'reittier') +
+      `<div class="nk-imp-zeile"><button type="button" class="nk-imp-knopf" data-imp="${x}">Werte übernehmen</button>` +
+      `<span class="nk-imp-status" id="nkImpStatus_${x}" aria-live="polite"></span></div>` +
       `<h3 class="nk-unterkopf">Einheit</h3>` + zaehler(`${x}.modelle`, 'Modelle in der Einheit') +
       zaehler(`${x}.basekontakt`, 'Modelle mit Basekontakt') + zaehler(`${x}.unterstuetzer`, 'Modelle mit Unterstützungsattacke', 'modelle') +
       zaehler(`${x}.lp`, 'Lebenspunkte pro Modell') + zaehler(`${x}.w`, 'Widerstand') +
@@ -3443,6 +3452,122 @@ function nahkampfTests() {
     neu('line', { x1: 10, x2: W - 10, y1: H - unten, y2: H - unten, stroke: '#4a3b28', 'stroke-width': 1.5 });
   }
 
+  /* ---- Werte von tow.whfb.app holen. Nichts wird gespeichert, die Seiten werden bei
+     Bedarf frisch abgerufen und nur waehrend des Besuchs zwischengehalten. Alles von
+     dort wird nur als Text bzw. als Zahl verwendet. ---- */
+  const TOW = 'https://tow.whfb.app';
+  const ARMEEN = ['beastmen-brayherds', 'chaos-dwarfs', 'daemons-of-chaos', 'dark-elves', 'dwarfen-mountain-holds', 'empire-of-man',
+                  'grand-cathay', 'high-elf-realms', 'kingdom-of-bretonnia', 'lizardmen', 'ogre-kingdoms', 'orc-and-goblin-tribes',
+                  'realms-of-men', 'regiments-of-renown', 'skaven', 'tomb-kings-of-khemri', 'vampire-counts', 'warriors-of-chaos', 'wood-elf-realms'];
+  const titel = slug => slug.split('-').map(w => ['of', 'and'].includes(w) ? w : w[0].toUpperCase() + w.slice(1)).join(' ');
+  const geladen = new Map();
+  function lade(pfad) {
+    if (!geladen.has(pfad)) geladen.set(pfad, fetch(TOW + pfad)
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(t => new DOMParser().parseFromString(t, 'text/html'))
+      .catch(e => { geladen.delete(pfad); throw e; }));
+    return geladen.get(pfad);
+  }
+  async function einheitenDer(armee) {
+    const doc = await lade('/army/' + armee), m = new Map();
+    doc.querySelectorAll('a[href^="/unit/"]').forEach(a => {
+      const slug = a.getAttribute('href').slice(6), name = a.textContent.trim();
+      if (name && /^[a-z0-9-]+$/.test(slug) && !m.has(slug)) m.set(slug, name);
+    });
+    return [...m].map(([slug, name]) => ({ slug, name })).sort((u, v) => u.name.localeCompare(v.name));
+  }
+  async function einheit(slug) {
+    const doc = await lade('/unit/' + slug);
+    const f = JSON.parse(doc.getElementById('__NEXT_DATA__').textContent).props.pageProps.entry.fields;
+    return { name: String(f.name || slug), zeilen: Array.isArray(f.unitProfile) ? f.unitProfile : [], ausr: ausruestung(f.equipment) };
+  }
+  // Ruestung aus der Grundausruestung: verlinkte Eintraege wie "Heavy Armour", "Shield", "Barding"
+  function ausruestung(eq) {
+    const namen = [];
+    (function lauf(k) {
+      if (!k || typeof k !== 'object') return;
+      const t = k.data && k.data.target;
+      if (t && t.fields && typeof t.fields.name === 'string') namen.push(t.fields.name.toLowerCase());
+      (k.content || []).forEach(lauf);
+    })(eq);
+    const basis = namen.includes('full plate armour') ? 4 : namen.includes('heavy armour') ? 5 : namen.includes('light armour') ? 6 : 7;
+    return { basis, schild: namen.includes('shield'), barding: namen.includes('barding') };
+  }
+  const zahlAus = v => { const n = parseInt(v, 10); return Number.isFinite(n) ? n : null; };
+  const plusAus = v => { const m = /\(\+(\d+)\)/.exec(String(v)); return m ? Number(m[1]) : 0; };
+  const imp = (x, name) => feld(`nkImp_${x}_${name}`);
+  const status = (x, t) => { feld('nkImpStatus_' + x).textContent = t; };
+  const fuelle = (sel, optionen, leer) => {
+    sel.replaceChildren();
+    if (leer) sel.append(new Option(leer, ''));
+    optionen.forEach(o => {
+      if (o.gruppe) {
+        const g = document.createElement('optgroup'); g.label = o.gruppe;
+        o.optionen.forEach(([v, t]) => g.append(new Option(t, v)));
+        sel.append(g);
+      } else sel.append(new Option(o[1], o[0]));
+    });
+  };
+  ['A', 'B'].forEach(x => {
+    fuelle(imp(x, 'armee'), ARMEEN.map(a => [a, titel(a)]), '– Armee wählen –');
+    fuelle(imp(x, 'einheit'), [], '–'); fuelle(imp(x, 'zeile'), [], '–'); fuelle(imp(x, 'reittier'), [], '–');
+    imp(x, 'armee').addEventListener('change', async e => {
+      fuelle(imp(x, 'einheit'), [], '–'); fuelle(imp(x, 'zeile'), [], '–'); fuelle(imp(x, 'reittier'), [], '–');
+      if (!e.target.value) return;
+      status(x, 'Lädt …');
+      try {
+        const liste = await einheitenDer(e.target.value);
+        fuelle(imp(x, 'einheit'), liste.map(u => [u.slug, u.name]), '– Einheit wählen –');
+        status(x, '');
+      } catch (err) { status(x, 'Abruf fehlgeschlagen – tow.whfb.app nicht erreichbar.'); }
+    });
+    imp(x, 'einheit').addEventListener('change', async e => {
+      fuelle(imp(x, 'zeile'), [], '–'); fuelle(imp(x, 'reittier'), [], '–');
+      if (!e.target.value) return;
+      status(x, 'Lädt …');
+      try {
+        const [u, liste] = await Promise.all([einheit(e.target.value), einheitenDer(imp(x, 'armee').value)]);
+        const zeilen = u.zeilen.map((z, i) => [String(i), String(z.Name || 'Profil ' + (i + 1))]);
+        fuelle(imp(x, 'zeile'), zeilen);
+        fuelle(imp(x, 'reittier'), [{ gruppe: 'Aus dieser Einheit', optionen: zeilen.map(([i, t]) => ['z:' + i, t]) },
+                                     { gruppe: 'Andere Einheit der Armee', optionen: liste.map(v => ['e:' + v.slug, v.name]) }], '– Reittier wählen –');
+        if (zeilen.length > 1) imp(x, 'reittier').value = 'z:' + (zeilen.length - 1);   // bei Kavallerie steht das Ross meist zuletzt
+        status(x, '');
+      } catch (err) { status(x, 'Abruf fehlgeschlagen – tow.whfb.app nicht erreichbar.'); }
+    });
+  });
+  async function uebernehmen(x) {
+    const slug = imp(x, 'einheit').value;
+    if (!slug) { status(x, 'Erst Armee und Einheit wählen.'); return; }
+    status(x, 'Lädt …');
+    try {
+      const u = await einheit(slug), e = st[x], z = u.zeilen[Number(imp(x, 'zeile').value) || 0];
+      if (!z) throw new Error('kein Profil');
+      const setze = (obj, k, v) => { if (v !== null) obj[k] = k === 'ini' ? Math.max(1, Math.min(10, v)) : klemme(k, v); };
+      setze(e.m, 'kg', zahlAus(z.WS)); setze(e.m, 's', zahlAus(z.S)); setze(e.m, 'ini', zahlAus(z.I)); setze(e.m, 'attacken', zahlAus(z.A));
+      setze(e, 'w', zahlAus(z.T)); setze(e, 'lp', zahlAus(z.W));
+      let wert = u.ausr.basis - (u.ausr.schild ? 1 : 0), barding = u.ausr.barding, namen = [u.name + ' – ' + (z.Name || '')];
+      if (e.typ === 'reittier' && imp(x, 'reittier').value) {
+        const [art, wahl] = imp(x, 'reittier').value.split(':');
+        let r = null, rAusr = null;
+        if (art === 'z') r = u.zeilen[Number(wahl)];
+        else { const mu = await einheit(wahl); r = mu.zeilen[0]; rAusr = mu.ausr; }
+        if (r) {
+          setze(e.r, 'kg', zahlAus(r.WS)); setze(e.r, 's', zahlAus(r.S)); setze(e.r, 'ini', zahlAus(r.I)); setze(e.r, 'attacken', zahlAus(r.A));
+          // Angaben wie "(+3)" erhoehen Widerstand bzw. Lebenspunkte des Reiters
+          setze(e, 'w', e.w + plusAus(r.T)); setze(e, 'lp', e.lp + plusAus(r.W));
+          if (rAusr) { wert = Math.min(wert, rAusr.basis); barding = barding || rAusr.barding; }   // bessere Ruestung von Reiter oder Reittier
+          namen.push(String(r.Name || ''));
+        }
+      }
+      if (barding) wert--;
+      e.ruestung = wert >= 7 ? 0 : Math.max(2, wert);
+      passeAn(x);
+      zeige();
+      status(x, 'Übernommen: ' + namen.join(' + ') + '. Waffen und Sonderregeln bitte selbst eintragen.');
+    } catch (err) { status(x, 'Abruf fehlgeschlagen – tow.whfb.app nicht erreichbar.'); }
+  }
+
   function zeige() {
     panel.querySelectorAll('[data-pfad]').forEach(el => { if (document.activeElement !== el) el.value = String(holen(el.dataset.pfad)); });
     panel.querySelectorAll('[data-nkwahl]').forEach(g => {
@@ -3470,6 +3595,8 @@ function nahkampfTests() {
   const klemme = (pfad, v) => { const [lo, hi] = GRENZEN[pfad.split('.').pop()]; return Math.max(lo, Math.min(hi, v)); };
   const aendere = (pfad, v) => { setzen(pfad, v); passeAn(pfad[0]); zeige(); };
   panel.addEventListener('click', e => {
+    const knopf = e.target.closest('[data-imp]');
+    if (knopf) { uebernehmen(knopf.dataset.imp); return; }
     const balken = e.target.closest('[data-d]');
     if (balken) { const d = Number(balken.getAttribute('data-d')); gewaehlt = gewaehlt === d ? null : d; zeige(); return; }
     const k = e.target.closest('[data-nk]');
