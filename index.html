@@ -367,8 +367,7 @@ button:hover{ background:var(--maroon-dark); }
 .nk-seiten .sr-steuer{ align-items:flex-start; align-content:flex-start; }
 .guide h2.nk-kopf{ flex-basis:100%; margin:0; font-size:1.1rem; color:var(--maroon); }
 .guide h3.nk-unterkopf{ flex-basis:100%; margin:6px 0 -6px; padding-top:8px; border-top:1px dashed #b9a77f; font-size:.95rem; color:var(--maroon); }
-.nk-haken{ display:flex; align-items:center; gap:6px; font-size:.92rem; color:var(--text); cursor:pointer; padding-top:16px; }
-.nk-haken input{ accent-color:var(--maroon); width:18px; height:18px; }
+.nk-block:not([hidden]){ display:contents; }   /* Felder des Reittiers stehen im selben Raster wie die anderen */
 .nk-zahl{ width:52px; text-align:center; font:inherit; font-weight:bold; border:0; border-radius:0; background:#fff; color:var(--text); padding:6px 0; -moz-appearance:textfield; appearance:textfield; }
 .nk-zahl::-webkit-outer-spin-button, .nk-zahl::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
 .nk-zahl:focus-visible{ outline:3px solid #8a6a3b; outline-offset:-3px; }
@@ -3326,13 +3325,11 @@ function nahkampfTests() {
   const panel = feld('panel-nahkampf');
   if (!panel) return;
   const N = nahkampf;
-  const GRENZEN = { modelle: [1, 100], lp: [1, 10], kgDef: [1, 10], w: [1, 10], bonus: [0, 20],
-                    basekontakt: [0, 20], apm: [0, 10], unterstuetzer: [0, 20], attacken: [0, 20],
-                    kg: [1, 10], s: [1, 10], stampfen: [0, 10] };
-  const PROFIL = art => ({ art, basekontakt: 5, apm: 1, unterstuetzer: 5, attacken: 1, kg: 3, s: 3, ap: 0, ini: 3,
-                           wdhT: 'keine', wdhV: 'keine', auto: false, stampfen: 0 });
-  const SEITE = () => ({ anzahl: '1', modelle: 20, lp: 1, kgDef: 3, w: 3, ruestung: 5, schutz: 0, regen: 0, bonus: 0,
-                         p: [PROFIL('glied'), PROFIL('einzeln')] });
+  const GRENZEN = { modelle: [1, 100], basekontakt: [0, 20], unterstuetzer: [0, 20], lp: [1, 10], w: [1, 10], bonus: [0, 20],
+                    attacken: [0, 10], kg: [1, 10], s: [1, 10], stampfen: [0, 10], aufprall: [0, 10] };
+  const ANGRIFF = () => ({ attacken: 1, kg: 3, s: 3, ap: 0, ini: 3, wdhT: 'keine', wdhV: 'keine', stampfen: 0, aufprall: 0 });
+  const SEITE = () => ({ typ: 'modelle', modelle: 20, basekontakt: 5, unterstuetzer: 5, lp: 1, w: 3, ruestung: 5, schutz: 0, regen: 0,
+                         bonus: 0, m: ANGRIFF(), r: ANGRIFF() });
   const st = { A: SEITE(), B: SEITE() };
   const holen = pfad => pfad.split('.').reduce((o, k) => o[k], st);
   const setzen = (pfad, v) => { const t = pfad.split('.'), k = t.pop(); t.reduce((o, x) => o[x], st)[k] = v; };
@@ -3340,68 +3337,64 @@ function nahkampfTests() {
   const prozent = p => (Math.round(p * 1000) / 10).toLocaleString('de-DE') + ' %';
   const zahl = x => (Math.round(x * 100) / 100).toLocaleString('de-DE');
 
-  /* Bausteine. "zeige" bindet ein Feld an ein Profil: es erscheint nur, wenn die Art
-     des Profils passt (glied, einzeln oder beide) - Profil 2 nur, wenn die Seite zwei Profile hat. */
-  const bind = z => z ? ` data-zeige="${z[0]}" data-art="${z[1]}"` : '';
-  const zaehler = (pfad, name, z) => `<div${bind(z)}><span class="sr-titel">${name}</span><div class="sr-zaehler">` +
+  /* Bausteine. Felder mit data-typ erscheinen nur bei dieser Art der Seite
+     ("modelle" oder "reittier"). */
+  const nur = (x, typ) => typ ? ` data-seite="${x}" data-typ="${typ}"` : '';
+  const zaehler = (pfad, name, typ) => `<div${nur(pfad[0], typ)}><span class="sr-titel">${name}</span><div class="sr-zaehler">` +
     `<button type="button" data-nk="${pfad}" data-schritt="-1" aria-label="${name} weniger">−</button>` +
     `<input type="number" inputmode="numeric" class="nk-zahl" id="${id(pfad)}" data-pfad="${pfad}" aria-label="${name}">` +
     `<button type="button" data-nk="${pfad}" data-schritt="1" aria-label="${name} mehr">+</button></div></div>`;
-  const auswahl = (pfad, name, optionen, z, zahlwert) => `<div${bind(z)}><label for="${id(pfad)}">${name}</label>` +
-    `<select id="${id(pfad)}" data-pfad="${pfad}"${zahlwert ? ' data-zahl="1"' : ''}>` +
+  const auswahl = (pfad, name, optionen) => `<div><label for="${id(pfad)}">${name}</label><select id="${id(pfad)}" data-pfad="${pfad}">` +
     optionen.map(([v, t]) => `<option value="${v}">${t}</option>`).join('') + '</select></div>';
+  const knoepfe = (pfad, name, werte) => `<div><span class="sr-titel">${name}</span><div class="sr-wahl" data-nkwahl="${pfad}">` +
+    werte.map(([v, t]) => `<button type="button" data-wert="${v}">${t}</button>`).join('') + '</div></div>';
   const wurf = [['0', 'keiner']].concat([2, 3, 4, 5, 6].map(v => [v, v + '+']));
   const durchschlag = [['0', '–']].concat([1, 2, 3, 4, 5, 6].map(v => ['-' + v, '−' + v]));
   const initiative = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(v => [v, String(v)]).concat([['0', 'zuletzt']]);
-  const knoepfe = (pfad, name, werte, z) => `<div${bind(z)}><span class="sr-titel">${name}</span><div class="sr-wahl" data-nkwahl="${pfad}">` +
-    werte.map(([v, t]) => `<button type="button" data-wert="${v}">${t}</button>`).join('') + '</div></div>';
-  const wdh = (pfad, name, z) => knoepfe(pfad, name, [['keine', 'Keine'], ['einsen', 'Einsen'], ['alle', 'Alle Fehlwürfe']], z);
-  const haken = (pfad, name, z) => `<div${bind(z)}><label class="nk-haken"><input type="checkbox" id="${id(pfad)}" data-pfad="${pfad}"> ${name}</label></div>`;
+  const wdh = (pfad, name) => knoepfe(pfad, name, [['keine', 'Keine'], ['einsen', 'Einsen'], ['alle', 'Alle Fehlwürfe']]);
 
-  function profilHtml(x, i) {
-    const q = `${x}.p.${i}`, g = [q, 'glied'], e = [q, 'einzeln'], b = [q, 'beide'];
-    const arten = [['glied', 'Glied'], ['einzeln', 'Einzeln (Charakter, Reittier)']];
-    return (i ? `<h3 class="nk-unterkopf"${bind(b)}>Profil 2 (z. B. Reittier)</h3>` : '') + auswahl(`${q}.art`, 'Art der Attacken', arten, b) +
-      zaehler(`${q}.basekontakt`, 'Modelle mit Basekontakt', g) + zaehler(`${q}.apm`, 'Attacken pro Modell mit Basekontakt', g) +
-      zaehler(`${q}.unterstuetzer`, 'Modelle mit Unterstützungsattacke', g) + zaehler(`${q}.attacken`, 'Attacken', e) +
-      zaehler(`${q}.kg`, 'Kampfgeschick (KG)', b) + zaehler(`${q}.s`, 'Stärke', b) +
-      auswahl(`${q}.ap`, 'Durchschlag', durchschlag, b, true) + auswahl(`${q}.ini`, 'Initiative', initiative, b, true) +
-      wdh(`${q}.wdhT`, 'Treffer wiederholen', b) + wdh(`${q}.wdhV`, 'Verwundung wiederholen', b) +
-      haken(`${q}.auto`, 'Trifft automatisch', b) + zaehler(`${q}.stampfen`, 'Stampfen (Ø aufgerundet)', b);
-  }
+  // Angriffswerte eines Blocks; Aufpralltreffer und Stampfen nur beim "Koerper" (Modell ohne Reittier bzw. Reittier)
+  const angriffHtml = (q, koerperTyp) => zaehler(`${q}.attacken`, 'Attacken pro Modell') + zaehler(`${q}.kg`, 'Kampfgeschick (KG)') +
+    zaehler(`${q}.s`, 'Stärke') + auswahl(`${q}.ap`, 'Durchschlag', durchschlag) + auswahl(`${q}.ini`, 'Initiative', initiative) +
+    wdh(`${q}.wdhT`, 'Treffer wiederholen') + wdh(`${q}.wdhV`, 'Verwundung wiederholen') +
+    zaehler(`${q}.aufprall`, 'Aufpralltreffer pro Modell (Ø aufgerundet)', koerperTyp) +
+    zaehler(`${q}.stampfen`, 'Stampfen pro Modell (Ø aufgerundet)', koerperTyp);
   function seiteHtml(x) {
-    return `<h2 class="nk-kopf">Seite ${x}</h2>` + knoepfe(`${x}.anzahl`, 'Profile', [['1', 'Ein Profil'], ['2', 'Zwei Profile']]) +
-      `<h3 class="nk-unterkopf">Profil 1</h3>` + zaehler(`${x}.modelle`, 'Modelle in der Einheit') + zaehler(`${x}.lp`, 'Lebenspunkte pro Modell') +
-      zaehler(`${x}.kgDef`, 'Kampfgeschick (wird getroffen)') + zaehler(`${x}.w`, 'Widerstand') +
-      auswahl(`${x}.ruestung`, 'Rüstungswurf', wurf, null, true) + auswahl(`${x}.schutz`, 'Schutzwurf (optional)', wurf, null, true) +
-      auswahl(`${x}.regen`, 'Regeneration (optional)', wurf, null, true) + zaehler(`${x}.bonus`, 'Kampfergebnis-Bonus') +
-      profilHtml(x, 0) + profilHtml(x, 1);
+    return `<h2 class="nk-kopf">Seite ${x}</h2>` + knoepfe(`${x}.typ`, 'Art', [['modelle', 'Modelle'], ['reittier', 'Modelle mit Reittier']]) +
+      `<h3 class="nk-unterkopf">Einheit</h3>` + zaehler(`${x}.modelle`, 'Modelle in der Einheit') +
+      zaehler(`${x}.basekontakt`, 'Modelle mit Basekontakt') + zaehler(`${x}.unterstuetzer`, 'Modelle mit Unterstützungsattacke', 'modelle') +
+      zaehler(`${x}.lp`, 'Lebenspunkte pro Modell') + zaehler(`${x}.w`, 'Widerstand') +
+      auswahl(`${x}.ruestung`, 'Rüstungswurf', wurf) + auswahl(`${x}.schutz`, 'Schutzwurf (optional)', wurf) +
+      auswahl(`${x}.regen`, 'Regeneration (optional)', wurf) + zaehler(`${x}.bonus`, 'Kampfergebnis-Bonus') +
+      `<h3 class="nk-unterkopf" id="nkTitelM${x}">Modell</h3>` + angriffHtml(`${x}.m`, 'modelle') +
+      `<h3 class="nk-unterkopf"${nur(x, 'reittier')}>Reittier</h3>` +
+      `<div class="nk-block"${nur(x, 'reittier')}>` + angriffHtml(`${x}.r`) + '</div>';
   }
   feld('nkSeiteA').innerHTML = seiteHtml('A');
   feld('nkSeiteB').innerHTML = seiteHtml('B');
 
-  // Glied-Profile koennen nicht mehr Modelle einsetzen, als die Einheit hat.
+  // Basekontakt und Unterstuetzer koennen nicht mehr Modelle sein, als die Einheit hat.
   function passeAn(x) {
-    st[x].p.forEach(pr => {
-      pr.basekontakt = Math.min(pr.basekontakt, st[x].modelle);
-      pr.unterstuetzer = Math.min(pr.unterstuetzer, st[x].modelle - pr.basekontakt);
-    });
+    const e = st[x];
+    e.basekontakt = Math.min(e.basekontakt, e.modelle);
+    e.unterstuetzer = Math.min(e.unterstuetzer, e.modelle - e.basekontakt);
   }
 
-  // Angaben einer Seite x (greift y an) fuer nahkampf.gefecht()
+  /* Angaben einer Seite x (greift y an) fuer nahkampf.gefecht(). Verluste fallen zuerst
+     bei den Modellen mit Basekontakt; jedes verlorene Modell kostet seine Attacken
+     (beim Reittier die von Reiter und Reittier). Getroffen wird gegen das KG von Modell bzw. Reiter. */
   function seite(x, y) {
-    const a = st[x], z = st[y], profile = [];
-    a.p.slice(0, Number(a.anzahl)).forEach(pr => {
-      const pT = pr.auto ? 1 : N.pTreffer(pr.kg, z.kgDef, pr.wdhT);
-      const p = pT * N.pVerwunden(pr.s, z.w, pr.wdhV) * N.pNichtAbgewehrt(z.ruestung || null, pr.ap, z.schutz || null);
-      const att = pr.art === 'glied'
-        ? L => N.attackenNachVerlusten({ kampfglied: pr.basekontakt, apm: pr.apm, unterstuetzer: pr.unterstuetzer }, L)
-        : () => pr.attacken;
-      profile.push({ att, p, ini: pr.ini });
-      // Stampfen: zuletzt, trifft automatisch, unveraenderte Staerke, kein Durchschlag
-      if (pr.stampfen > 0) profile.push({ att: () => pr.stampfen, ini: 0,
-        p: N.pVerwunden(pr.s, z.w, 'keine') * N.pNichtAbgewehrt(z.ruestung || null, 0, z.schutz || null) });
-    });
+    const a = st[x], z = st[y], profile = [], reittier = a.typ === 'reittier';
+    const vorne = L => Math.max(0, a.basekontakt - L);
+    const p = (q, auto, ap) => (auto ? 1 : N.pTreffer(q.kg, z.m.kg, q.wdhT)) *
+      N.pVerwunden(q.s, z.w, auto ? 'keine' : q.wdhV) * N.pNichtAbgewehrt(z.ruestung || null, ap, z.schutz || null);
+    profile.push({ ini: a.m.ini, p: p(a.m, false, a.m.ap), att: reittier ? L => vorne(L) * a.m.attacken
+      : L => N.attackenNachVerlusten({ kampfglied: a.basekontakt, apm: a.m.attacken, unterstuetzer: a.unterstuetzer }, L) });
+    const koerper = reittier ? a.r : a.m;
+    if (reittier) profile.push({ ini: a.r.ini, p: p(a.r, false, a.r.ap), att: L => vorne(L) * a.r.attacken });
+    // Aufpralltreffer (Initiative 10) und Stampfen (zuletzt): treffen automatisch, Staerke des Koerpers, kein Durchschlag
+    if (koerper.aufprall > 0) profile.push({ ini: 10, p: p(koerper, true, 0), att: L => vorne(L) * koerper.aufprall });
+    if (koerper.stampfen > 0) profile.push({ ini: 0, p: p(koerper, true, 0), att: L => vorne(L) * koerper.stampfen });
     return { modelle: a.modelle, lpModell: a.lp, regen: a.regen ? N.chance(a.regen) : 0, bonus: a.bonus, profile };
   }
 
@@ -3436,19 +3429,13 @@ function nahkampfTests() {
   }
 
   function zeige() {
-    panel.querySelectorAll('[data-pfad]').forEach(el => {
-      const v = holen(el.dataset.pfad);
-      if (el.type === 'checkbox') el.checked = v;
-      else if (document.activeElement !== el) el.value = String(v);
-    });
+    panel.querySelectorAll('[data-pfad]').forEach(el => { if (document.activeElement !== el) el.value = String(holen(el.dataset.pfad)); });
     panel.querySelectorAll('[data-nkwahl]').forEach(g => {
       const v = holen(g.dataset.nkwahl);
       g.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.wert === v ? 'true' : 'false'));
     });
-    panel.querySelectorAll('[data-zeige]').forEach(el => {
-      const [x, , i] = el.dataset.zeige.split('.'), art = holen(el.dataset.zeige + '.art');
-      el.hidden = (i === '1' && st[x].anzahl === '1') || (el.dataset.art !== 'beide' && el.dataset.art !== art);
-    });
+    panel.querySelectorAll('[data-typ]').forEach(el => { el.hidden = st[el.dataset.seite].typ !== el.dataset.typ; });
+    ['A', 'B'].forEach(x => { feld('nkTitelM' + x).textContent = st[x].typ === 'reittier' ? 'Reiter' : 'Modell'; });
     const r = N.gefecht(seite('A', 'B'), seite('B', 'A'));
     feld('nkSiegA').textContent = prozent(r.a);
     feld('nkSiegU').textContent = prozent(r.unentschieden);
@@ -3462,8 +3449,7 @@ function nahkampfTests() {
     grafik(r.D);
   }
 
-  const schluessel = pfad => pfad.split('.').pop();
-  const klemme = (pfad, v) => { const [lo, hi] = GRENZEN[schluessel(pfad)]; return Math.max(lo, Math.min(hi, v)); };
+  const klemme = (pfad, v) => { const [lo, hi] = GRENZEN[pfad.split('.').pop()]; return Math.max(lo, Math.min(hi, v)); };
   const aendere = (pfad, v) => { setzen(pfad, v); passeAn(pfad[0]); zeige(); };
   panel.addEventListener('click', e => {
     const k = e.target.closest('[data-nk]');
@@ -3481,8 +3467,7 @@ function nahkampfTests() {
   panel.addEventListener('change', e => {
     const el = e.target, pfad = el.dataset.pfad;
     if (!pfad) return;
-    if (el.type === 'checkbox') return aendere(pfad, el.checked);
-    if (el.tagName === 'SELECT') return aendere(pfad, el.dataset.zahl ? Number(el.value) : el.value);
+    if (el.tagName === 'SELECT') return aendere(pfad, Number(el.value));
     const v = parseInt(el.value, 10);
     if (Number.isInteger(v)) setzen(pfad, klemme(pfad, v));
     passeAn(pfad[0]);
