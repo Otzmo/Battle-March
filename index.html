@@ -1241,8 +1241,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <div class="sr-zahl nk-b"><span>B gewinnt</span><b id="nkSiegB">–</b></div>
 </div>
 <div class="nk-zahlen">
-  <div class="sr-zahl"><span>Verluste bei A</span><b id="nkVerlA">0</b></div>
-  <div class="sr-zahl"><span>Verluste bei B</span><b id="nkVerlB">0</b></div>
+  <div class="sr-zahl"><span id="nkVerlTitelA">Verluste bei A</span><b id="nkVerlA">0</b></div>
+  <div class="sr-zahl"><span id="nkVerlTitelB">Verluste bei B</span><b id="nkVerlB">0</b></div>
 </div>
 <p class="sr-hint" style="margin:0 0 6px;">Verteilung des Kampfergebnisses A minus B (Punkte):</p>
 <svg class="nk-grafik" id="nkGrafik" role="img" aria-label="Balkengrafik: Verteilung des Kampfergebnisses A minus B"></svg>
@@ -1251,7 +1251,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <span><i style="background:#b9a77f"></i>Gleichstand</span>
   <span><i style="background:#1f3f6b"></i>B vorn</span>
 </div>
-<p class="sr-hint" id="nkDetail"></p>
 <div class="nk-seiten">
   <div class="sr-steuer" id="nkSeiteA"></div>
   <div class="sr-steuer" id="nkSeiteB"></div>
@@ -3203,14 +3202,14 @@ const nahkampf = (function () {
     const T = x => x.modelle * x.lpModell;
     const gleich = A.ini === B.ini, fIstA = A.ini >= B.ini;
     const F = fIstA ? A : B, S = fIstA ? B : A;
-    const erw = { cF: 0, cS: 0, verlusteS: 0, verlusteF: 0, attS: 0 };
+    const erw = { cF: 0, cS: 0, verlusteS: 0, verlusteF: 0, lpS: 0, lpF: 0, attS: 0 };
     const gruppen = new Map();   // Verluste der langsamen Seite -> Ausgaenge der schnellen
     angriffErgebnis(F.att(0), F.p, S.regen, T(S), (c, e, p) => {
       const L = Math.floor(e / S.lpModell), k = gleich ? 0 : L;
       if (!gruppen.has(k)) gruppen.set(k, { aus: new Map(), gew: 0 });
       const g = gruppen.get(k), key = c * 2 + (e >= T(S) ? 1 : 0);   // gleiche Ausgaenge zusammenfassen
       g.aus.set(key, (g.aus.get(key) || 0) + p); g.gew += p;
-      erw.cF += p * c; erw.verlusteS += p * L;
+      erw.cF += p * c; erw.verlusteS += p * L; erw.lpS += p * e;
     });
     const r = { a: 0, b: 0, unentschieden: 0 }, D = new Map();
     const bA = A.bonus || 0, bB = B.bonus || 0;
@@ -3219,7 +3218,7 @@ const nahkampf = (function () {
       angriffErgebnis(nS, S.p, F.regen, T(F), (c, e, p) => {
         const key = c * 2 + (e >= T(F) ? 1 : 0);
         aus.set(key, (aus.get(key) || 0) + p);
-        erw.cS += g.gew * p * c; erw.verlusteF += g.gew * p * Math.floor(e / F.lpModell);
+        erw.cS += g.gew * p * c; erw.verlusteF += g.gew * p * Math.floor(e / F.lpModell); erw.lpF += g.gew * p * e;
       });
       erw.attS += g.gew * nS;
       g.aus.forEach((pF, keyF) => aus.forEach((pS, key) => {
@@ -3237,8 +3236,8 @@ const nahkampf = (function () {
     r.D = { min, werte };
     r.schneller = gleich ? null : (fIstA ? 'A' : 'B');
     r.erw = fIstA
-      ? { verwA: erw.cF, verwB: erw.cS, verlusteB: erw.verlusteS, verlusteA: erw.verlusteF, attA: F.att(0), attB: erw.attS }
-      : { verwB: erw.cF, verwA: erw.cS, verlusteA: erw.verlusteS, verlusteB: erw.verlusteF, attB: F.att(0), attA: erw.attS };
+      ? { verwA: erw.cF, verwB: erw.cS, verlusteB: erw.verlusteS, verlusteA: erw.verlusteF, lpB: erw.lpS, lpA: erw.lpF, attA: F.att(0), attB: erw.attS }
+      : { verwB: erw.cF, verwA: erw.cS, verlusteA: erw.verlusteS, verlusteB: erw.verlusteF, lpA: erw.lpS, lpB: erw.lpF, attB: F.att(0), attA: erw.attS };
     return r;
   }
   const erwartung = v => v.reduce((s, p, k) => s + p * k, 0);
@@ -3378,17 +3377,15 @@ function nahkampfTests() {
     const A = chancen('A', 'B'), B = chancen('B', 'A');
     const r = N.kampfrunde(seite('A', A), seite('B', B)), g = r;
     A.erw = r.erw.verwA; B.erw = r.erw.verwB; A.verluste = r.erw.verlusteB; B.verluste = r.erw.verlusteA;
-    A.att = r.erw.attA; B.att = r.erw.attB;
-    const langsam = r.schneller ? (r.schneller === 'A' ? 'B' : 'A') : null;
     feld('nkSiegA').textContent = prozent(g.a);
     feld('nkSiegU').textContent = prozent(g.unentschieden);
     feld('nkSiegB').textContent = prozent(g.b);
-    feld('nkVerlB').textContent = zahl(A.verluste);
-    feld('nkVerlA').textContent = zahl(B.verluste);
-    const detail = (x, c) => `Seite ${x}: ${zahl(c.att)} Attacken${langsam === x ? ' (im Schnitt, nach Verlusten)' : ''}, pro Attacke trifft ${prozent(c.pT)}` +
-      ` · verwundet ${prozent(c.pV)} · nicht abgewehrt ${prozent(c.pN)} → ${prozent(c.p)}.`;
-    const wer = r.schneller ? `Seite ${r.schneller} schlägt zuerst zu. ` : 'Gleiche Initiative: beide schlagen gleichzeitig zu. ';
-    feld('nkDetail').textContent = wer + detail('A', A) + ' ' + detail('B', B);
+    // Bei mehreren Lebenspunkten pro Modell zaehlen verlorene Wunden statt Modelle
+    ['A', 'B'].forEach(x => {
+      const wunden = st[x].lp > 1;
+      feld('nkVerlTitel' + x).textContent = (wunden ? 'Verlust Wunden bei ' : 'Verluste bei ') + x;
+      feld('nkVerl' + x).textContent = zahl(wunden ? r.erw['lp' + x] : r.erw['verluste' + x]);
+    });
     grafik(r.D);
   }
 
