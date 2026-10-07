@@ -356,6 +356,26 @@ button:hover{ background:var(--maroon-dark); }
 .bg-note{ font-size:.78rem; color:#5a4a36; text-align:center; line-height:1.4; }
 .bg-note.error{ color:var(--maroon); font-weight:bold; font-style:normal; }
 @media (max-width:760px){ .basegen .layout{ flex-direction:column; } }
+/* ---------- Nahkampfrechner ---------- */
+.nk-sieg{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:8px; }
+.nk-sieg .sr-zahl b{ font-size:1.7rem; }
+.nk-sieg .nk-a{ border-left:5px solid var(--maroon); }
+.nk-sieg .nk-b{ border-left:5px solid #1f3f6b; }
+.nk-zahlen{ display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; margin-bottom:12px; }
+.nk-grafik{ display:block; width:100%; height:auto; background:#fff; border:1.5px solid var(--maroon); border-radius:4px; }
+.nk-seiten{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+.nk-seiten .sr-steuer{ align-items:flex-start; align-content:flex-start; }
+.guide h2.nk-kopf{ flex-basis:100%; margin:0; font-size:1.1rem; color:var(--maroon); }
+.nk-zahl{ width:52px; text-align:center; font:inherit; font-weight:bold; border:0; border-radius:0; background:#fff; color:var(--text); padding:6px 0; -moz-appearance:textfield; appearance:textfield; }
+.nk-zahl::-webkit-outer-spin-button, .nk-zahl::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+.nk-zahl:focus-visible{ outline:3px solid #8a6a3b; outline-offset:-3px; }
+@media (max-width:720px){
+  .nk-seiten{ grid-template-columns:1fr; }
+  .nk-zahlen{ grid-template-columns:repeat(2, 1fr); }
+  .nk-sieg .sr-zahl{ padding:8px 6px; }
+  .nk-sieg .sr-zahl:last-child, .nk-zahlen .sr-zahl:last-child{ grid-column:auto; }   /* hebt die Regel des Schablonenrechners auf */
+  .nk-sieg .sr-zahl b{ font-size:1.25rem; }
+}
 </style>
 </head>
 <body>
@@ -386,9 +406,10 @@ button:hover{ background:var(--maroon-dark); }
 </div>
 <div class="subtabbar" role="tablist" aria-label="Tools" data-gruppe="tools" hidden="">
   <button class="tab-btn" role="tab" id="tab-schablone" data-tab="schablone" aria-controls="panel-schablone" aria-selected="true" tabindex="0">Schablonen&shy;rechner</button>
-  <button class="tab-btn" role="tab" id="tab-angriff" data-tab="angriff" aria-controls="panel-angriff" aria-selected="false" tabindex="-1">Angriffs&shy;rechner</button>
+  <button class="tab-btn" role="tab" id="tab-angriff" data-tab="angriff" aria-controls="panel-angriff" aria-selected="false" tabindex="-1">Ansturm&shy;rechner</button>
   <button class="tab-btn" role="tab" id="tab-zauber" data-tab="zauber" aria-controls="panel-zauber" aria-selected="false" tabindex="-1">Zauber&shy;rechner</button>
   <button class="tab-btn" role="tab" id="tab-patzer" data-tab="patzer" aria-controls="panel-patzer" aria-selected="false" tabindex="-1">Zauber&shy;patzer</button>
+  <button class="tab-btn" role="tab" id="tab-nahkampf" data-tab="nahkampf" aria-controls="panel-nahkampf" aria-selected="false" tabindex="-1">Nahkampf&shy;rechner</button>
 </div>
 </nav>
 
@@ -1119,10 +1140,10 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 </div>
 </div>
 
-<!-- ===================== TOOLS: ANGRIFFSRECHNER ===================== -->
+<!-- ===================== TOOLS: ANSTURMRECHNER ===================== -->
 <div class="tab-content" id="panel-angriff" role="tabpanel" aria-labelledby="tab-angriff" tabindex="0" hidden="">
 <div class="guide sr">
-<h1>Angriffsrechner</h1>
+<h1>Ansturmrechner</h1>
 <p class="sr-hint">Wie wahrscheinlich kommt der Angriff an? Angriffsreichweite = Bewegung + 2W6, der höhere Würfel zählt.</p>
 <div class="ar-ergebnis" aria-live="polite">
   <span>Erfolgschance</span>
@@ -1207,6 +1228,34 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <tr><td><b>10–11</b></td><td>13,9</td><td><b>Magischer Angelpunkt:</b> Der Magier (und jede Einheit, der er angeschlossen ist) weicht sofort 2" direkt von der nächsten feindlichen Einheit zurück und wird verwirrt (siehe Rückschlag). Kann er nicht zurückweichen, erleidet er einen Treffer S6, DS -2.</td></tr>
 <tr><td><b>12</b></td><td>2,8</td><td><b>Preis der Macht:</b> Der Zauber wird mit perfekter Anrufung gewirkt. Der Magier verliert sofort eine Magiestufe und vergisst diesen Zauber für den Rest des Spiels. In diesem Zug können keine weiteren Zauber gewirkt werden.</td></tr>
 </tbody></table>
+</div>
+</div>
+
+<!-- ===================== TOOLS: NAHKAMPFRECHNER ===================== -->
+<div class="tab-content" id="panel-nahkampf" role="tabpanel" aria-labelledby="tab-nahkampf" tabindex="0" hidden="">
+<div class="guide sr">
+<h1>Nahkampfrechner</h1>
+<div class="nk-sieg" aria-live="polite">
+  <div class="sr-zahl nk-a"><span>A gewinnt</span><b id="nkSiegA">–</b></div>
+  <div class="sr-zahl"><span>Unentschieden</span><b id="nkSiegU">–</b></div>
+  <div class="sr-zahl nk-b"><span>B gewinnt</span><b id="nkSiegB">–</b></div>
+</div>
+<div class="nk-zahlen">
+  <div class="sr-zahl"><span>Verluste bei A</span><b id="nkVerlA">0</b></div>
+  <div class="sr-zahl"><span>Verluste bei B</span><b id="nkVerlB">0</b></div>
+</div>
+<p class="sr-hint" style="margin:0 0 6px;">Verteilung des Kampfergebnisses A minus B (Punkte):</p>
+<svg class="nk-grafik" id="nkGrafik" role="img" aria-label="Balkengrafik: Verteilung des Kampfergebnisses A minus B"></svg>
+<div class="sr-legende">
+  <span><i style="background:#4a3b28"></i>A vorn</span>
+  <span><i style="background:#b9a77f"></i>Gleichstand</span>
+  <span><i style="background:#1f3f6b"></i>B vorn</span>
+</div>
+<p class="sr-hint" id="nkDetail"></p>
+<div class="nk-seiten">
+  <div class="sr-steuer" id="nkSeiteA"></div>
+  <div class="sr-steuer" id="nkSeiteB"></div>
+</div>
 </div>
 </div>
 
@@ -2799,7 +2848,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
 })();
 </script>
 <script>
-/* ================= Tools: Angriffsrechner =================
+/* ================= Tools: Ansturmrechner =================
    Angriffsreichweite = Bewegung + 2W6, der hoehere zaehlt. Schnelle Bewegung: zusaetzlich + 1W6,
    kleine schnelle Bewegung: zusaetzlich + 1W3. Durch schweres Gelaende zaehlt der niedrigere der 2W6.
    Darf der Angriffswurf wiederholt werden, werden bei zu kurzem Ergebnis nur die 2W6 neu gewuerfelt.
@@ -2982,6 +3031,402 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   try { if (localStorage.getItem('battleMarchPatzer') === 'katastrophal') start = 'katastrophal'; } catch (e) { /* egal */ }
   knoepfe.forEach(k => k.addEventListener('click', () => zeige(k.dataset.pt)));
   zeige(start);
+})();
+</script>
+<script>
+/* ================= Tools: Nahkampfrechner =================
+   REGELTABELLEN - hier korrigieren, falls noetig.
+   Quelle: tow.whfb.app (Roll to Hit / Roll to Wound (Combat), Armour Piercing,
+   Ward Saves, More than One Save).
+   TREFFER[KG Angreifer - 1][KG Ziel - 1]       = benoetigter Wurf (2 heisst 2+)
+   VERWUNDEN[Staerke - 1][Widerstand - 1]       = benoetigter Wurf, null = kann nicht verwunden
+   RUESTUNG: benoetigter Wurf = Ruestungswert - Durchschlag (Durchschlag ist negativ,
+   aus 5+ mit -1 wird 6+). Schlechter als schlechtesterWurf = nicht zu schaffen.
+   Der Schutzwurf wird vom Durchschlag nicht veraendert und erst nach einem
+   misslungenen Ruestungswurf gewuerfelt. Eine natuerliche 1 misslingt bei allen
+   Wuerfen, eine natuerliche 6 trifft beim Trefferwurf immer. */
+const TABELLEN = {
+  TREFFER: [
+    /* KG  1   2   3   4   5   6   7   8   9  10  <- KG des Ziels */
+    /* 1 */ [4, 4, 5, 5, 5, 5, 5, 5, 5, 5],
+    /* 2 */ [3, 4, 4, 4, 5, 5, 5, 5, 5, 5],
+    /* 3 */ [2, 3, 4, 4, 4, 4, 5, 5, 5, 5],
+    /* 4 */ [2, 3, 3, 4, 4, 4, 4, 4, 5, 5],
+    /* 5 */ [2, 2, 3, 3, 4, 4, 4, 4, 4, 4],
+    /* 6 */ [2, 2, 3, 3, 3, 4, 4, 4, 4, 4],
+    /* 7 */ [2, 2, 2, 3, 3, 3, 4, 4, 4, 4],
+    /* 8 */ [2, 2, 2, 3, 3, 3, 3, 4, 4, 4],
+    /* 9 */ [2, 2, 2, 2, 3, 3, 3, 3, 4, 4],
+    /*10 */ [2, 2, 2, 2, 3, 3, 3, 3, 3, 4]
+  ],
+  VERWUNDEN: [
+    /* S   1   2   3   4   5   6   7     8     9     10  <- Widerstand */
+    /* 1 */ [4, 5, 6, 6, 6, 6, null, null, null, null],
+    /* 2 */ [3, 4, 5, 6, 6, 6, 6, null, null, null],
+    /* 3 */ [2, 3, 4, 5, 6, 6, 6, 6, null, null],
+    /* 4 */ [2, 2, 3, 4, 5, 6, 6, 6, 6, null],
+    /* 5 */ [2, 2, 2, 3, 4, 5, 6, 6, 6, 6],
+    /* 6 */ [2, 2, 2, 2, 3, 4, 5, 6, 6, 6],
+    /* 7 */ [2, 2, 2, 2, 2, 3, 4, 5, 6, 6],
+    /* 8 */ [2, 2, 2, 2, 2, 2, 3, 4, 5, 6],
+    /* 9 */ [2, 2, 2, 2, 2, 2, 2, 3, 4, 5],
+    /*10 */ [2, 2, 2, 2, 2, 2, 2, 2, 3, 4]
+  ],
+  RUESTUNG: { schlechtesterWurf: 6 },
+  WUERFEL: { einsMisslingtImmer: true, sechsTrifftImmer: true }
+};
+
+/* Reine Rechenfunktionen ohne Oberflaeche - in der Konsole aufrufbar
+   (nahkampf.binomial(10, 0.25) usw.). Verteilungen sind Arrays: v[k] = P(genau k). */
+const nahkampf = (function () {
+  // Chance, mit einem W6 mindestens "ziel" zu wuerfeln. null = unmoeglich.
+  function chance(ziel, sechsGelingt) {
+    if (ziel === null || ziel === undefined) return 0;
+    const z = Math.max(ziel, TABELLEN.WUERFEL.einsMisslingtImmer ? 2 : 1);
+    if (z > 6) return sechsGelingt ? 1 / 6 : 0;
+    return (7 - z) / 6;
+  }
+  // Jeder Wuerfel wird hoechstens einmal wiederholt. Eine 1 ist immer ein Fehlwurf.
+  function mitWiederholung(p, art) {
+    if (art === 'einsen') return p + p / 6;
+    if (art === 'alle') return p + (1 - p) * p;
+    return p;
+  }
+  function pTreffer(kgAngreifer, kgZiel, wdh) {
+    const ziel = TABELLEN.TREFFER[kgAngreifer - 1][kgZiel - 1];
+    return mitWiederholung(chance(ziel, TABELLEN.WUERFEL.sechsTrifftImmer), wdh);
+  }
+  function pVerwunden(staerke, widerstand, wdh) {
+    return mitWiederholung(chance(TABELLEN.VERWUNDEN[staerke - 1][widerstand - 1], false), wdh);
+  }
+  // ruestung / schutz: Wert wie 4 fuer 4+, null = keiner. durchschlag: 0, -1, -2 ...
+  function pNichtAbgewehrt(ruestung, durchschlag, schutz) {
+    let pR = 0;
+    if (ruestung) {
+      const noetig = ruestung - (durchschlag || 0);
+      pR = noetig > TABELLEN.RUESTUNG.schlechtesterWurf ? 0 : chance(noetig, false);
+    }
+    const pS = schutz ? chance(schutz, false) : 0;
+    return (1 - pR) * (1 - pS);
+  }
+  /* Binomialverteilung ueber Logarithmen: der Koeffizient waechst schrittweise
+     (n-k+1)/k, es entstehen keine Fakultaeten und kein Ueberlauf bei grossem n. */
+  function binomial(n, p) {
+    const v = new Array(n + 1).fill(0);
+    if (p <= 0) { v[0] = 1; return v; }
+    if (p >= 1) { v[n] = 1; return v; }
+    const lp = Math.log(p), lq = Math.log1p(-p);
+    let logC = 0;
+    for (let k = 0; k <= n; k++) {
+      if (k > 0) logC += Math.log((n - k + 1) / k);
+      v[k] = Math.exp(logC + k * lp + (n - k) * lq);
+    }
+    return v;
+  }
+  // Mehr als "max" zaehlt als "max" (der Gegner hat nicht mehr Lebenspunkte).
+  function deckeln(v, max) {
+    if (max >= v.length - 1) return v.slice();
+    const out = v.slice(0, max + 1);
+    for (let k = max + 1; k < v.length; k++) out[max] += v[k];
+    return out;
+  }
+  // Verteilung der Summe zweier unabhaengiger Zufallszahlen.
+  function faltung(a, b) {
+    const c = new Array(a.length + b.length - 1).fill(0);
+    for (let i = 0; i < a.length; i++) for (let j = 0; j < b.length; j++) c[i + j] += a[i] * b[j];
+    return c;
+  }
+  /* Verteilung von D = (A + bonusA) - (B + bonusB) durch Faltung von A mit dem
+     gespiegelten B. Ergebnis: { min, werte }, werte[i] = P(D = min + i). */
+  function differenz(vA, vB, bonusA, bonusB) {
+    return { min: -(vB.length - 1) + (bonusA || 0) - (bonusB || 0), werte: faltung(vA, vB.slice().reverse()) };
+  }
+  /* Gewinnchancen. lpA / lpB = Lebenspunkte der ganzen Einheit: erreicht eine Seite
+     so viele Verwundungen, ist der Gegner ausgeloescht und sie gewinnt immer.
+     Loeschen sich beide aus, ist es unentschieden. Ohne lpA/lpB: nur nach Punkten. */
+  function gewinnwahrscheinlichkeit(vA, vB, bonusA, bonusB, lp) {
+    const lpA = lp && lp.lpA > 0 ? lp.lpA : Infinity, lpB = lp && lp.lpB > 0 ? lp.lpB : Infinity;
+    const r = { a: 0, b: 0, unentschieden: 0 };
+    for (let i = 0; i < vA.length; i++) {
+      if (!vA[i]) continue;
+      for (let j = 0; j < vB.length; j++) {
+        const p = vA[i] * vB[j];
+        if (!p) continue;
+        const bWeg = i >= lpB, aWeg = j >= lpA;
+        let d;
+        if (bWeg || aWeg) d = bWeg && aWeg ? 0 : bWeg ? 1 : -1;
+        else d = (i + (bonusA || 0)) - (j + (bonusB || 0));
+        if (d > 0) r.a += p; else if (d < 0) r.b += p; else r.unentschieden += p;
+      }
+    }
+    return r;
+  }
+  /* Attacken, die nach "verluste" gefallenen Modellen noch bleiben. Verluste gelten
+     zuerst als Modelle des Kampfglieds, erst ueberzaehlige als Modelle des Glieds
+     dahinter und kosten dann Unterstuetzungsattacken (eine pro Modell).
+     e = { kampfglied, apm, unterstuetzer } (apm = Attacken pro Modell mit Basekontakt) */
+  function attackenNachVerlusten(e, verluste) {
+    const ausGlied = Math.min(verluste, e.kampfglied);
+    const ausStuetze = Math.max(0, verluste - e.kampfglied);
+    return (e.kampfglied - ausGlied) * e.apm + Math.max(0, e.unterstuetzer - ausStuetze);
+  }
+  /* Ergebnis eines Angriffs mit n Attacken (je p unabgewehrt) gegen eine Einheit
+     mit T Lebenspunkten insgesamt, deren Modelle mit Wahrscheinlichkeit r regenerieren.
+     Ruft besuche(c, e, wahrscheinlichkeit) fuer jeden Ausgang auf:
+     c = Verwundungen fuers Kampfergebnis (regenerierte zaehlen mit),
+     e = tatsaechlich verlorene Lebenspunkte (e = T heisst: Einheit ausgeloescht).
+     Ist die Einheit ausgeloescht, zaehlen weitere Verwundungen nicht mehr: c ist dann
+     die Stelle der T-ten nicht regenerierten Verwundung (negative Binomialverteilung). */
+  function angriffErgebnis(n, p, r, T, besuche) {
+    const bu = binomial(n, p), q = 1 - r;
+    for (let u = 0; u <= n; u++) {
+      const pu = bu[u];
+      if (!pu) continue;
+      if (r <= 0) { const e = Math.min(u, T); besuche(e, e, pu); continue; }
+      const be = binomial(u, q);
+      for (let e = 0; e <= Math.min(u, T - 1); e++) if (be[e]) besuche(u, e, pu * be[e]);
+      let logC = 0;   // log C(m-1, T-1), schrittweise ohne Fakultaeten
+      for (let m = T; m <= u; m++) {
+        if (m > T) logC += Math.log((m - 1) / (m - T));
+        besuche(m, T, pu * Math.exp(logC + T * Math.log(q) + (m - T) * Math.log(r)));
+      }
+    }
+  }
+  /* Eine Nahkampfrunde exakt. A, B = { att(L): Attacken nach L eigenen Verlusten,
+     p: unabgewehrte Verwundung pro Attacke gegen den Gegner, lpModell, modelle,
+     regen: Chance, einen verlorenen Lebenspunkt zu regenerieren, bonus, ini }.
+     Hoehere Initiative schlaegt zuerst; ihre Verluste kosten die langsamere Seite
+     Attacken. Gleiche Initiative: gleichzeitig. Wer den Gegner ausloescht, gewinnt;
+     loeschen sich beide aus, ist es unentschieden.
+     Ergebnis: { a, b, unentschieden, D: {min, werte}, erw: {...}, schneller } */
+  function kampfrunde(A, B) {
+    const T = x => x.modelle * x.lpModell;
+    const gleich = A.ini === B.ini, fIstA = A.ini >= B.ini;
+    const F = fIstA ? A : B, S = fIstA ? B : A;
+    const erw = { cF: 0, cS: 0, verlusteS: 0, verlusteF: 0, attS: 0 };
+    const gruppen = new Map();   // Verluste der langsamen Seite -> Ausgaenge der schnellen
+    angriffErgebnis(F.att(0), F.p, S.regen, T(S), (c, e, p) => {
+      const L = Math.floor(e / S.lpModell), k = gleich ? 0 : L;
+      if (!gruppen.has(k)) gruppen.set(k, { aus: new Map(), gew: 0 });
+      const g = gruppen.get(k), key = c * 2 + (e >= T(S) ? 1 : 0);   // gleiche Ausgaenge zusammenfassen
+      g.aus.set(key, (g.aus.get(key) || 0) + p); g.gew += p;
+      erw.cF += p * c; erw.verlusteS += p * L;
+    });
+    const r = { a: 0, b: 0, unentschieden: 0 }, D = new Map();
+    const bA = A.bonus || 0, bB = B.bonus || 0;
+    gruppen.forEach((g, L) => {
+      const nS = S.att(L), aus = new Map();
+      angriffErgebnis(nS, S.p, F.regen, T(F), (c, e, p) => {
+        const key = c * 2 + (e >= T(F) ? 1 : 0);
+        aus.set(key, (aus.get(key) || 0) + p);
+        erw.cS += g.gew * p * c; erw.verlusteF += g.gew * p * Math.floor(e / F.lpModell);
+      });
+      erw.attS += g.gew * nS;
+      g.aus.forEach((pF, keyF) => aus.forEach((pS, key) => {
+        const p = pF * pS, cF = keyF >> 1, fWeg = (keyF & 1) === 1, cS = key >> 1, sWeg = (key & 1) === 1;
+        const cA = fIstA ? cF : cS, cB = fIstA ? cS : cF;
+        const aWegB = fIstA ? fWeg : sWeg, bWegA = fIstA ? sWeg : fWeg;   // A loescht B aus / B loescht A aus
+        const d = cA + bA - (cB + bB);
+        D.set(d, (D.get(d) || 0) + p);
+        const ergebnis = (aWegB || bWegA) ? (aWegB && bWegA ? 0 : aWegB ? 1 : -1) : d;
+        if (ergebnis > 0) r.a += p; else if (ergebnis < 0) r.b += p; else r.unentschieden += p;
+      }));
+    });
+    const schluessel = [...D.keys()], min = Math.min(...schluessel), werte = new Array(Math.max(...schluessel) - min + 1).fill(0);
+    D.forEach((p, d) => { werte[d - min] = p; });
+    r.D = { min, werte };
+    r.schneller = gleich ? null : (fIstA ? 'A' : 'B');
+    r.erw = fIstA
+      ? { verwA: erw.cF, verwB: erw.cS, verlusteB: erw.verlusteS, verlusteA: erw.verlusteF, attA: F.att(0), attB: erw.attS }
+      : { verwB: erw.cF, verwA: erw.cS, verlusteA: erw.verlusteS, verlusteB: erw.verlusteF, attB: F.att(0), attA: erw.attS };
+    return r;
+  }
+  const erwartung = v => v.reduce((s, p, k) => s + p * k, 0);
+  return { chance, mitWiederholung, pTreffer, pVerwunden, pNichtAbgewehrt, binomial, deckeln,
+           faltung, differenz, gewinnwahrscheinlichkeit, erwartung, attackenNachVerlusten, angriffErgebnis, kampfrunde };
+})();
+
+/* Pruefung in der Konsole: nahkampfTests() */
+function nahkampfTests() {
+  const N = nahkampf, zeilen = [];
+  const nah = (a, b, tol) => Math.abs(a - b) < (tol || 1e-9);
+  const pruefe = (nr, text, soll, ist, ok) => zeilen.push(nr + ' ' + text + ': ' + (ok ? 'ok' : 'FEHLER – Soll ' + JSON.stringify(soll) + ', Ist ' + JSON.stringify(ist)));
+  const b2 = N.binomial(2, 0.5);
+  pruefe(1, 'binomial(2, 0.5)', [0.25, 0.5, 0.25], b2, b2.length === 3 && nah(b2[0], 0.25) && nah(b2[1], 0.5) && nah(b2[2], 0.25));
+  const p2 = 0.5 * 0.5 * N.pNichtAbgewehrt(null, 0, null), e2 = N.erwartung(N.binomial(10, p2));
+  pruefe(2, '10 Attacken, Treffer 0.5, Verwunden 0.5, kein Schutz', 2.5, e2, nah(e2, 2.5));
+  const e3 = N.erwartung(N.binomial(10, 0.5 * 0.5 * N.pNichtAbgewehrt(4, 0, null)));
+  pruefe(3, 'dazu Rüstungswurf 4+', 1.25, e3, nah(e3, 1.25));
+  const p4 = N.mitWiederholung(N.chance(4), 'einsen');
+  pruefe(4, 'Treffer 4+, Einsen wiederholen', 0.5 + 0.5 / 6, p4, nah(p4, 0.5 + 0.5 / 6));
+  const p5 = N.mitWiederholung(N.chance(4), 'alle');
+  pruefe(5, 'Treffer 4+, alle Fehlwürfe wiederholen', 0.75, p5, nah(p5, 0.75));
+  const d6 = N.differenz(N.binomial(12, 0.3), N.binomial(9, 0.45), 2, 1), s6 = d6.werte.reduce((s, p) => s + p, 0);
+  pruefe(6, 'Verteilung von D summiert auf 1', 1, s6, nah(s6, 1));
+  const v7 = N.binomial(10, 0.3), g7 = N.gewinnwahrscheinlichkeit(v7, v7, 0, 0, { lpA: 10, lpB: 10 });
+  pruefe(7, 'beide Seiten gleich: P(A) = P(B)', g7.b, g7.a, nah(g7.a, g7.b));
+  const d8 = N.differenz(N.binomial(5, 1), N.binomial(3, 1), 0, 0), i8 = 2 - d8.min;
+  pruefe(8, 'p = 1, A 5 Attacken, B 3 → D = 2 sicher', 1, d8.werte[i8], nah(d8.werte[i8], 1));
+  const g9 = N.gewinnwahrscheinlichkeit(N.binomial(0, 0.5), N.binomial(8, 0.4), 0, 0, { lpA: 10, lpB: 10 });
+  pruefe(9, 'Seite A mit 0 Attacken: P(A gewinnt)', 0, g9.a, g9.a === 0);
+  zeilen.push('10 Beispiel aus dem Regelbuch: offen – Zahlen folgen');
+  const e13 = { kampfglied: 5, apm: 2, unterstuetzer: 5 };
+  const r11 = [N.attackenNachVerlusten(e13, 0), N.attackenNachVerlusten(e13, 3), N.attackenNachVerlusten(e13, 7), N.attackenNachVerlusten(e13, 12)];
+  pruefe(11, 'Attacken nach 0/3/7/12 Verlusten (5×2 im Glied, 5×1 Unterstützung)', [15, 9, 3, 0], r11, r11.join() === '15,9,3,0');
+  const seite = (n, p, modelle, ini, regen) => ({ att: () => n, p, lpModell: 1, modelle, regen: regen || 0, bonus: 0, ini });
+  const k12 = N.kampfrunde(seite(10, 0.3, 10, 3), seite(8, 0.4, 10, 3));
+  const g12 = N.gewinnwahrscheinlichkeit(N.deckeln(N.binomial(10, 0.3), 10), N.deckeln(N.binomial(8, 0.4), 10), 0, 0, { lpA: 10, lpB: 10 });
+  pruefe(12, 'gleiche Initiative, ohne Regeneration = getrennte Binomialverteilungen', g12.a, k12.a, nah(k12.a, g12.a) && nah(k12.b, g12.b));
+  const k13 = N.kampfrunde(seite(5, 1, 5, 5), { att: L => N.attackenNachVerlusten({ kampfglied: 5, apm: 1, unterstuetzer: 0 }, L), p: 0.5, lpModell: 1, modelle: 5, regen: 0, bonus: 0, ini: 3 });
+  pruefe(13, 'Schnellere Seite löscht 5 Modelle sicher aus → langsame 0 Verwundungen', 0, k13.erw.verwB, nah(k13.erw.verwB, 0));
+  const k14 = N.kampfrunde(seite(3, 1, 5, 3), seite(0, 0, 1, 3, 0.5));
+  pruefe(14, 'Regeneration 4+: 3 sichere Verwundungen gegen 1 Modell mit 1 LP → Kampfergebnis 1,75, Verluste 0,875', [1.75, 0.875],
+    [k14.erw.verwA, k14.erw.verlusteB], nah(k14.erw.verwA, 1.75) && nah(k14.erw.verlusteB, 0.875));
+  zeilen.forEach(z => console.log(z));
+  return zeilen.every(z => !z.includes('FEHLER')) ? 'alle Tests ok' : 'es gibt FEHLER';
+}
+
+/* Oberflaeche. Es wird nichts gespeichert - alle Werte tippt der Nutzer selbst ein. */
+(function () {
+  const feld = id => document.getElementById(id);
+  if (!feld('panel-nahkampf')) return;
+  const N = nahkampf;
+  const GRENZEN = { modelle: [1, 100], kampfglied: [0, 20], apm: [0, 10], unterstuetzer: [0, 20],
+                    initiative: [1, 10], kg: [1, 10], s: [1, 10], w: [1, 10], lp: [1, 10], bonus: [0, 20] };
+  const START = { modelle: 20, kampfglied: 5, apm: 1, unterstuetzer: 5, initiative: 3, kg: 3, s: 3, w: 3, lp: 1,
+                  ruestung: 5, ap: 0, schutz: 0, regen: 0, wdhT: 'keine', wdhV: 'keine', bonus: 0 };
+  const st = { A: Object.assign({}, START), B: Object.assign({}, START) };
+  const ZAEHLER = [['modelle', 'Modelle in der Einheit'], ['kampfglied', 'Modelle mit Basekontakt'], ['apm', 'Attacken pro Modell mit Basekontakt'],
+                   ['unterstuetzer', 'Modelle mit Unterstützungsattacke'],
+                   ['initiative', 'Initiative'], ['kg', 'Kampfgeschick (KG)'], ['s', 'Stärke'], ['w', 'Widerstand'], ['lp', 'Lebenspunkte pro Modell']];
+  const prozent = p => (Math.round(p * 1000) / 10).toLocaleString('de-DE') + ' %';
+  const zahl = x => (Math.round(x * 100) / 100).toLocaleString('de-DE');
+
+  function seiteHtml(x) {
+    const zaehler = (k, name) => `<div><span class="sr-titel">${name}</span><div class="sr-zaehler">` +
+      `<button type="button" data-nk="${x}.${k}" data-schritt="-1" aria-label="${name} Seite ${x} weniger">−</button>` +
+      `<input type="number" inputmode="numeric" class="nk-zahl" id="nk_${x}_${k}" aria-label="${name} Seite ${x}">` +
+      `<button type="button" data-nk="${x}.${k}" data-schritt="1" aria-label="${name} Seite ${x} mehr">+</button></div></div>`;
+    const wurf = (k, name) => `<div><label for="nk_${x}_${k}">${name}</label><select id="nk_${x}_${k}">` +
+      '<option value="0">keiner</option>' + [2, 3, 4, 5, 6].map(v => `<option value="${v}">${v}+</option>`).join('') + '</select></div>';
+    const ap = `<div><label for="nk_${x}_ap">Durchschlag</label><select id="nk_${x}_ap"><option value="0">–</option>` +
+      [1, 2, 3, 4, 5, 6].map(v => `<option value="-${v}">−${v}</option>`).join('') + '</select></div>';
+    const wdh = (k, name) => `<div><span class="sr-titel">${name}</span><div class="sr-wahl" data-nkwahl="${x}.${k}">` +
+      '<button type="button" data-wert="keine">Keine</button><button type="button" data-wert="einsen">Einsen</button>' +
+      '<button type="button" data-wert="alle">Alle Fehlwürfe</button></div></div>';
+    return `<h2 class="nk-kopf">Seite ${x}</h2>` + ZAEHLER.map(([k, n]) => zaehler(k, n)).join('') +
+      wurf('ruestung', 'Rüstungswurf') + ap + wurf('schutz', 'Schutzwurf (optional)') + wurf('regen', 'Regeneration (optional)') +
+      wdh('wdhT', 'Treffer wiederholen') + wdh('wdhV', 'Verwundung wiederholen') +
+      zaehler('bonus', 'Kampfergebnis-Bonus');
+  }
+  feld('nkSeiteA').innerHTML = seiteHtml('A');
+  feld('nkSeiteB').innerHTML = seiteHtml('B');
+
+  const gesamtLP = x => st[x].modelle * st[x].lp;
+  const attacken = (x, verluste) => N.attackenNachVerlusten(st[x], verluste);
+  // Chancen pro Attacke, wenn Seite "an" Seite "ziel" angreift
+  function chancen(an, ziel) {
+    const a = st[an], z = st[ziel];
+    const pT = N.pTreffer(a.kg, z.kg, a.wdhT);
+    const pV = N.pVerwunden(a.s, z.w, a.wdhV);
+    const pN = N.pNichtAbgewehrt(z.ruestung || null, a.ap, z.schutz || null);
+    return { pT, pV, pN, p: pT * pV * pN };
+  }
+  // Angaben einer Seite fuer nahkampf.kampfrunde()
+  const seite = (x, c) => ({ att: L => attacken(x, L), p: c.p, lpModell: st[x].lp, modelle: st[x].modelle,
+                             regen: st[x].regen ? N.chance(st[x].regen) : 0, bonus: st[x].bonus, ini: st[x].initiative });
+
+  function grafik(d) {
+    const svg = feld('nkGrafik'), NS = 'http://www.w3.org/2000/svg';
+    const null0 = -d.min;   // Index von D = 0
+    let lo = 0, hi = d.werte.length - 1;
+    while (lo < hi && d.werte[lo] < 5e-4 && lo !== null0) lo++;
+    while (hi > lo && d.werte[hi] < 5e-4 && hi !== null0) hi--;
+    const W = 600, H = 240, oben = 26, unten = 34, n = hi - lo + 1, bw = (W - 20) / n;
+    const maxP = Math.max(...d.werte.slice(lo, hi + 1)) || 1;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.replaceChildren();
+    const neu = (tag, attr, text) => {
+      const el = document.createElementNS(NS, tag);
+      Object.entries(attr).forEach(([k, v]) => el.setAttribute(k, v));
+      if (text !== undefined) el.textContent = text;
+      svg.appendChild(el);
+    };
+    const schritt = Math.ceil(n / 18);
+    for (let i = lo; i <= hi; i++) {
+      const wert = d.min + i, p = d.werte[i], x = 10 + (i - lo) * bw;
+      const h = (H - oben - unten) * p / maxP;
+      neu('rect', { x: x + bw * 0.1, y: H - unten - h, width: bw * 0.8, height: Math.max(h, 0),
+                    fill: wert > 0 ? '#4a3b28' : wert < 0 ? '#1f3f6b' : '#b9a77f' });
+      if ((i - lo) % schritt === 0 || wert === 0)
+        neu('text', { x: x + bw / 2, y: H - unten + 20, 'text-anchor': 'middle', 'font-size': 16, fill: '#2b2116' }, (wert > 0 ? '+' : '') + wert);
+      if (n <= 14 && p >= 0.005)
+        neu('text', { x: x + bw / 2, y: H - unten - h - 6, 'text-anchor': 'middle', 'font-size': 13, fill: '#5a4a36' }, Math.round(p * 100) + '%');
+    }
+    neu('line', { x1: 10, x2: W - 10, y1: H - unten, y2: H - unten, stroke: '#4a3b28', 'stroke-width': 1.5 });
+  }
+
+  function zeige() {
+    ['A', 'B'].forEach(x => {
+      Object.keys(GRENZEN).forEach(k => { const el = feld(`nk_${x}_${k}`); if (document.activeElement !== el) el.value = st[x][k]; });
+      ['ruestung', 'ap', 'schutz', 'regen'].forEach(k => { feld(`nk_${x}_${k}`).value = String(st[x][k]); });
+      document.querySelectorAll(`[data-nkwahl^="${x}."]`).forEach(g => {
+        const k = g.dataset.nkwahl.split('.')[1];
+        g.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.wert === st[x][k] ? 'true' : 'false'));
+      });
+    });
+    const A = chancen('A', 'B'), B = chancen('B', 'A');
+    const r = N.kampfrunde(seite('A', A), seite('B', B)), g = r;
+    A.erw = r.erw.verwA; B.erw = r.erw.verwB; A.verluste = r.erw.verlusteB; B.verluste = r.erw.verlusteA;
+    A.att = r.erw.attA; B.att = r.erw.attB;
+    const langsam = r.schneller ? (r.schneller === 'A' ? 'B' : 'A') : null;
+    feld('nkSiegA').textContent = prozent(g.a);
+    feld('nkSiegU').textContent = prozent(g.unentschieden);
+    feld('nkSiegB').textContent = prozent(g.b);
+    feld('nkVerlB').textContent = zahl(A.verluste);
+    feld('nkVerlA').textContent = zahl(B.verluste);
+    const detail = (x, c) => `Seite ${x}: ${zahl(c.att)} Attacken${langsam === x ? ' (im Schnitt, nach Verlusten)' : ''}, pro Attacke trifft ${prozent(c.pT)}` +
+      ` · verwundet ${prozent(c.pV)} · nicht abgewehrt ${prozent(c.pN)} → ${prozent(c.p)}.`;
+    const wer = r.schneller ? `Seite ${r.schneller} schlägt zuerst zu. ` : 'Gleiche Initiative: beide schlagen gleichzeitig zu. ';
+    feld('nkDetail').textContent = wer + detail('A', A) + ' ' + detail('B', B);
+    grafik(r.D);
+  }
+
+  const klemme = (k, v) => Math.max(GRENZEN[k][0], Math.min(GRENZEN[k][1], v));
+  function passeAn(x) {   // Kampfglied und Unterstuetzer koennen nicht mehr sein als die Einheit hat
+    const e = st[x];
+    e.kampfglied = Math.min(e.kampfglied, e.modelle);
+    e.unterstuetzer = Math.min(e.unterstuetzer, e.modelle - e.kampfglied);
+  }
+  document.querySelectorAll('#panel-nahkampf [data-nk]').forEach(b => b.addEventListener('click', () => {
+    const [x, k] = b.dataset.nk.split('.');
+    st[x][k] = klemme(k, st[x][k] + Number(b.dataset.schritt));
+    passeAn(x);
+    zeige();
+  }));
+  ['A', 'B'].forEach(x => {
+    Object.keys(GRENZEN).forEach(k => {
+      const el = feld(`nk_${x}_${k}`);
+      // Waehrend des Tippens nur gueltige Zahlen uebernehmen, beim Verlassen in die Grenzen ziehen.
+      el.addEventListener('input', () => {
+        const v = parseInt(el.value, 10);
+        if (Number.isInteger(v) && v === klemme(k, v)) { st[x][k] = v; passeAn(x); zeige(); }
+      });
+      el.addEventListener('change', () => {
+        const v = parseInt(el.value, 10);
+        if (Number.isInteger(v)) st[x][k] = klemme(k, v);
+        passeAn(x);
+        el.value = st[x][k];
+        zeige();
+      });
+    });
+    ['ruestung', 'ap', 'schutz', 'regen'].forEach(k => feld(`nk_${x}_${k}`).addEventListener('change', e => { st[x][k] = Number(e.target.value); zeige(); }));
+  });
+  document.querySelectorAll('#panel-nahkampf [data-nkwahl]').forEach(g => {
+    const [x, k] = g.dataset.nkwahl.split('.');
+    g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { st[x][k] = b.dataset.wert; zeige(); }));
+  });
+  zeige();
 })();
 </script>
 <script>
