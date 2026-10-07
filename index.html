@@ -366,6 +366,9 @@ button:hover{ background:var(--maroon-dark); }
 .nk-seiten{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
 .nk-seiten .sr-steuer{ align-items:flex-start; align-content:flex-start; }
 .guide h2.nk-kopf{ flex-basis:100%; margin:0; font-size:1.1rem; color:var(--maroon); }
+.guide h3.nk-unterkopf{ flex-basis:100%; margin:6px 0 -6px; padding-top:8px; border-top:1px dashed #b9a77f; font-size:.95rem; color:var(--maroon); }
+.nk-haken{ display:flex; align-items:center; gap:6px; font-size:.92rem; color:var(--text); cursor:pointer; padding-top:16px; }
+.nk-haken input{ accent-color:var(--maroon); width:18px; height:18px; }
 .nk-zahl{ width:52px; text-align:center; font:inherit; font-weight:bold; border:0; border-radius:0; background:#fff; color:var(--text); padding:6px 0; -moz-appearance:textfield; appearance:textfield; }
 .nk-zahl::-webkit-outer-spin-button, .nk-zahl::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
 .nk-zahl:focus-visible{ outline:3px solid #8a6a3b; outline-offset:-3px; }
@@ -3169,80 +3172,104 @@ const nahkampf = (function () {
     const ausStuetze = Math.max(0, verluste - e.kampfglied);
     return (e.kampfglied - ausGlied) * e.apm + Math.max(0, e.unterstuetzer - ausStuetze);
   }
-  /* Ergebnis eines Angriffs mit n Attacken (je p unabgewehrt) gegen eine Einheit
-     mit T Lebenspunkten insgesamt, deren Modelle mit Wahrscheinlichkeit r regenerieren.
+  /* Wirkung unabgewehrter Verwundungen auf eine Einheit mit noch "rest" Lebenspunkten,
+     deren Modelle mit Wahrscheinlichkeit r regenerieren. uVert[u] = P(u unabgewehrte).
      Ruft besuche(c, e, wahrscheinlichkeit) fuer jeden Ausgang auf:
      c = Verwundungen fuers Kampfergebnis (regenerierte zaehlen mit),
-     e = tatsaechlich verlorene Lebenspunkte (e = T heisst: Einheit ausgeloescht).
+     e = tatsaechlich verlorene Lebenspunkte (e = rest heisst: Einheit ausgeloescht).
      Ist die Einheit ausgeloescht, zaehlen weitere Verwundungen nicht mehr: c ist dann
-     die Stelle der T-ten nicht regenerierten Verwundung (negative Binomialverteilung). */
-  function angriffErgebnis(n, p, r, T, besuche) {
-    const bu = binomial(n, p), q = 1 - r;
-    for (let u = 0; u <= n; u++) {
-      const pu = bu[u];
-      if (!pu) continue;
-      if (r <= 0) { const e = Math.min(u, T); besuche(e, e, pu); continue; }
+     die Stelle der letzten noetigen nicht regenerierten Verwundung (negative Binomialverteilung). */
+  function wirkung(uVert, r, rest, besuche) {
+    if (rest <= 0) { besuche(0, 0, 1); return; }
+    const q = 1 - r;
+    uVert.forEach((pu, u) => {
+      if (!pu) return;
+      if (r <= 0) { const e = Math.min(u, rest); besuche(e, e, pu); return; }
       const be = binomial(u, q);
-      for (let e = 0; e <= Math.min(u, T - 1); e++) if (be[e]) besuche(u, e, pu * be[e]);
-      let logC = 0;   // log C(m-1, T-1), schrittweise ohne Fakultaeten
-      for (let m = T; m <= u; m++) {
-        if (m > T) logC += Math.log((m - 1) / (m - T));
-        besuche(m, T, pu * Math.exp(logC + T * Math.log(q) + (m - T) * Math.log(r)));
+      for (let e = 0; e <= Math.min(u, rest - 1); e++) if (be[e]) besuche(u, e, pu * be[e]);
+      let logC = 0;   // log C(m-1, rest-1), schrittweise ohne Fakultaeten
+      for (let m = rest; m <= u; m++) {
+        if (m > rest) logC += Math.log((m - 1) / (m - rest));
+        besuche(m, rest, pu * Math.exp(logC + rest * Math.log(q) + (m - rest) * Math.log(r)));
       }
-    }
-  }
-  /* Eine Nahkampfrunde exakt. A, B = { att(L): Attacken nach L eigenen Verlusten,
-     p: unabgewehrte Verwundung pro Attacke gegen den Gegner, lpModell, modelle,
-     regen: Chance, einen verlorenen Lebenspunkt zu regenerieren, bonus, ini }.
-     Hoehere Initiative schlaegt zuerst; ihre Verluste kosten die langsamere Seite
-     Attacken. Gleiche Initiative: gleichzeitig. Wer den Gegner ausloescht, gewinnt;
-     loeschen sich beide aus, ist es unentschieden.
-     Ergebnis: { a, b, unentschieden, D: {min, werte}, erw: {...}, schneller } */
-  function kampfrunde(A, B) {
-    const T = x => x.modelle * x.lpModell;
-    const gleich = A.ini === B.ini, fIstA = A.ini >= B.ini;
-    const F = fIstA ? A : B, S = fIstA ? B : A;
-    const erw = { cF: 0, cS: 0, verlusteS: 0, verlusteF: 0, lpS: 0, lpF: 0, attS: 0 };
-    const gruppen = new Map();   // Verluste der langsamen Seite -> Ausgaenge der schnellen
-    angriffErgebnis(F.att(0), F.p, S.regen, T(S), (c, e, p) => {
-      const L = Math.floor(e / S.lpModell), k = gleich ? 0 : L;
-      if (!gruppen.has(k)) gruppen.set(k, { aus: new Map(), gew: 0 });
-      const g = gruppen.get(k), key = c * 2 + (e >= T(S) ? 1 : 0);   // gleiche Ausgaenge zusammenfassen
-      g.aus.set(key, (g.aus.get(key) || 0) + p); g.gew += p;
-      erw.cF += p * c; erw.verlusteS += p * L; erw.lpS += p * e;
     });
-    const r = { a: 0, b: 0, unentschieden: 0 }, D = new Map();
-    const bA = A.bonus || 0, bB = B.bonus || 0;
-    gruppen.forEach((g, L) => {
-      const nS = S.att(L), aus = new Map();
-      angriffErgebnis(nS, S.p, F.regen, T(F), (c, e, p) => {
-        const key = c * 2 + (e >= T(F) ? 1 : 0);
-        aus.set(key, (aus.get(key) || 0) + p);
-        erw.cS += g.gew * p * c; erw.verlusteF += g.gew * p * Math.floor(e / F.lpModell); erw.lpF += g.gew * p * e;
+  }
+  // n Attacken mit je p unabgewehrt gegen eine Einheit mit T Lebenspunkten
+  function angriffErgebnis(n, p, r, T, besuche) { wirkung(binomial(n, p), r, T, besuche); }
+
+  /* Ein Nahkampf exakt, mit mehreren Angriffsprofilen pro Seite.
+     Seite = { modelle, lpModell, regen (Chance pro verlorenem LP), bonus,
+               profile: [{ att(L): Attacken nach L eigenen Verlusten, p: unabgewehrt pro Attacke, ini }] }
+     ini 10..1, 0 = zuletzt (Stampfen). Gleiche Initiative schlaegt gleichzeitig zu, auch
+     ueber beide Seiten. Eine ausgeloeschte Seite greift nicht mehr an. Gerechnet wird
+     ueber Zustaende (verlorene LP A, verlorene LP B, Kampfergebnis A minus B); Ausgaenge
+     unter 1e-14 entfallen. Wer den Gegner ausloescht, gewinnt; beide = unentschieden.
+     Ergebnis: { a, b, unentschieden, D: {min, werte}, erw: {...} } */
+  function gefecht(A, B) {
+    const TA = A.modelle * A.lpModell, TB = B.modelle * B.lpModell;
+    const stufen = [...new Set(A.profile.concat(B.profile).map(p => p.ini))].sort((x, y) => y - x);
+    const cache = new Map();
+    // Ausgaenge der Angriffe von "seite" in Stufe ini: Liste [c, e, p] gegen den Gegner
+    function ausgaenge(name, seite, verluste, weg, ini, regenZiel, rest) {
+      const key = [name, verluste, weg, ini, rest].join('|');
+      if (cache.has(key)) return cache.get(key);
+      let u = [1];
+      if (!weg) seite.profile.forEach(pr => {
+        if (pr.ini !== ini) return;
+        const n = pr.att(verluste);
+        if (n > 0) u = faltung(u, binomial(n, pr.p));
       });
-      erw.attS += g.gew * nS;
-      g.aus.forEach((pF, keyF) => aus.forEach((pS, key) => {
-        const p = pF * pS, cF = keyF >> 1, fWeg = (keyF & 1) === 1, cS = key >> 1, sWeg = (key & 1) === 1;
-        const cA = fIstA ? cF : cS, cB = fIstA ? cS : cF;
-        const aWegB = fIstA ? fWeg : sWeg, bWegA = fIstA ? sWeg : fWeg;   // A loescht B aus / B loescht A aus
-        const d = cA + bA - (cB + bB);
-        D.set(d, (D.get(d) || 0) + p);
-        const ergebnis = (aWegB || bWegA) ? (aWegB && bWegA ? 0 : aWegB ? 1 : -1) : d;
-        if (ergebnis > 0) r.a += p; else if (ergebnis < 0) r.b += p; else r.unentschieden += p;
-      }));
+      const m = new Map();
+      wirkung(u, regenZiel, rest, (c, e, p) => { const k = c + ',' + e; m.set(k, (m.get(k) || 0) + p); });
+      const liste = [...m].map(([k, p]) => { const [c, e] = k.split(',').map(Number); return [c, e, p]; });
+      cache.set(key, liste);
+      return liste;
+    }
+    let zust = new Map([['0,0,0', { eA: 0, eB: 0, d: 0, p: 1 }]]);
+    const erw = { cA: 0, cB: 0 };
+    stufen.forEach(ini => {
+      const neu = new Map();
+      zust.forEach(z => {
+        const aWeg = z.eA >= TA, bWeg = z.eB >= TB;
+        const vonA = ausgaenge('A', A, Math.floor(z.eA / A.lpModell), aWeg, ini, B.regen, TB - z.eB);
+        const vonB = ausgaenge('B', B, Math.floor(z.eB / B.lpModell), bWeg, ini, A.regen, TA - z.eA);
+        vonA.forEach(([cA, eB, pa]) => vonB.forEach(([cB, eA, pb]) => {
+          const p = z.p * pa * pb;
+          if (p < 1e-14) return;
+          erw.cA += p * cA; erw.cB += p * cB;
+          const n = { eA: z.eA + eA, eB: z.eB + eB, d: z.d + cA - cB, p };
+          const key = n.eA + ',' + n.eB + ',' + n.d, alt = neu.get(key);
+          if (alt) alt.p += p; else neu.set(key, n);
+        }));
+      });
+      zust = neu;
+    });
+    const r = { a: 0, b: 0, unentschieden: 0 }, D = new Map(), bA = A.bonus || 0, bB = B.bonus || 0;
+    const e = { verwA: erw.cA, verwB: erw.cB, lpA: 0, lpB: 0, verlusteA: 0, verlusteB: 0 };
+    zust.forEach(z => {
+      const aWeg = z.eA >= TA, bWeg = z.eB >= TB, d = z.d + bA - bB;
+      D.set(d, (D.get(d) || 0) + z.p);
+      const erg = (aWeg || bWeg) ? (aWeg && bWeg ? 0 : bWeg ? 1 : -1) : d;
+      if (erg > 0) r.a += z.p; else if (erg < 0) r.b += z.p; else r.unentschieden += z.p;
+      e.lpA += z.p * z.eA; e.lpB += z.p * z.eB;
+      e.verlusteA += z.p * Math.floor(z.eA / A.lpModell); e.verlusteB += z.p * Math.floor(z.eB / B.lpModell);
     });
     const schluessel = [...D.keys()], min = Math.min(...schluessel), werte = new Array(Math.max(...schluessel) - min + 1).fill(0);
     D.forEach((p, d) => { werte[d - min] = p; });
     r.D = { min, werte };
-    r.schneller = gleich ? null : (fIstA ? 'A' : 'B');
-    r.erw = fIstA
-      ? { verwA: erw.cF, verwB: erw.cS, verlusteB: erw.verlusteS, verlusteA: erw.verlusteF, lpB: erw.lpS, lpA: erw.lpF, attA: F.att(0), attB: erw.attS }
-      : { verwB: erw.cF, verwA: erw.cS, verlusteA: erw.verlusteS, verlusteB: erw.verlusteF, lpA: erw.lpS, lpB: erw.lpF, attB: F.att(0), attA: erw.attS };
+    r.erw = e;
+    return r;
+  }
+  /* Kurzform mit einem Profil pro Seite: A, B = { att(L), p, lpModell, modelle, regen, bonus, ini } */
+  function kampfrunde(A, B) {
+    const s = X => ({ modelle: X.modelle, lpModell: X.lpModell, regen: X.regen, bonus: X.bonus, profile: [{ att: X.att, p: X.p, ini: X.ini }] });
+    const r = gefecht(s(A), s(B));
+    r.schneller = A.ini === B.ini ? null : (A.ini > B.ini ? 'A' : 'B');
     return r;
   }
   const erwartung = v => v.reduce((s, p, k) => s + p * k, 0);
   return { chance, mitWiederholung, pTreffer, pVerwunden, pNichtAbgewehrt, binomial, deckeln,
-           faltung, differenz, gewinnwahrscheinlichkeit, erwartung, attackenNachVerlusten, angriffErgebnis, kampfrunde };
+           faltung, differenz, gewinnwahrscheinlichkeit, erwartung, attackenNachVerlusten, wirkung, angriffErgebnis, gefecht, kampfrunde };
 })();
 
 /* Pruefung in der Konsole: nahkampfTests() */
@@ -3281,6 +3308,14 @@ function nahkampfTests() {
   const k14 = N.kampfrunde(seite(3, 1, 5, 3), seite(0, 0, 1, 3, 0.5));
   pruefe(14, 'Regeneration 4+: 3 sichere Verwundungen gegen 1 Modell mit 1 LP → Kampfergebnis 1,75, Verluste 0,875', [1.75, 0.875],
     [k14.erw.verwA, k14.erw.verlusteB], nah(k14.erw.verwA, 1.75) && nah(k14.erw.verlusteB, 0.875));
+  const einzeln = (n, p, ini) => ({ att: () => n, p, ini });
+  const k15 = N.gefecht({ modelle: 1, lpModell: 5, regen: 0, bonus: 0, profile: [einzeln(3, 1, 5), einzeln(2, 1, 0)] },
+                        { modelle: 10, lpModell: 1, regen: 0, bonus: 0, profile: [einzeln(0, 0, 3)] });
+  pruefe(15, 'Zwei Profile (3 Attacken + 2 Stampfen, sicher) → Kampfergebnis A = 5', 5, k15.erw.verwA, nah(k15.erw.verwA, 5));
+  const k16 = N.gefecht({ modelle: 5, lpModell: 1, regen: 0, bonus: 0, profile: [einzeln(2, 1, 1)] },
+                        { modelle: 10, lpModell: 1, regen: 0, bonus: 0, profile: [einzeln(4, 1, 5)] });
+  pruefe(16, 'Einzelprofil behält Attacken trotz 4 Verlusten, verliert sie erst beim Auslöschen', [2, 4], [k16.erw.verwA, k16.erw.verwB],
+    nah(k16.erw.verwA, 2) && nah(k16.erw.verwB, 4));
   zeilen.forEach(z => console.log(z));
   return zeilen.every(z => !z.includes('FEHLER')) ? 'alle Tests ok' : 'es gibt FEHLER';
 }
@@ -3288,52 +3323,87 @@ function nahkampfTests() {
 /* Oberflaeche. Es wird nichts gespeichert - alle Werte tippt der Nutzer selbst ein. */
 (function () {
   const feld = id => document.getElementById(id);
-  if (!feld('panel-nahkampf')) return;
+  const panel = feld('panel-nahkampf');
+  if (!panel) return;
   const N = nahkampf;
-  const GRENZEN = { modelle: [1, 100], kampfglied: [0, 20], apm: [0, 10], unterstuetzer: [0, 20],
-                    initiative: [1, 10], kg: [1, 10], s: [1, 10], w: [1, 10], lp: [1, 10], bonus: [0, 20] };
-  const START = { modelle: 20, kampfglied: 5, apm: 1, unterstuetzer: 5, initiative: 3, kg: 3, s: 3, w: 3, lp: 1,
-                  ruestung: 5, ap: 0, schutz: 0, regen: 0, wdhT: 'keine', wdhV: 'keine', bonus: 0 };
-  const st = { A: Object.assign({}, START), B: Object.assign({}, START) };
-  const ZAEHLER = [['modelle', 'Modelle in der Einheit'], ['kampfglied', 'Modelle mit Basekontakt'], ['apm', 'Attacken pro Modell mit Basekontakt'],
-                   ['unterstuetzer', 'Modelle mit Unterstützungsattacke'],
-                   ['initiative', 'Initiative'], ['kg', 'Kampfgeschick (KG)'], ['s', 'Stärke'], ['w', 'Widerstand'], ['lp', 'Lebenspunkte pro Modell']];
+  const GRENZEN = { modelle: [1, 100], lp: [1, 10], kgDef: [1, 10], w: [1, 10], bonus: [0, 20],
+                    basekontakt: [0, 20], apm: [0, 10], unterstuetzer: [0, 20], attacken: [0, 20],
+                    kg: [1, 10], s: [1, 10], stampfen: [0, 10] };
+  const PROFIL = art => ({ art, basekontakt: 5, apm: 1, unterstuetzer: 5, attacken: 1, kg: 3, s: 3, ap: 0, ini: 3,
+                           wdhT: 'keine', wdhV: 'keine', auto: false, stampfen: 0 });
+  const SEITE = () => ({ anzahl: '1', modelle: 20, lp: 1, kgDef: 3, w: 3, ruestung: 5, schutz: 0, regen: 0, bonus: 0,
+                         p: [PROFIL('glied'), PROFIL('einzeln')] });
+  const st = { A: SEITE(), B: SEITE() };
+  const holen = pfad => pfad.split('.').reduce((o, k) => o[k], st);
+  const setzen = (pfad, v) => { const t = pfad.split('.'), k = t.pop(); t.reduce((o, x) => o[x], st)[k] = v; };
+  const id = pfad => 'nk_' + pfad.replace(/\./g, '_');
   const prozent = p => (Math.round(p * 1000) / 10).toLocaleString('de-DE') + ' %';
   const zahl = x => (Math.round(x * 100) / 100).toLocaleString('de-DE');
 
+  /* Bausteine. "zeige" bindet ein Feld an ein Profil: es erscheint nur, wenn die Art
+     des Profils passt (glied, einzeln oder beide) - Profil 2 nur, wenn die Seite zwei Profile hat. */
+  const bind = z => z ? ` data-zeige="${z[0]}" data-art="${z[1]}"` : '';
+  const zaehler = (pfad, name, z) => `<div${bind(z)}><span class="sr-titel">${name}</span><div class="sr-zaehler">` +
+    `<button type="button" data-nk="${pfad}" data-schritt="-1" aria-label="${name} weniger">−</button>` +
+    `<input type="number" inputmode="numeric" class="nk-zahl" id="${id(pfad)}" data-pfad="${pfad}" aria-label="${name}">` +
+    `<button type="button" data-nk="${pfad}" data-schritt="1" aria-label="${name} mehr">+</button></div></div>`;
+  const auswahl = (pfad, name, optionen, z, zahlwert) => `<div${bind(z)}><label for="${id(pfad)}">${name}</label>` +
+    `<select id="${id(pfad)}" data-pfad="${pfad}"${zahlwert ? ' data-zahl="1"' : ''}>` +
+    optionen.map(([v, t]) => `<option value="${v}">${t}</option>`).join('') + '</select></div>';
+  const wurf = [['0', 'keiner']].concat([2, 3, 4, 5, 6].map(v => [v, v + '+']));
+  const durchschlag = [['0', '–']].concat([1, 2, 3, 4, 5, 6].map(v => ['-' + v, '−' + v]));
+  const initiative = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(v => [v, String(v)]).concat([['0', 'zuletzt']]);
+  const knoepfe = (pfad, name, werte, z) => `<div${bind(z)}><span class="sr-titel">${name}</span><div class="sr-wahl" data-nkwahl="${pfad}">` +
+    werte.map(([v, t]) => `<button type="button" data-wert="${v}">${t}</button>`).join('') + '</div></div>';
+  const wdh = (pfad, name, z) => knoepfe(pfad, name, [['keine', 'Keine'], ['einsen', 'Einsen'], ['alle', 'Alle Fehlwürfe']], z);
+  const haken = (pfad, name, z) => `<div${bind(z)}><label class="nk-haken"><input type="checkbox" id="${id(pfad)}" data-pfad="${pfad}"> ${name}</label></div>`;
+
+  function profilHtml(x, i) {
+    const q = `${x}.p.${i}`, g = [q, 'glied'], e = [q, 'einzeln'], b = [q, 'beide'];
+    const arten = [['glied', 'Glied'], ['einzeln', 'Einzeln (Charakter, Reittier)']];
+    return (i ? `<h3 class="nk-unterkopf"${bind(b)}>Profil 2 (z. B. Reittier)</h3>` : '') + auswahl(`${q}.art`, 'Art der Attacken', arten, b) +
+      zaehler(`${q}.basekontakt`, 'Modelle mit Basekontakt', g) + zaehler(`${q}.apm`, 'Attacken pro Modell mit Basekontakt', g) +
+      zaehler(`${q}.unterstuetzer`, 'Modelle mit Unterstützungsattacke', g) + zaehler(`${q}.attacken`, 'Attacken', e) +
+      zaehler(`${q}.kg`, 'Kampfgeschick (KG)', b) + zaehler(`${q}.s`, 'Stärke', b) +
+      auswahl(`${q}.ap`, 'Durchschlag', durchschlag, b, true) + auswahl(`${q}.ini`, 'Initiative', initiative, b, true) +
+      wdh(`${q}.wdhT`, 'Treffer wiederholen', b) + wdh(`${q}.wdhV`, 'Verwundung wiederholen', b) +
+      haken(`${q}.auto`, 'Trifft automatisch', b) + zaehler(`${q}.stampfen`, 'Stampfen (Ø aufgerundet)', b);
+  }
   function seiteHtml(x) {
-    const zaehler = (k, name) => `<div><span class="sr-titel">${name}</span><div class="sr-zaehler">` +
-      `<button type="button" data-nk="${x}.${k}" data-schritt="-1" aria-label="${name} Seite ${x} weniger">−</button>` +
-      `<input type="number" inputmode="numeric" class="nk-zahl" id="nk_${x}_${k}" aria-label="${name} Seite ${x}">` +
-      `<button type="button" data-nk="${x}.${k}" data-schritt="1" aria-label="${name} Seite ${x} mehr">+</button></div></div>`;
-    const wurf = (k, name) => `<div><label for="nk_${x}_${k}">${name}</label><select id="nk_${x}_${k}">` +
-      '<option value="0">keiner</option>' + [2, 3, 4, 5, 6].map(v => `<option value="${v}">${v}+</option>`).join('') + '</select></div>';
-    const ap = `<div><label for="nk_${x}_ap">Durchschlag</label><select id="nk_${x}_ap"><option value="0">–</option>` +
-      [1, 2, 3, 4, 5, 6].map(v => `<option value="-${v}">−${v}</option>`).join('') + '</select></div>';
-    const wdh = (k, name) => `<div><span class="sr-titel">${name}</span><div class="sr-wahl" data-nkwahl="${x}.${k}">` +
-      '<button type="button" data-wert="keine">Keine</button><button type="button" data-wert="einsen">Einsen</button>' +
-      '<button type="button" data-wert="alle">Alle Fehlwürfe</button></div></div>';
-    return `<h2 class="nk-kopf">Seite ${x}</h2>` + ZAEHLER.map(([k, n]) => zaehler(k, n)).join('') +
-      wurf('ruestung', 'Rüstungswurf') + ap + wurf('schutz', 'Schutzwurf (optional)') + wurf('regen', 'Regeneration (optional)') +
-      wdh('wdhT', 'Treffer wiederholen') + wdh('wdhV', 'Verwundung wiederholen') +
-      zaehler('bonus', 'Kampfergebnis-Bonus');
+    return `<h2 class="nk-kopf">Seite ${x}</h2>` + knoepfe(`${x}.anzahl`, 'Profile', [['1', 'Ein Profil'], ['2', 'Zwei Profile']]) +
+      `<h3 class="nk-unterkopf">Profil 1</h3>` + zaehler(`${x}.modelle`, 'Modelle in der Einheit') + zaehler(`${x}.lp`, 'Lebenspunkte pro Modell') +
+      zaehler(`${x}.kgDef`, 'Kampfgeschick (wird getroffen)') + zaehler(`${x}.w`, 'Widerstand') +
+      auswahl(`${x}.ruestung`, 'Rüstungswurf', wurf, null, true) + auswahl(`${x}.schutz`, 'Schutzwurf (optional)', wurf, null, true) +
+      auswahl(`${x}.regen`, 'Regeneration (optional)', wurf, null, true) + zaehler(`${x}.bonus`, 'Kampfergebnis-Bonus') +
+      profilHtml(x, 0) + profilHtml(x, 1);
   }
   feld('nkSeiteA').innerHTML = seiteHtml('A');
   feld('nkSeiteB').innerHTML = seiteHtml('B');
 
-  const gesamtLP = x => st[x].modelle * st[x].lp;
-  const attacken = (x, verluste) => N.attackenNachVerlusten(st[x], verluste);
-  // Chancen pro Attacke, wenn Seite "an" Seite "ziel" angreift
-  function chancen(an, ziel) {
-    const a = st[an], z = st[ziel];
-    const pT = N.pTreffer(a.kg, z.kg, a.wdhT);
-    const pV = N.pVerwunden(a.s, z.w, a.wdhV);
-    const pN = N.pNichtAbgewehrt(z.ruestung || null, a.ap, z.schutz || null);
-    return { pT, pV, pN, p: pT * pV * pN };
+  // Glied-Profile koennen nicht mehr Modelle einsetzen, als die Einheit hat.
+  function passeAn(x) {
+    st[x].p.forEach(pr => {
+      pr.basekontakt = Math.min(pr.basekontakt, st[x].modelle);
+      pr.unterstuetzer = Math.min(pr.unterstuetzer, st[x].modelle - pr.basekontakt);
+    });
   }
-  // Angaben einer Seite fuer nahkampf.kampfrunde()
-  const seite = (x, c) => ({ att: L => attacken(x, L), p: c.p, lpModell: st[x].lp, modelle: st[x].modelle,
-                             regen: st[x].regen ? N.chance(st[x].regen) : 0, bonus: st[x].bonus, ini: st[x].initiative });
+
+  // Angaben einer Seite x (greift y an) fuer nahkampf.gefecht()
+  function seite(x, y) {
+    const a = st[x], z = st[y], profile = [];
+    a.p.slice(0, Number(a.anzahl)).forEach(pr => {
+      const pT = pr.auto ? 1 : N.pTreffer(pr.kg, z.kgDef, pr.wdhT);
+      const p = pT * N.pVerwunden(pr.s, z.w, pr.wdhV) * N.pNichtAbgewehrt(z.ruestung || null, pr.ap, z.schutz || null);
+      const att = pr.art === 'glied'
+        ? L => N.attackenNachVerlusten({ kampfglied: pr.basekontakt, apm: pr.apm, unterstuetzer: pr.unterstuetzer }, L)
+        : () => pr.attacken;
+      profile.push({ att, p, ini: pr.ini });
+      // Stampfen: zuletzt, trifft automatisch, unveraenderte Staerke, kein Durchschlag
+      if (pr.stampfen > 0) profile.push({ att: () => pr.stampfen, ini: 0,
+        p: N.pVerwunden(pr.s, z.w, 'keine') * N.pNichtAbgewehrt(z.ruestung || null, 0, z.schutz || null) });
+    });
+    return { modelle: a.modelle, lpModell: a.lp, regen: a.regen ? N.chance(a.regen) : 0, bonus: a.bonus, profile };
+  }
 
   function grafik(d) {
     const svg = feld('nkGrafik'), NS = 'http://www.w3.org/2000/svg';
@@ -3366,20 +3436,23 @@ function nahkampfTests() {
   }
 
   function zeige() {
-    ['A', 'B'].forEach(x => {
-      Object.keys(GRENZEN).forEach(k => { const el = feld(`nk_${x}_${k}`); if (document.activeElement !== el) el.value = st[x][k]; });
-      ['ruestung', 'ap', 'schutz', 'regen'].forEach(k => { feld(`nk_${x}_${k}`).value = String(st[x][k]); });
-      document.querySelectorAll(`[data-nkwahl^="${x}."]`).forEach(g => {
-        const k = g.dataset.nkwahl.split('.')[1];
-        g.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.wert === st[x][k] ? 'true' : 'false'));
-      });
+    panel.querySelectorAll('[data-pfad]').forEach(el => {
+      const v = holen(el.dataset.pfad);
+      if (el.type === 'checkbox') el.checked = v;
+      else if (document.activeElement !== el) el.value = String(v);
     });
-    const A = chancen('A', 'B'), B = chancen('B', 'A');
-    const r = N.kampfrunde(seite('A', A), seite('B', B)), g = r;
-    A.erw = r.erw.verwA; B.erw = r.erw.verwB; A.verluste = r.erw.verlusteB; B.verluste = r.erw.verlusteA;
-    feld('nkSiegA').textContent = prozent(g.a);
-    feld('nkSiegU').textContent = prozent(g.unentschieden);
-    feld('nkSiegB').textContent = prozent(g.b);
+    panel.querySelectorAll('[data-nkwahl]').forEach(g => {
+      const v = holen(g.dataset.nkwahl);
+      g.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.wert === v ? 'true' : 'false'));
+    });
+    panel.querySelectorAll('[data-zeige]').forEach(el => {
+      const [x, , i] = el.dataset.zeige.split('.'), art = holen(el.dataset.zeige + '.art');
+      el.hidden = (i === '1' && st[x].anzahl === '1') || (el.dataset.art !== 'beide' && el.dataset.art !== art);
+    });
+    const r = N.gefecht(seite('A', 'B'), seite('B', 'A'));
+    feld('nkSiegA').textContent = prozent(r.a);
+    feld('nkSiegU').textContent = prozent(r.unentschieden);
+    feld('nkSiegB').textContent = prozent(r.b);
     // Bei mehreren Lebenspunkten pro Modell zaehlen verlorene Wunden statt Modelle
     ['A', 'B'].forEach(x => {
       const wunden = st[x].lp > 1;
@@ -3389,39 +3462,32 @@ function nahkampfTests() {
     grafik(r.D);
   }
 
-  const klemme = (k, v) => Math.max(GRENZEN[k][0], Math.min(GRENZEN[k][1], v));
-  function passeAn(x) {   // Kampfglied und Unterstuetzer koennen nicht mehr sein als die Einheit hat
-    const e = st[x];
-    e.kampfglied = Math.min(e.kampfglied, e.modelle);
-    e.unterstuetzer = Math.min(e.unterstuetzer, e.modelle - e.kampfglied);
-  }
-  document.querySelectorAll('#panel-nahkampf [data-nk]').forEach(b => b.addEventListener('click', () => {
-    const [x, k] = b.dataset.nk.split('.');
-    st[x][k] = klemme(k, st[x][k] + Number(b.dataset.schritt));
-    passeAn(x);
-    zeige();
-  }));
-  ['A', 'B'].forEach(x => {
-    Object.keys(GRENZEN).forEach(k => {
-      const el = feld(`nk_${x}_${k}`);
-      // Waehrend des Tippens nur gueltige Zahlen uebernehmen, beim Verlassen in die Grenzen ziehen.
-      el.addEventListener('input', () => {
-        const v = parseInt(el.value, 10);
-        if (Number.isInteger(v) && v === klemme(k, v)) { st[x][k] = v; passeAn(x); zeige(); }
-      });
-      el.addEventListener('change', () => {
-        const v = parseInt(el.value, 10);
-        if (Number.isInteger(v)) st[x][k] = klemme(k, v);
-        passeAn(x);
-        el.value = st[x][k];
-        zeige();
-      });
-    });
-    ['ruestung', 'ap', 'schutz', 'regen'].forEach(k => feld(`nk_${x}_${k}`).addEventListener('change', e => { st[x][k] = Number(e.target.value); zeige(); }));
+  const schluessel = pfad => pfad.split('.').pop();
+  const klemme = (pfad, v) => { const [lo, hi] = GRENZEN[schluessel(pfad)]; return Math.max(lo, Math.min(hi, v)); };
+  const aendere = (pfad, v) => { setzen(pfad, v); passeAn(pfad[0]); zeige(); };
+  panel.addEventListener('click', e => {
+    const k = e.target.closest('[data-nk]');
+    if (k) { aendere(k.dataset.nk, klemme(k.dataset.nk, holen(k.dataset.nk) + Number(k.dataset.schritt))); return; }
+    const w = e.target.closest('[data-nkwahl] button');
+    if (w) aendere(w.closest('[data-nkwahl]').dataset.nkwahl, w.dataset.wert);
   });
-  document.querySelectorAll('#panel-nahkampf [data-nkwahl]').forEach(g => {
-    const [x, k] = g.dataset.nkwahl.split('.');
-    g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { st[x][k] = b.dataset.wert; zeige(); }));
+  // Waehrend des Tippens nur gueltige Zahlen uebernehmen, beim Verlassen in die Grenzen ziehen.
+  panel.addEventListener('input', e => {
+    const el = e.target;
+    if (!el.classList.contains('nk-zahl')) return;
+    const v = parseInt(el.value, 10);
+    if (Number.isInteger(v) && v === klemme(el.dataset.pfad, v)) aendere(el.dataset.pfad, v);
+  });
+  panel.addEventListener('change', e => {
+    const el = e.target, pfad = el.dataset.pfad;
+    if (!pfad) return;
+    if (el.type === 'checkbox') return aendere(pfad, el.checked);
+    if (el.tagName === 'SELECT') return aendere(pfad, el.dataset.zahl ? Number(el.value) : el.value);
+    const v = parseInt(el.value, 10);
+    if (Number.isInteger(v)) setzen(pfad, klemme(pfad, v));
+    passeAn(pfad[0]);
+    el.value = holen(pfad);
+    zeige();
   });
   zeige();
 })();
