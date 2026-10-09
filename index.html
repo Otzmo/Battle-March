@@ -373,12 +373,12 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-tools" data-tab="tools" aria-selected="false" tabindex="-1">Tools</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Battle March" data-gruppe="battlemarch">
-  <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
+  <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Regeln</button>
   <button class="tab-btn" role="tab" id="tab-armee" data-tab="armee" aria-controls="panel-armee" aria-selected="false" tabindex="-1">Armeebau</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Core Battle" data-gruppe="core" hidden="">
-  <button class="tab-btn" role="tab" id="tab-coreleitfaden" data-tab="coreleitfaden" aria-controls="panel-coreleitfaden" aria-selected="true" tabindex="0">Leitfaden</button>
-  <button class="tab-btn" role="tab" id="tab-corearmee" data-tab="corearmee" aria-controls="panel-corearmee" aria-selected="false" tabindex="-1">Armeebau</button>
+  <button class="tab-btn" role="tab" id="tab-coreleitfaden" data-tab="coreleitfaden" aria-controls="panel-coreleitfaden" aria-selected="true" tabindex="0">Rules</button>
+  <button class="tab-btn" role="tab" id="tab-corearmee" data-tab="corearmee" aria-controls="panel-corearmee" aria-selected="false" tabindex="-1">Army Building</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Kartenbau" data-gruppe="kartenbau" hidden="">
   <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="true" tabindex="0">Battle March</button>
@@ -401,17 +401,13 @@ Die vollständigen Regeln von The Old World findest du online.<p class="version-
 
 <h1>1. Spielablauf</h1>
 <p>Vor dem Spiel wird der Reihe nach gewürfelt:</p><ul>
-<li>W3 – Mission</li>
-<li>Geländeaufstellung und Aufstellungszone</li>
-
+<li>Karte, Mission und Zufallsereignisse auswürfeln</li>
 <li>W6 gegeneinander – Sieger wählt die Tischseite</li>
 <li>W6 gegeneinander – Sieger bestimmt, wer zuerst eine Einheit aufstellt</li>
 <li>W6 gegeneinander – Sieger bestimmt, wer zuerst am Zug ist</li>
-<li>2W6 – Zufallsereignisse</li>
 </ul>
 
-<h1>2. Gelände &amp; Aufstellung</h1>
-<h2>Geländeregeln</h2>
+<h1>2. Gelände</h1>
 <p>Alle Geländestücke haben klare Kanten (Zonengelände). Wenn möglich wird 2D-Gelände genutzt, auf das zur Verschönerung 3D-Modelle gelegt werden.</p>
 <p><b>Alle Geländestücke blockieren die Sicht dahinter.</b> Die folgende Tabelle listet die jeweils zusätzlichen Eigenschaften auf.</p>
 <table><tbody><tr><th>Geländetyp</th><th>Eigenschaften</th></tr>
@@ -423,11 +419,6 @@ Die vollständigen Regeln von The Old World findest du online.<p class="version-
 <tr><td>Hügel</td><td>Schießen aus zwei Reihen möglich · Kanonenschüsse stoppen hinten</td></tr>
 </tbody></table>
 
-<h2>Geländeaufstellung</h2>
-<p>Gespielt wird auf einer Matte von 48×36 Zoll. Setze von jedem Geländestück eins auf die Matte. In der Mitte sollte ein 14 Zoll Kreis frei bleiben. Alternativ nutze den <b>Kartenbau</b>-Reiter oben auf dieser Seite.</p>
-
-<h2>Aufstellungszonen</h2>
-<p>Die Aufstellungszone ist 10 Zoll tief. Alternativ nutze den Kartenbau-Reiter oben auf dieser Seite</p>
 
 <h1>3. Zufallsereignisse</h1>
 <p>Zu Beginn des Spiels wird einmalig mit 2W6 das Ereignis bestimmt, das für die gesamte Partie gilt.</p>
@@ -700,7 +691,7 @@ The complete rules of The Old World can be found online.<p class="version-link">
 <div class="acc">
 <button type="button" class="acc-head" aria-expanded="false" aria-controls="core-obj-1a-body"><span class="acc-title">Strategic Locations <span class="italic">(End of player turn)</span></span><span class="acc-icon" aria-hidden="true">▸</span></button>
 <div class="acc-body" id="core-obj-1a-body" role="region" hidden="">
-<p>There are <b>2, 3 or 4</b> strategic locations, depending on the mission (Strategic Locations 2, 3 or 4).</p>
+<p>There are <b>3</b> strategic locations.</p>
 <p>Each strategic location is marked by a <b>40 mm round base</b>.</p>
 <p><b>Controlling a Strategic Location:</b> A strategic location is controlled by a scoring unit within <b>6"</b> of it.</p>
 <p><b>30 Victory Points</b> per scoring.</p>
@@ -2564,7 +2555,7 @@ function blattAkkordeon(bodyId) {
 kartenbau({ endung: '', w: 48, h: 36, kreis: 14, zonenTiefe: 10, passAbstand: 16,
             speicher: 'battleMarchBuilderState', datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder', ereignis: true,
             blatt: { lang: 'de', titel: 'Battle March', zone: 'Aufstellungszone', keine: 'keine', ereignis: 'Zufallsereignis', spalten: 2,
-                     danach: [['Geländeregeln', () => blattAbschnitt('panel-leitfaden', 'h2', 'Geländeregeln', ['H1', 'H2'])],
+                     danach: [['Geländeregeln', () => blattAbschnitt('panel-leitfaden', 'h1', '2. Gelände', ['H1'])],
                               ['Siegpunkte', () => blattAbschnitt('panel-leitfaden', 'h1', '5. Siegpunkte', ['H1'])]] },
             marker: { name: 'Schatz', farbe: '#d4a52a', rand: '#6b4a1a', abstand: 3 },
             gruppen: [{ titel: 'Mission', kurz: 'Mission', missionen: [
@@ -2584,17 +2575,12 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
                               ['Victory Points', () => blattAbschnitt('panel-coreleitfaden', 'h1', '4. Victory Points', ['H1'])]] },
             marker: { name: 'Missionsziel', klasse: 'ziel', farbe: '#1f3a6b', rand: '#0d1b33', abstand: 6 },
             // Ziele jeweils auf halbem Weg zwischen Mitte und Mitte einer Kante
-            // Location 3 und 2 gibt es waagerecht und senkrecht
+            // Location 3 gibt es waagerecht und senkrecht
             gruppen: [
               { titel: 'Mission – End of player turn', kurz: 'End of player turn', missionen: [
-                { wert: 'location2', name: 'Strategic Locations 2', regel: 'core-obj-1a-body',
-                  art: { varianten: [[[0.5, 0.75], [0.5, 0.25]],
-                                     [[0.25, 0.5], [0.75, 0.5]]] } },
                 { wert: 'location3', name: 'Strategic Locations 3', regel: 'core-obj-1a-body',
                   art: { varianten: [[[0.25, 0.5], [0.5, 0.5], [0.75, 0.5]],
                                      [[0.5, 0.25], [0.5, 0.5], [0.5, 0.75]]] } },
-                { wert: 'location4', name: 'Strategic Locations 4', regel: 'core-obj-1a-body',
-                  art: { varianten: [[[0.5, 0.75], [0.5, 0.25], [0.25, 0.5], [0.75, 0.5]]] } },
                 { wert: 'domination', name: 'Domination', art: 'keine', regel: 'core-obj-1b-body' },
                 { wert: 'banners', name: 'Hold the Banners High', art: 'keine', regel: 'core-obj-3-body' }] },
               { titel: 'Mission – End of game', kurz: 'End of game', missionen: [
