@@ -629,6 +629,7 @@ Deine Armeeliste kannst du online mit dem Armeebuilder zusammenstellen. Die <b>L
       <button id="resetBtn">Gelände leeren</button>
       <button id="resetAllBtn" title="Löscht Gelände, Zonen, Schätze, eigene Geländetypen, Feldgröße und die Würfelauswahl – auch aus dem Browser-Speicher">Alles zurücksetzen</button>
       <button id="downloadBtn" title="Aktuelle Karte als PNG-Bild herunterladen">⬇ Karte herunterladen</button>
+      <button id="blattBtn" title="Gewürfelte Karte mit Missions-, Gelände- und Siegpunktregeln als A4-Blatt drucken oder als PDF speichern" hidden>🖨 Karte mit Regeln</button>
       <button id="mirrorHBtn" title="Spiegelt Gelände und Zonen links/rechts">⇋ Horizontal spiegeln</button>
       <button id="mirrorVBtn" title="Spiegelt Gelände und Zonen oben/unten">⇵ Vertikal spiegeln</button>
       <button id="randomBtn" title="Würfelt unter den angehakten Aufstellungszonen und Missionen, dazu Spiegelung und Geländeplatzierung">🎲 Zufällige Karte</button>
@@ -1440,6 +1441,7 @@ function kartenbau(opt) {
       const gezogen = Array.isArray(data.wurf.missionen) ? data.wurf.missionen : [data.wurf.mission];
       if (gezogen.every(m => m === null || m === undefined || MISSIONEN.includes(m))) {
         wurf = { zone: data.wurf.zone, missionen: gezogen.map(m => m || null) };
+        if (opt.ereignis && Number.isInteger(data.wurf.ereignis) && data.wurf.ereignis >= 2 && data.wurf.ereignis <= 12) wurf.ereignis = data.wurf.ereignis;
       }
     }
     if (Array.isArray(data.customTypes)) {
@@ -1931,6 +1933,7 @@ function kartenbau(opt) {
       if (!((arten.includes('turm') || arten.includes('ruine')) && arten.some(mitteZiel))) break;
     }
     wurf = { zone: chosen, missionen: gezogen };
+    if (opt.ereignis) wurf.ereignis = 2 + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6);   // 2W6
     zeigeWurf();
     const arten = gezogen.map(missionsArt);
     // Mittelstueck: Turm oder Ruine (Die Ruine / The Ruin), genau mittig; die normale Ruine entfaellt dann
@@ -2240,14 +2243,23 @@ function kartenbau(opt) {
   function wurfTeile() {
     if (!wurf) return [];
     const zone = $('wahlZone').querySelector(`input[value="${wurf.zone}"]`).parentElement.textContent.trim();
-    return [['Aufstellungszone', zone]].concat(GRUPPEN.map((g, gi) =>
+    const teile = [['Aufstellungszone', zone]].concat(GRUPPEN.map((g, gi) =>
       [g.kurz, wurf.missionen[gi] ? missionsName(wurf.missionen[gi]) : 'keine']));
+    if (wurf.ereignis) teile.push(['Zufallsereignis', wurf.ereignis + ' – ' + ereignis(wurf.ereignis).name]);
+    return teile;
+  }
+  // Zufallsereignis aus der Tabelle im Leitfaden: { name, html }
+  function ereignis(n) {
+    const zeile = [...document.querySelectorAll('#rh-1-body tr')].find(tr => tr.cells[0] && tr.cells[0].textContent.trim() === String(n));
+    const zelle = zeile && zeile.cells[2];
+    return { name: zelle && zelle.querySelector('b') ? zelle.querySelector('b').textContent.trim() : '', html: zelle ? zelle.innerHTML : '' };
   }
   function zeigeWurf() {
     const fett = t => Object.assign(document.createElement('b'), { textContent: t });
     const ziel = $('kartenInfo');
     ziel.textContent = '';
     wurfTeile().forEach(([was, wert], k) => ziel.append(k ? ' · ' : '', was + ': ', fett(wert)));
+    $('blattBtn').hidden = !wurf;   // das A4-Blatt gibt es nur fuer gewuerfelte Karten
   }
   [...$('wahlZone').querySelectorAll('input'), ...missionsBoxen()].forEach(i => {
     i.addEventListener('change', () => {
@@ -2256,13 +2268,17 @@ function kartenbau(opt) {
     });
   });
 
-  function downloadMap() {
+  /* Zeichnet die Karte als PNG (data-URL). mitInfo = false laesst die Zeile
+     mit Zone und Missionen unter der Karte weg (fuer das A4-Blatt); namen
+     uebersetzt die Gelaendenamen (englisches Blatt). */
+  function kartenBild(mitInfo, namen) {
+    const nameVon = p => (namen && namen[p.name]) || p.name;
     const S = 36;                       // Export-Auflösung: px pro Zoll
     const F = {                         // Schriftgrößen in px, relativ zum Zoll
       tag: Math.round(S * 0.62), name: Math.round(S * 0.8),
       mass: Math.round(S * 0.6), achse: Math.round(S * 0.62)
     };
-    const info = wurfTeile();           // gewuerfelte Zone und Missionen stehen unter der Karte
+    const info = mitInfo === false ? [] : wurfTeile();   // gewuerfelte Zone und Missionen stehen unter der Karte
     const INFO_H = info.length ? Math.round(F.achse * 2.2) : 0;
     const ML = F.achse * 2 + 12, MR = F.achse + 8, MT = 20, MB = F.achse + 18 + INFO_H;   // Ränder für Achsen
     const bW = cfg.w * S, bH = cfg.h * S;
@@ -2313,7 +2329,7 @@ function kartenbau(opt) {
       g.font = 'italic bold ' + F.mass + 'px "Crimson Pro", Georgia, serif';
       const frei = mitteBelegt(0.3);
       const kreisY = cy(cfg.h / 2) - (frei > 0 ? frei * S + F.mass * 0.7 : 0);
-      g.fillText(cfg.circle + '" Durchmesser', cx(cfg.w / 2), kreisY);
+      g.fillText(cfg.circle + '" ' + ((namen && namen.Durchmesser) || 'Durchmesser'), cx(cfg.w / 2), kreisY);
     }
 
     // kleiner Koordinaten-Kasten
@@ -2352,8 +2368,8 @@ function kartenbau(opt) {
         const b = g.measureText(text).width;
         if (b > platz) g.font = stil + Math.max(8, Math.floor(px * platz / b)) + 'px "Crimson Pro", Georgia, serif';
       };
-      passend('bold ', F.name, p.name);
-      g.fillText(p.name, ccx, ccy - S * 0.42);
+      passend('bold ', F.name, nameVon(p));
+      g.fillText(nameVon(p), ccx, ccy - S * 0.42);
       passend('italic ', F.mass, p.w + 'x' + p.d + '"');
       g.fillText(p.w + 'x' + p.d + '"', ccx, ccy + S * 0.42);
     });
@@ -2398,7 +2414,11 @@ function kartenbau(opt) {
       });
     }
 
-    const bild = cv.toDataURL('image/png');
+    return cv.toDataURL('image/png');
+  }
+
+  function downloadMap() {
+    const bild = kartenBild();
 
     /* Handys laden data:-Bilder oft nicht herunter. Dort oeffnet sich die
        Karte in einem neuen Tab; gespeichert wird sie mit langem Druck aufs Bild.
@@ -2430,6 +2450,57 @@ function kartenbau(opt) {
   }
 
   $('downloadBtn').addEventListener('click', downloadMap);
+
+  /* A4-Blatt (Hochformat): gewuerfelte Karte gross, darunter die Regeln der
+     Mission(en), Gelaende und Siegpunkte - die Texte kommen direkt aus dem Leitfaden.
+     Es oeffnet sich eine Druckansicht; drucken oder "Als PDF speichern". Die
+     Schrift wird verkleinert, bis alles auf eine Seite passt. */
+  function druckeBlatt() {
+    if (!wurf) return;
+    const b = opt.blatt, esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    const zone = b.zonen ? b.zonen[wurf.zone]
+      : $('wahlZone').querySelector(`input[value="${wurf.zone}"]`).parentElement.textContent.trim().replace(/^\d+\.\s*/, '');
+    const info = [[b.zone, zone]].concat(GRUPPEN.map((g, gi) => [g.kurz, wurf.missionen[gi] ? missionsName(wurf.missionen[gi]) : b.keine]));
+    const teile = [];
+    (b.vorMission || []).forEach(([titel, inhalt]) => teile.push([titel, inhalt()]));
+    wurf.missionen.forEach(m => {
+      const def = alleMissionen.find(x => x.wert === m), a = def && def.regel && blattAkkordeon(def.regel);
+      if (a) teile.push([a.titel, a.html]);
+    });
+    if (wurf.ereignis) {
+      const e = ereignis(wurf.ereignis);
+      info.push([b.ereignis, wurf.ereignis + ' – ' + e.name]);
+      teile.push([b.ereignis + ' (' + wurf.ereignis + ')', '<p>' + e.html + '</p>']);
+    }
+    b.danach.forEach(([titel, inhalt]) => teile.push([titel, inhalt()]));
+    const html = '<!doctype html><html lang="' + b.lang + '"><head><meta charset="utf-8"><title>' + esc(b.titel + ' – ' + zone) + '</title><style>' +
+      '@page{size:A4 portrait;margin:8mm}*{box-sizing:border-box}html,body{margin:0;background:#fff}' +
+      'body{width:194mm;font-family:Georgia,"Times New Roman",serif;color:#2b2116;font-size:8.5pt;line-height:1.25;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
+      '.kopf{font-size:13pt;font-weight:bold;margin:0 0 .5mm;color:#4a3b28}.info{font-size:9pt;margin:0 0 1.5mm}' +
+      '.karte{width:100%;display:block;margin:0 auto 1.5mm}.spalten{column-count:' + b.spalten + ';column-gap:5mm}' +
+      'h2{font-size:1.15em;margin:1.2mm 0 .6mm;color:#4a3b28;break-after:avoid}h3,.spalten h1{font-size:1.05em;margin:1mm 0 .4mm}' +
+      'p,ul{margin:0 0 .9mm}ul{padding-left:4mm}li{margin:0}figure{display:none}' +
+      'table{border-collapse:collapse;width:100%;margin:.4mm 0 1mm;break-inside:avoid}th,td{border:.3pt solid #b9a77f;padding:.3mm 1mm;text-align:left;vertical-align:top}' +
+      'th{background:#e3d6b8}.statbox{border-left:1mm solid #4a3b28;padding-left:2mm;margin:.8mm 0}.italic{font-style:italic}' +
+      '</style></head><body><div class="kopf">' + esc(b.titel) + '</div><p class="info">' +
+      info.map(([was, wert]) => esc(was) + ': <b>' + esc(wert) + '</b>').join(' · ') + '</p>' +
+      '<img class="karte" src="' + kartenBild(false, b.gelaende) + '" alt="">' +
+      '<div class="spalten">' + teile.map(([titel, inhalt]) => '<h2>' + esc(titel) + '</h2>' + inhalt).join('') + '</div>' +
+      '<script>window.addEventListener("load",function(){' +
+      'var max=1055,f=8.5,w=100,img=document.querySelector(".karte"),h=function(){return document.documentElement.scrollHeight;};' +
+      'while(h()>max&&f>6){f-=0.25;document.body.style.fontSize=f+"pt";}' +    // erst die Schrift verkleinern ...
+      'while(h()>max&&w>80){w-=2;img.style.width=w+"%";}' +                     // ... dann notfalls die Karte etwas
+      'setTimeout(function(){window.focus();window.print();},150);});<\/script></body></html>';
+    const tab = window.open('', '_blank');
+    if (tab) { tab.document.open(); tab.document.write(html); tab.document.close(); return; }
+    // Neuer Tab blockiert: unsichtbar in der Seite drucken
+    const fr = document.createElement('iframe');
+    fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+    document.body.appendChild(fr);
+    fr.contentDocument.open(); fr.contentDocument.write(html); fr.contentDocument.close();
+    setTimeout(() => fr.remove(), 60000);
+  }
+  $('blattBtn').addEventListener('click', druckeBlatt);
 
   $('addCustomBtn').addEventListener('click', () => {
     // Gleiche Grenzen wie beim Laden, sonst verschwände der Typ nach dem Neuladen.
@@ -2466,35 +2537,70 @@ function kartenbau(opt) {
   // Ausgangspunkt für "hat sich etwas geändert?" beim Verlassen der Seite.
   _lastWritten = JSON.stringify(serializeState());
 }
+/* Regeltexte fuer das A4-Blatt, direkt aus dem Leitfaden kopiert (ohne ids). */
+function blattSauber(el) {
+  const k = el.cloneNode(true);
+  k.removeAttribute('id');
+  k.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+  k.querySelectorAll('[hidden]').forEach(e => e.removeAttribute('hidden'));
+  return k.outerHTML;
+}
+// Alles nach der Ueberschrift (tag + Text) bis zur naechsten Ueberschrift der Art "bis"
+function blattAbschnitt(panelId, tag, text, bis) {
+  const start = [...document.querySelectorAll('#' + panelId + ' ' + tag)].find(h => h.textContent.trim() === text);
+  let html = '', el = start && start.nextElementSibling;
+  while (el && !bis.includes(el.tagName)) { html += blattSauber(el); el = el.nextElementSibling; }
+  return html;
+}
+// Inhalt eines Akkordeons (Mission) mit seinem Titel
+function blattAkkordeon(bodyId) {
+  const body = document.getElementById(bodyId);
+  if (!body) return null;
+  const titel = body.parentElement.querySelector('.acc-title');
+  return { titel: titel ? titel.textContent.trim() : '', html: [...body.children].map(blattSauber).join('') };
+}
+
 // zonenTiefe: Offene Feldschlacht und Unerwartete Begegnung; passAbstand: Gebirgspass
 kartenbau({ endung: '', w: 48, h: 36, kreis: 14, zonenTiefe: 10, passAbstand: 16,
-            speicher: 'battleMarchBuilderState', datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder',
+            speicher: 'battleMarchBuilderState', datei: 'battle-march-karte.png', auffrischen: '__refreshBuilder', ereignis: true,
+            blatt: { lang: 'de', titel: 'Battle March', zone: 'Aufstellungszone', keine: 'keine', ereignis: 'Zufallsereignis', spalten: 2,
+                     danach: [['Geländeregeln', () => blattAbschnitt('panel-leitfaden', 'h2', 'Geländeregeln', ['H1', 'H2'])],
+                              ['Siegpunkte', () => blattAbschnitt('panel-leitfaden', 'h1', '5. Siegpunkte', ['H1'])]] },
             marker: { name: 'Schatz', farbe: '#d4a52a', rand: '#6b4a1a', abstand: 3 },
             gruppen: [{ titel: 'Mission', kurz: 'Mission', missionen: [
-                          { wert: 'landmarke', name: 'Die Ruine', art: 'ruine' },
-                          { wert: 'schaetze', name: 'Schätze', art: 'schaetze' },
-                          { wert: 'versorgung', name: 'Versorgungswagen', art: 'keine' }] }] });
+                          { wert: 'landmarke', name: 'Die Ruine', art: 'ruine', regel: 'mission-2-body' },
+                          { wert: 'schaetze', name: 'Schätze', art: 'schaetze', regel: 'mission-1-body' },
+                          { wert: 'versorgung', name: 'Versorgungswagen', art: 'keine', regel: 'mission-3-body' }] }] });
 kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstand: 24,
             speicher: 'coreBattleBuilderState', datei: 'core-battle-karte.png', auffrischen: '__refreshCore',
+            blatt: { lang: 'en', titel: 'Core Battle', zone: 'Deployment', keine: 'none', spalten: 3,
+                     // englische Namen der Aufstellungszonen
+                     zonen: { standard: 'Pitched Battle', aufeinandertreffen: 'Close Encounter', flanken: 'Opposed Flanks',
+                              begegnung: 'A Chance Encounter', gebirgspass: 'Mountain Pass', ueberfluegeln: 'Encirclement' },
+                     gelaende: { 'Wald': 'Woods', 'Gebäude': 'Building', 'Hügel': 'Hill', 'Ruine': 'Ruins', 'Feld': 'Field', 'See': 'Lake', 'Turm': 'Tower', 'Durchmesser': 'diameter' },
+                     vorMission: [['Scoring Units', () => blattAbschnitt('panel-coreleitfaden', 'h2', 'Scoring Units', ['H1', 'H2'])],
+                                  ['Scoring Check', () => blattAbschnitt('panel-coreleitfaden', 'h2', 'Scoring Check', ['H1', 'H2'])]],
+                     danach: [['Terrain Rules', () => blattAbschnitt('panel-coreleitfaden', 'h2', 'Terrain Rules', ['H1', 'H2'])],
+                              ['Victory Points', () => blattAbschnitt('panel-coreleitfaden', 'h1', '4. Victory Points', ['H1'])]] },
             marker: { name: 'Missionsziel', klasse: 'ziel', farbe: '#1f3a6b', rand: '#0d1b33', abstand: 6 },
             // Ziele jeweils auf halbem Weg zwischen Mitte und Mitte einer Kante
             // Location 3 und 2 gibt es waagerecht und senkrecht
             gruppen: [
               { titel: 'Mission – End of player turn', kurz: 'End of player turn', missionen: [
-                { wert: 'location2', name: 'Strategic Locations 2',
+                { wert: 'location2', name: 'Strategic Locations 2', regel: 'core-obj-1a-body',
                   art: { varianten: [[[0.5, 0.75], [0.5, 0.25]],
                                      [[0.25, 0.5], [0.75, 0.5]]] } },
-                { wert: 'location3', name: 'Strategic Locations 3',
+                { wert: 'location3', name: 'Strategic Locations 3', regel: 'core-obj-1a-body',
                   art: { varianten: [[[0.25, 0.5], [0.5, 0.5], [0.75, 0.5]],
                                      [[0.5, 0.25], [0.5, 0.5], [0.5, 0.75]]] } },
-                { wert: 'location4', name: 'Strategic Locations 4',
+                { wert: 'location4', name: 'Strategic Locations 4', regel: 'core-obj-1a-body',
                   art: { varianten: [[[0.5, 0.75], [0.5, 0.25], [0.25, 0.5], [0.75, 0.5]]] } },
-                { wert: 'domination', name: 'Domination', art: 'keine' },
-                { wert: 'banners', name: 'Hold the Banners High', art: 'keine' }] },
+                { wert: 'domination', name: 'Domination', art: 'keine', regel: 'core-obj-1b-body' },
+                { wert: 'banners', name: 'Hold the Banners High', art: 'keine', regel: 'core-obj-3-body' }] },
               { titel: 'Mission – End of game', kurz: 'End of game', missionen: [
-                { wert: 'special', name: 'The Ruin', art: 'ruine' },
-                { wert: 'baggage', name: 'Baggage Train', art: 'keine' },
-                { wert: 'holdline', name: 'Hold the Line', art: 'keine' }] }] });
+                { wert: 'special', name: 'The Ruin', art: 'ruine', regel: 'core-obj-4-body' },
+                { wert: 'baggage', name: 'Baggage Train', art: 'keine', regel: 'core-obj-5-body' },
+                { wert: 'holdline', name: 'Hold the Line', art: 'keine', regel: 'core-obj-6-body' }] }] });
 
 /* ================= Tab-Navigation ================= */
 (function () {
