@@ -318,6 +318,20 @@ button:hover{ background:var(--maroon-dark); }
 .version-box{ background:#fff; border:1.5px solid var(--maroon); border-left:5px solid var(--maroon); border-radius:4px; padding:9px 14px; margin:.4rem 0 1.2rem; font-size:.85rem; color:#3e3226; }
 .version-box b{ color:var(--maroon); }
 .guide .gc-table td:first-child{ font-weight:bold; }
+.guide .termin-tabelle tr.termin-monat th{ background:var(--maroon); color:#fff; }
+.guide .termin-tabelle tr.vorbei td{ color:#9a8f7a; }
+.guide .termin-tabelle tr.naechster td{ background:#cfe3c1; font-weight:bold; }
+.termin-knoepfe{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 .5rem; }
+.termin-knopf{ display:inline-block; text-decoration:none; font-weight:bold; font-size:.9rem; padding:8px 14px; border-radius:4px;
+  border:1.5px solid var(--maroon); background:var(--maroon); color:#fff; }
+.termin-knopf:hover{ background:var(--maroon-dark); }
+.termin-knopf:focus-visible{ outline:3px solid #8a6a3b; outline-offset:2px; }
+.termin-hinweis{ font-size:.82rem; color:#5a4a36; margin:0 0 .8rem; padding-left:1.1rem; overflow-wrap:anywhere; }
+.termin-hinweis li{ margin-bottom:.2rem; }
+.termin-legende{ display:flex; flex-wrap:wrap; gap:6px 18px; font-size:.9rem; margin:0 0 .6rem; }
+.termin-legende span{ display:inline-flex; align-items:center; gap:6px; }
+.termin-legende i{ display:inline-block; width:14px; height:14px; border-radius:3px; border:1px solid var(--grey-line); }
+.guide .termin-tabelle td:first-child{ white-space:nowrap; }
 .guide .gc-table th{ background:var(--maroon); color:#fff; }
 .guide .gc-pct{ color:#756b5f; font-size:.85em; }
 .version-box .version-link{ margin:8px 0 0; display:flex; flex-wrap:wrap; gap:6px; }
@@ -371,6 +385,7 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-kartenbau" data-tab="kartenbau" aria-selected="false" tabindex="-1">Kartenbau</button>
   <button class="tab-btn" role="tab" id="tab-base" data-tab="base" aria-controls="panel-base" aria-selected="false" tabindex="-1">BASE</button>
   <button class="tab-btn" role="tab" id="tab-tools" data-tab="tools" aria-selected="false" tabindex="-1">Tools</button>
+  <button class="tab-btn" role="tab" id="tab-termine" data-tab="termine" aria-controls="panel-termine" aria-selected="false" tabindex="-1">Termine 2027</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Battle March" data-gruppe="battlemarch">
   <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Regeln</button>
@@ -1198,6 +1213,67 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <tr><td><b>8–9</b></td><td>25,0</td><td><b>Rückschlag:</b> Der Magier erleidet einen Treffer S4, DS -1 und ist für den Rest des Spiels verwirrt: -1 auf Zauber- und Bannwürfe. Wird er erneut verwirrt, steigt der Malus auf -2 usw.</td></tr>
 <tr><td><b>10–11</b></td><td>13,9</td><td><b>Magischer Angelpunkt:</b> Der Magier (und jede Einheit, der er angeschlossen ist) weicht sofort 2" direkt von der nächsten feindlichen Einheit zurück und wird verwirrt (siehe Rückschlag). Kann er nicht zurückweichen, erleidet er einen Treffer S6, DS -2.</td></tr>
 <tr><td><b>12</b></td><td>2,8</td><td><b>Preis der Macht:</b> Der Zauber wird mit perfekter Anrufung gewirkt. Der Magier verliert sofort eine Magiestufe und vergisst diesen Zauber für den Rest des Spiels. In diesem Zug können keine weiteren Zauber gewirkt werden.</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- ===================== TERMINE ===================== -->
+<div class="tab-content" id="panel-termine" role="tabpanel" aria-labelledby="tab-termine" tabindex="0" hidden="">
+<div class="guide">
+<h1>Termine 2027</h1>
+<div class="termin-knoepfe">
+  <a class="termin-knopf" href="termine-2027.ics" download="termine-2027.ics">📅 Alle Termine in den Kalender</a>
+  <a class="termin-knopf" id="terminAbo" href="webcal://otzmo.github.io/Battle-March/termine-2027.ics">🔔 Kalender abonnieren</a>
+</div>
+<ul class="termin-hinweis">
+<li><b>Alle Termine in den Kalender:</b> lädt eine Datei mit allen Terminen herunter. Einmal öffnen, dann stehen sie in deinem Kalender – mit Erinnerung zwei Tage vorher. Spätere Änderungen kommen so nicht an.</li>
+<li><b>Kalender abonnieren:</b> dein Kalender übernimmt die Termine und hält sie selbst aktuell. Ändert sich ein Termin, wird er automatisch angepasst.</li>
+<li><b>Wichtig:</b> Den Kalender bitte über das Handy hinzufügen – dort landen die Termine direkt in deinem Kalender.</li>
+</ul>
+<div class="termin-legende">
+  <span><i style="background:#cfe3c1"></i>Nächster Termin</span>
+  <span><i style="background:var(--beige)"></i>Kommende Termine</span>
+  <span><i style="background:var(--beige)"></i><span style="color:#9a8f7a">Vergangene Termine (graue Schrift)</span></span>
+</div>
+<table class="termin-tabelle"><tbody>
+<tr><th>Datum</th><th>Tag</th><th>Uhrzeit</th></tr>
+<tr class="termin-monat"><th colspan="3">Januar</th></tr>
+<tr data-datum="2027-01-10"><td>10.01.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr data-datum="2027-01-22"><td>22.01.</td><td>Freitag</td><td>16:00–22:00 Uhr</td></tr>
+<tr class="termin-monat"><th colspan="3">Februar</th></tr>
+<tr data-datum="2027-02-14"><td>14.02.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr data-datum="2027-02-28"><td>28.02.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr class="termin-monat"><th colspan="3">März</th></tr>
+<tr data-datum="2027-03-19"><td>19.03.</td><td>Freitag</td><td>16:00–22:00 Uhr</td></tr>
+<tr data-datum="2027-03-28"><td>28.03.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr class="termin-monat"><th colspan="3">April</th></tr>
+<tr data-datum="2027-04-10"><td>10.04.</td><td>Samstag</td><td>9:30–15:30 Uhr</td></tr>
+<tr data-datum="2027-04-25"><td>25.04.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr class="termin-monat"><th colspan="3">Mai</th></tr>
+<tr data-datum="2027-05-09"><td>09.05.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr data-datum="2027-05-21"><td>21.05.</td><td>Freitag</td><td>16:00–22:00 Uhr</td></tr>
+<tr class="termin-monat"><th colspan="3">Juni</th></tr>
+<tr data-datum="2027-06-06"><td>06.06.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr data-datum="2027-06-19"><td>19.06.</td><td>Samstag</td><td>9:30–15:30 Uhr</td></tr>
+<tr class="termin-monat"><th colspan="3">Juli</th></tr>
+<tr data-datum="2027-07-04"><td>04.07.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr data-datum="2027-07-16"><td>16.07.</td><td>Freitag</td><td>16:00–22:00 Uhr</td></tr>
+<tr class="termin-monat"><th colspan="3">August</th></tr>
+<tr data-datum="2027-08-01"><td>01.08.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr data-datum="2027-08-15"><td>15.08.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr data-datum="2027-08-29"><td>29.08.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr class="termin-monat"><th colspan="3">September</th></tr>
+<tr data-datum="2027-09-12"><td>12.09.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr data-datum="2027-09-26"><td>26.09.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr class="termin-monat"><th colspan="3">Oktober</th></tr>
+<tr data-datum="2027-10-15"><td>15.10.</td><td>Freitag</td><td>16:00–22:00 Uhr</td></tr>
+<tr data-datum="2027-10-24"><td>24.10.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr class="termin-monat"><th colspan="3">November</th></tr>
+<tr data-datum="2027-11-07"><td>07.11.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr data-datum="2027-11-26"><td>26.11.</td><td>Freitag</td><td>16:00–22:00 Uhr</td></tr>
+<tr class="termin-monat"><th colspan="3">Dezember</th></tr>
+<tr data-datum="2027-12-05"><td>05.12.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
+<tr data-datum="2027-12-19"><td>19.12.</td><td>Sonntag</td><td>9:30–15:30 Uhr</td></tr>
 </tbody></table>
 </div>
 </div>
@@ -2644,6 +2720,17 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
 })();
 </script>
 
+<script>
+/* ================= Termine: vergangene grau, naechster gruen ================= */
+(function () {
+  const heute = new Date(); heute.setHours(0, 0, 0, 0);
+  let naechster = false;
+  document.querySelectorAll('.termin-tabelle tr[data-datum]').forEach(tr => {
+    if (new Date(tr.dataset.datum + 'T00:00:00') < heute) tr.classList.add('vorbei');
+    else if (!naechster) { tr.classList.add('naechster'); naechster = true; }
+  });
+})();
+</script>
 <script>
 /* ================= Akkordeon ================= */
 (function () {
