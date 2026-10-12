@@ -1,0 +1,34 @@
+# Holt alle 15 Minuten die Termine aus Firebase und schreibt die Kalenderdateien neu,
+# wenn sich etwas geaendert hat. GitHub Pages veroeffentlicht den Commit danach automatisch.
+name: Kalender aktualisieren
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kalender
+  cancel-in-progress: false
+
+jobs:
+  kalender:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python tools/kalender.py
+      - name: Commit, falls geaendert
+        run: |
+          if [ -n "$(git status --porcelain -- termine.ics termine-2027.ics)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+            git add termine.ics termine-2027.ics
+            git commit -m "Kalender aus der Datenbank aktualisiert"
+            git push
+          fi

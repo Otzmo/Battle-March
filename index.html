@@ -348,6 +348,12 @@ button:hover{ background:var(--maroon-dark); }
 .termin-form input{ font:inherit; font-size:.9rem; padding:5px 8px; border:1.5px solid var(--grey-line); border-radius:4px; flex:1 1 140px; min-width:0; }
 .termin-meldung{ font-size:.82rem; color:#a33; margin:.4rem 0 0; }
 .termin-status{ font-size:.82rem; color:#5a4a36; margin:0 0 .4rem; }
+.termin-editor{ background:#fff; border:1.5px solid var(--maroon); border-left:5px solid var(--maroon); border-radius:4px; padding:10px 14px; margin:.4rem 0 1rem; }
+.termin-editor h2{ margin:0 0 .5rem; font-size:1.05rem; }
+.termin-editor-felder{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-bottom:8px; }
+.termin-editor-felder label{ display:flex; flex-direction:column; gap:3px; font-size:.85rem; font-weight:bold; }
+.termin-editor-felder input{ font:inherit; font-size:.9rem; padding:5px 8px; border:1.5px solid var(--grey-line); border-radius:4px; min-width:0; }
+.termin-mini.sicher{ background:#a33; border-color:#a33; color:#fff; }
 .termin-admin{ margin-top:1rem; font-size:.82rem; }
 .termin-admin summary{ cursor:pointer; color:#5a4a36; }
 @media (max-width:720px){
@@ -411,7 +417,7 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-kartenbau" data-tab="kartenbau" aria-selected="false" tabindex="-1">Kartenbau</button>
   <button class="tab-btn" role="tab" id="tab-base" data-tab="base" aria-controls="panel-base" aria-selected="false" tabindex="-1">BASE</button>
   <button class="tab-btn" role="tab" id="tab-tools" data-tab="tools" aria-selected="false" tabindex="-1">Tools</button>
-  <button class="tab-btn" role="tab" id="tab-termine" data-tab="termine" aria-controls="panel-termine" aria-selected="false" tabindex="-1">Termine 2027</button>
+  <button class="tab-btn" role="tab" id="tab-termine" data-tab="termine" aria-controls="panel-termine" aria-selected="false" tabindex="-1">Termine</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Battle March" data-gruppe="battlemarch">
   <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Regeln</button>
@@ -1246,14 +1252,14 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <!-- ===================== TERMINE ===================== -->
 <div class="tab-content" id="panel-termine" role="tabpanel" aria-labelledby="tab-termine" tabindex="0" hidden="">
 <div class="guide">
-<h1>Termine 2027</h1>
+<h1>Termine</h1>
 <div class="termin-knoepfe">
-  <a class="termin-knopf" href="termine-2027.ics" download="termine-2027.ics">📅 Alle Termine in den Kalender</a>
-  <a class="termin-knopf" id="terminAbo" href="webcal://otzmo.github.io/Battle-March/termine-2027.ics">🔔 Kalender abonnieren</a>
+  <a class="termin-knopf" href="termine.ics" download="termine.ics">📅 Alle Termine in den Kalender</a>
+  <a class="termin-knopf" id="terminAbo" href="webcal://otzmo.github.io/Battle-March/termine.ics">🔔 Kalender abonnieren</a>
 </div>
 <ul class="termin-hinweis">
 <li><b>Alle Termine in den Kalender:</b> lädt eine Datei mit allen Terminen herunter. Einmal öffnen, dann stehen sie in deinem Kalender – mit Erinnerung zwei Tage vorher. Spätere Änderungen kommen so nicht an.</li>
-<li><b>Kalender abonnieren:</b> dein Kalender übernimmt die Termine und hält sie selbst aktuell. Ändert sich ein Termin, wird er automatisch angepasst.</li>
+<li><b>Kalender abonnieren:</b> dein Kalender übernimmt die Termine und hält sie selbst aktuell. Ändert sich ein Termin, wird er automatisch angepasst – je nach Handy mit etwas Verzögerung.</li>
 <li><b>Wichtig:</b> Den Kalender bitte über das Handy hinzufügen – dort landen die Termine direkt in deinem Kalender.</li>
 </ul>
 <div class="termin-legende">
@@ -1262,46 +1268,24 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <span><i style="background:var(--beige)"></i><span style="color:#9a8f7a">Vergangene Termine (graue Schrift)</span></span>
 </div>
 <p class="termin-status" id="terminStatus">Anmeldungen werden geladen …</p>
-<table class="termin-tabelle"><tbody>
-<tr><th>Datum</th><th>Tag</th><th>Art</th><th>Uhrzeit</th><th>Spieler</th></tr>
-<tr class="termin-monat"><th colspan="5">Januar</th></tr>
-<tr data-datum="2027-01-10"><td>10.01.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-01-22"><td>22.01.</td><td>Fr<span class="termin-lang">eitag</span></td><td>Spieltag</td><td>16:00–22:00<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr class="termin-monat"><th colspan="5">Februar</th></tr>
-<tr data-datum="2027-02-14"><td>14.02.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-02-28"><td>28.02.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr class="termin-monat"><th colspan="5">März</th></tr>
-<tr data-datum="2027-03-19"><td>19.03.</td><td>Fr<span class="termin-lang">eitag</span></td><td>Spieltag</td><td>16:00–22:00<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-03-28"><td>28.03.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr class="termin-monat"><th colspan="5">April</th></tr>
-<tr data-datum="2027-04-10"><td>10.04.</td><td>Sa<span class="termin-lang">mstag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-04-25"><td>25.04.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr class="termin-monat"><th colspan="5">Mai</th></tr>
-<tr data-datum="2027-05-09"><td>09.05.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-05-21"><td>21.05.</td><td>Fr<span class="termin-lang">eitag</span></td><td>Spieltag</td><td>16:00–22:00<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr class="termin-monat"><th colspan="5">Juni</th></tr>
-<tr data-datum="2027-06-06"><td>06.06.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-06-19"><td>19.06.</td><td>Sa<span class="termin-lang">mstag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr class="termin-monat"><th colspan="5">Juli</th></tr>
-<tr data-datum="2027-07-04"><td>04.07.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-07-16"><td>16.07.</td><td>Fr<span class="termin-lang">eitag</span></td><td>Spieltag</td><td>16:00–22:00<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr class="termin-monat"><th colspan="5">August</th></tr>
-<tr data-datum="2027-08-01"><td>01.08.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-08-15"><td>15.08.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-08-29"><td>29.08.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr class="termin-monat"><th colspan="5">September</th></tr>
-<tr data-datum="2027-09-12"><td>12.09.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-09-26"><td>26.09.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr class="termin-monat"><th colspan="5">Oktober</th></tr>
-<tr data-datum="2027-10-15"><td>15.10.</td><td>Fr<span class="termin-lang">eitag</span></td><td>Spieltag</td><td>16:00–22:00<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-10-24"><td>24.10.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr class="termin-monat"><th colspan="5">November</th></tr>
-<tr data-datum="2027-11-07"><td>07.11.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-11-26"><td>26.11.</td><td>Fr<span class="termin-lang">eitag</span></td><td>Spieltag</td><td>16:00–22:00<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr class="termin-monat"><th colspan="5">Dezember</th></tr>
-<tr data-datum="2027-12-05"><td>05.12.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-<tr data-datum="2027-12-19"><td>19.12.</td><td>So<span class="termin-lang">nntag</span></td><td>Spieltag</td><td>9:30–15:30<span class="termin-lang"> Uhr</span></td><td class="termin-spieler"></td></tr>
-</tbody></table>
+<form class="termin-editor" id="terminEditor" hidden>
+<h2 id="teTitel">Neuer Termin</h2>
+<div class="termin-editor-felder">
+  <label>Datum<input type="date" id="teDatum" required></label>
+  <label>Art<input type="text" id="teArt" list="teArten" maxlength="30" required></label>
+  <label>Beginn<input type="time" id="teBeginn" required></label>
+  <label>Ende<input type="time" id="teEnde" required></label>
+</div>
+<datalist id="teArten"></datalist>
+<div class="termin-form">
+  <button type="submit" class="termin-mini voll">Speichern</button>
+  <button type="button" class="termin-mini" id="teLoeschen" hidden>Löschen</button>
+  <button type="button" class="termin-mini" id="teAbbrechen" hidden>Abbrechen</button>
+</div>
+<p class="termin-meldung" id="teMeldung" hidden></p>
+<p id="teStartBox" hidden>Die Datenbank enthält noch keine Termine. <button type="button" class="termin-mini voll" id="teUebernehmen">Die 25 Termine 2027 übernehmen</button></p>
+</form>
+<table class="termin-tabelle"><tbody id="terminRumpf"></tbody></table>
 <details class="termin-admin" id="terminAdmin">
 <summary>Admin</summary>
 <form class="termin-form" id="terminAdminForm" style="margin-top:.5rem">
@@ -1309,7 +1293,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <input type="password" id="terminAdminPw" autocomplete="current-password" placeholder="Passwort" aria-label="Admin-Passwort">
   <button type="submit" class="termin-mini voll">Anmelden</button>
 </form>
-<p id="terminAdminAn" hidden>Als Admin angemeldet – du kannst jeden Namen entfernen. <button type="button" class="termin-mini" id="terminAdminAus">Abmelden</button></p>
+<p id="terminAdminAn" hidden>Als Admin angemeldet – oben Termine eintragen, mit ✎ bearbeiten, jeden Namen entfernen. <button type="button" class="termin-mini" id="terminAdminAus">Abmelden</button></p>
 <p class="termin-meldung" id="terminAdminMeldung" hidden></p>
 </details>
 </div>
@@ -2758,66 +2742,126 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
 </script>
 
 <script>
-/* ================= Termine: vergangene grau, naechster gruen, Anmeldung ================= */
+/* ================= Termine: Liste, Anmeldung, Admin ================= */
 (function () {
-  const heute = new Date(); heute.setHours(0, 0, 0, 0);
-  const NAME_KEY = 'tow-termin-name';
   const feld = id => document.getElementById(id);
-  const zeilen = [...document.querySelectorAll('.termin-tabelle tr[data-datum]')];
-  let naechster = false;
-  zeilen.forEach(tr => {
-    if (new Date(tr.dataset.datum + 'T00:00:00') < heute) tr.classList.add('vorbei');
-    else if (!naechster) { tr.classList.add('naechster'); naechster = true; }
-  });
+  const rumpf = feld('terminRumpf');
+  if (!rumpf) return;
+  const NAME_KEY = 'tow-termin-name', CACHE_KEY = 'tow-termine-cache';
+  const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  const TAGE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+  // Ausgangsliste: wird beim ersten Mal vom Admin in die Datenbank uebernommen (ID = Datum)
+  const START = [
+    ['2027-01-10', '09:30', '15:30'],
+    ['2027-01-22', '16:00', '22:00'],
+    ['2027-02-14', '09:30', '15:30'],
+    ['2027-02-28', '09:30', '15:30'],
+    ['2027-03-19', '16:00', '22:00'],
+    ['2027-03-28', '09:30', '15:30'],
+    ['2027-04-10', '09:30', '15:30'],
+    ['2027-04-25', '09:30', '15:30'],
+    ['2027-05-09', '09:30', '15:30'],
+    ['2027-05-21', '16:00', '22:00'],
+    ['2027-06-06', '09:30', '15:30'],
+    ['2027-06-19', '09:30', '15:30'],
+    ['2027-07-04', '09:30', '15:30'],
+    ['2027-07-16', '16:00', '22:00'],
+    ['2027-08-01', '09:30', '15:30'],
+    ['2027-08-15', '09:30', '15:30'],
+    ['2027-08-29', '09:30', '15:30'],
+    ['2027-09-12', '09:30', '15:30'],
+    ['2027-09-26', '09:30', '15:30'],
+    ['2027-10-15', '16:00', '22:00'],
+    ['2027-10-24', '09:30', '15:30'],
+    ['2027-11-07', '09:30', '15:30'],
+    ['2027-11-26', '16:00', '22:00'],
+    ['2027-12-05', '09:30', '15:30'],
+    ['2027-12-19', '09:30', '15:30']
+  ];
+  const startTermine = () => Object.fromEntries(START.map(([d, b, e]) => [d, { datum: d, art: 'Spieltag', beginn: b, ende: e }]));
 
-  /* Zustand: daten[datum][id] = {name, uid, zeit}; meinUid = anonymes Geraet; admin = Admin angemeldet.
-     Das Firebase-Modul am Dateiende liefert Daten und stellt towTermin.anmelden/abmelden bereit.
-     Laedt es nicht (offline, im Artefakt), bleibt die Tabelle lesbar, nur ohne Anmeldung. */
-  let daten = {}, meinUid = null, admin = false, verbunden = false;
+  /* Zustand. termine kommt aus der Datenbank (null = leer/noch nicht geladen), anmeldungen[terminId][id] = {name, uid, zeit}.
+     Das Firebase-Modul am Dateiende liefert die Daten und stellt window.towTermin bereit.
+     Laedt es nicht (offline, im Artefakt), zeigt die Seite den letzten Stand bzw. die Ausgangsliste. */
+  const lese = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const schreibe = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+  let termine = null, dbLeer = false, anmeldungen = {}, meinUid = null, admin = false, verbunden = false, bearbeite = null;
+  try { const c = JSON.parse(lese(CACHE_KEY)); if (c && typeof c === 'object') termine = c; } catch (e) {}
   const offen = new Set(), sicher = new Set();
-  const merkName = () => { try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; } };
-  const speichereName = n => { try { localStorage.setItem(NAME_KEY, n); } catch (e) {} };
 
+  const gueltig = t => t && /^\d{4}-\d\d-\d\d$/.test(t.datum) && typeof t.art === 'string' && /^\d\d:\d\d$/.test(t.beginn) && /^\d\d:\d\d$/.test(t.ende);
+  const liste = () => Object.entries(termine || startTermine()).filter(([, t]) => gueltig(t))
+    .sort((x, y) => (x[1].datum + x[1].beginn).localeCompare(y[1].datum + y[1].beginn));
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-  const eintraege = datum => Object.entries(daten[datum] || {})
+  const uhr = t => t.replace(/^0(\d)/, '$1');
+  const eintraege = id => Object.entries(anmeldungen[id] || {})
     .filter(([, v]) => v && typeof v.name === 'string')
     .sort((x, y) => (x[1].zeit || 0) - (y[1].zeit || 0));
-
-  zeilen.forEach(tr => {
-    const d = el('tr', 'termin-detail'); d.hidden = true; d.dataset.fuer = tr.dataset.datum;
-    const td = el('td'); td.colSpan = 5; d.appendChild(td);
-    tr.after(d);
-  });
+  const knopf = (cls, text, aktion, id, extra) => {
+    const b = el('button', cls, text); b.type = 'button'; b.dataset.aktion = aktion; b.dataset.id = id;
+    if (extra) Object.assign(b.dataset, extra);
+    return b;
+  };
+  // Zweiter Klick bestaetigt (keine Browser-Dialoge)
+  function bestaetigt(k) {
+    if (sicher.has(k)) { sicher.delete(k); return true; }
+    sicher.add(k); zeichne(); setTimeout(() => { if (sicher.delete(k)) zeichne(); }, 4000);
+    return false;
+  }
 
   function zeichne() {
-    zeilen.forEach(tr => {
-      const datum = tr.dataset.datum, liste = eintraege(datum), vorbei = tr.classList.contains('vorbei');
-      const ich = liste.some(([, v]) => meinUid && v.uid === meinUid);
-      const zelle = tr.querySelector('.termin-spieler');
-      zelle.replaceChildren();
-      const zahl = el('button', 'termin-mini', '👥 ' + liste.length + (offen.has(datum) ? ' ▴' : ' ▾'));
-      zahl.type = 'button'; zahl.dataset.aktion = 'auf'; zahl.dataset.datum = datum;
-      zahl.setAttribute('aria-expanded', offen.has(datum) ? 'true' : 'false');
-      zahl.setAttribute('aria-label', liste.length + ' Spieler angemeldet, Namen anzeigen');
-      zelle.appendChild(zahl);
-      if (!vorbei && !ich) {
-        const an = el('button', 'termin-mini voll', 'Anmelden');
-        an.type = 'button'; an.dataset.aktion = 'oeffnen'; an.dataset.datum = datum;
-        zelle.appendChild(an);
-      } else if (ich) zelle.appendChild(el('span', null, ' ✓'));
+    const heute = new Date(); heute.setHours(0, 0, 0, 0);
+    // Eingaben offener Formulare und Meldungen ueber das Neuzeichnen retten
+    const werte = {}, meldungen = {};
+    rumpf.querySelectorAll('tr.termin-detail').forEach(d => {
+      const i = d.querySelector('input'), m = d.querySelector('.termin-meldung');
+      if (i) werte[d.dataset.fuer] = i.value;
+      if (m && !m.hidden) meldungen[d.dataset.fuer] = m.textContent;
+    });
+    rumpf.replaceChildren();
+    const kopf = el('tr');
+    ['Datum', 'Tag', 'Art', 'Uhrzeit', 'Spieler'].forEach(t => kopf.appendChild(el('th', null, t)));
+    rumpf.appendChild(kopf);
+    let monat = '', naechster = false;
+    const arten = new Set(['Spieltag']);
+    liste().forEach(([id, t]) => {
+      arten.add(t.art);
+      const tag = new Date(t.datum + 'T00:00:00'), m = t.datum.slice(0, 7);
+      if (m !== monat) {
+        monat = m;
+        const tr = el('tr', 'termin-monat'), th = el('th', null, MONATE[tag.getMonth()] + ' ' + tag.getFullYear());
+        th.colSpan = 5; tr.appendChild(th); rumpf.appendChild(tr);
+      }
+      const tr = el('tr'); tr.dataset.id = id;
+      const vorbei = tag < heute;
+      if (vorbei) tr.classList.add('vorbei'); else if (!naechster) { tr.classList.add('naechster'); naechster = true; }
+      const wt = TAGE[tag.getDay()], tdTag = el('td', null, wt.slice(0, 2)), tdUhr = el('td', null, uhr(t.beginn) + '–' + uhr(t.ende));
+      tdTag.appendChild(el('span', 'termin-lang', wt.slice(2)));
+      tdUhr.appendChild(el('span', 'termin-lang', ' Uhr'));
+      tr.append(el('td', null, t.datum.slice(8) + '.' + t.datum.slice(5, 7) + '.'), tdTag, el('td', null, t.art), tdUhr);
 
-      const detail = tr.nextElementSibling, td = detail.firstChild;
-      detail.hidden = !offen.has(datum);
+      const listeA = eintraege(id), ich = listeA.some(([, v]) => meinUid && v.uid === meinUid);
+      const zelle = el('td', 'termin-spieler');
+      const zahl = knopf('termin-mini', '👥 ' + listeA.length + (offen.has(id) ? ' ▴' : ' ▾'), 'auf', id);
+      zahl.setAttribute('aria-expanded', offen.has(id) ? 'true' : 'false');
+      zahl.setAttribute('aria-label', listeA.length + ' Spieler angemeldet, Namen anzeigen');
+      zelle.appendChild(zahl);
+      if (!vorbei && !ich) zelle.appendChild(knopf('termin-mini voll', 'Anmelden', 'oeffnen', id));
+      else if (ich) zelle.appendChild(el('span', null, ' ✓'));
+      if (admin) { const b = knopf('termin-mini', '✎', 'bearbeiten', id); b.setAttribute('aria-label', 'Termin bearbeiten'); zelle.appendChild(b); }
+      tr.appendChild(zelle);
+      rumpf.appendChild(tr);
+
+      const detail = el('tr', 'termin-detail'), td = el('td'); td.colSpan = 5;
+      detail.dataset.fuer = id; detail.hidden = !offen.has(id); detail.appendChild(td);
+      rumpf.appendChild(detail);
       if (detail.hidden) return;
-      const meldung = td.querySelector('.termin-meldung'), wert = td.querySelector('input')?.value;
-      td.replaceChildren();
       const ul = el('ul', 'termin-namen');
-      if (!liste.length) ul.appendChild(el('li', 'leer', 'Noch niemand angemeldet.'));
-      liste.forEach(([id, v]) => {
+      if (!listeA.length) ul.appendChild(el('li', 'leer', 'Noch niemand angemeldet.'));
+      listeA.forEach(([aid, v]) => {
         const li = el('li', null, v.name);
         if (admin || (meinUid && v.uid === meinUid)) {
-          const k = datum + '/' + id, b = el('button', sicher.has(k) ? 'sicher' : '', sicher.has(k) ? 'Wirklich entfernen?' : '✕');
-          b.type = 'button'; b.dataset.aktion = 'weg'; b.dataset.datum = datum; b.dataset.id = id;
+          const k = id + '/' + aid, b = knopf(sicher.has(k) ? 'sicher' : '', sicher.has(k) ? 'Wirklich entfernen?' : '✕', 'weg', id, { aid });
           b.setAttribute('aria-label', v.name + ' abmelden');
           li.appendChild(b);
         }
@@ -2825,62 +2869,108 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
       });
       td.appendChild(ul);
       if (!vorbei && !ich) {
-        const f = el('form', 'termin-form'); f.dataset.datum = datum;
+        const f = el('form', 'termin-form'); f.dataset.id = id;
         const inp = el('input'); inp.type = 'text'; inp.maxLength = 30; inp.placeholder = 'Dein Name';
         inp.setAttribute('aria-label', 'Dein Name'); inp.autocomplete = 'name';
-        inp.value = wert != null ? wert : merkName();
+        inp.value = werte[id] != null ? werte[id] : (lese(NAME_KEY) || '');
         const ok = el('button', 'termin-mini voll', 'Anmelden'); ok.type = 'submit';
         f.append(inp, ok); td.appendChild(f);
       }
-      if (meldung && !meldung.hidden) td.appendChild(meldung);
+      if (meldungen[id]) td.appendChild(el('p', 'termin-meldung', meldungen[id]));
     });
+    if (bearbeite && !(termine && termine[bearbeite])) leereEditor();
+    feld('teArten').replaceChildren(...[...arten].map(a => { const o = el('option'); o.value = a; return o; }));
+    feld('terminEditor').hidden = !admin;
+    feld('teStartBox').hidden = !(admin && dbLeer);
+    const lo = feld('teLoeschen'), k = 'termin/' + bearbeite;
+    lo.classList.toggle('sicher', sicher.has(k));
+    lo.textContent = sicher.has(k) ? 'Wirklich löschen?' : 'Löschen';
   }
 
-  function melde(datum, text) {
-    const td = document.querySelector(`tr.termin-detail[data-fuer="${datum}"] td`);
+  function melde(id, text) {
+    const td = rumpf.querySelector(`tr.termin-detail[data-fuer="${CSS.escape(id)}"] td`);
     if (!td) return;
     let m = td.querySelector('.termin-meldung');
     if (!m) { m = el('p', 'termin-meldung'); td.appendChild(m); }
     m.textContent = text; m.hidden = !text;
   }
-  const keineVerbindung = 'Anmeldung gerade nicht möglich – keine Verbindung zur Datenbank.';
+  const keineVerbindung = 'Gerade nicht möglich – keine Verbindung zur Datenbank.';
+  const bereit = () => verbunden && window.towTermin;
 
-  const tabelle = document.querySelector('.termin-tabelle');
-  tabelle.addEventListener('click', e => {
+  rumpf.addEventListener('click', e => {
     const b = e.target.closest('button[data-aktion]');
     if (!b) return;
-    const datum = b.dataset.datum;
-    if (b.dataset.aktion === 'auf' || b.dataset.aktion === 'oeffnen') {
-      const fokus = b.dataset.aktion === 'oeffnen';
-      if (fokus) offen.add(datum); else if (offen.has(datum)) offen.delete(datum); else offen.add(datum);
+    const id = b.dataset.id, aktion = b.dataset.aktion;
+    if (aktion === 'auf' || aktion === 'oeffnen') {
+      if (aktion === 'oeffnen') offen.add(id); else if (offen.has(id)) offen.delete(id); else offen.add(id);
       zeichne();
-      if (fokus) document.querySelector(`tr.termin-detail[data-fuer="${datum}"] input`)?.focus();
-      return;
-    }
-    if (b.dataset.aktion === 'weg') {
-      const k = datum + '/' + b.dataset.id;
-      // Zweiter Klick bestaetigt (keine Browser-Dialoge)
-      if (!sicher.has(k)) { sicher.add(k); zeichne(); setTimeout(() => { sicher.delete(k); zeichne(); }, 4000); return; }
-      sicher.delete(k);
-      if (!verbunden || !window.towTermin) return melde(datum, keineVerbindung);
-      window.towTermin.abmelden(datum, b.dataset.id).catch(() => melde(datum, 'Entfernen hat nicht geklappt.'));
+      if (aktion === 'oeffnen') rumpf.querySelector(`tr.termin-detail[data-fuer="${CSS.escape(id)}"] input`)?.focus();
+    } else if (aktion === 'weg') {
+      if (!bestaetigt(id + '/' + b.dataset.aid)) return;
+      if (!bereit()) return melde(id, keineVerbindung);
+      window.towTermin.abmelden(id, b.dataset.aid).catch(() => melde(id, 'Entfernen hat nicht geklappt.'));
+    } else if (aktion === 'bearbeiten') {
+      const t = (termine || {})[id];
+      if (!t) { zeigeEditorMeldung(dbLeer ? 'Erst die 25 Termine 2027 übernehmen.' : keineVerbindung); feld('terminEditor').scrollIntoView({ block: 'center' }); return; }
+      bearbeite = id;
+      feld('teTitel').textContent = 'Termin bearbeiten';
+      feld('teDatum').value = t.datum; feld('teArt').value = t.art; feld('teBeginn').value = t.beginn; feld('teEnde').value = t.ende;
+      feld('teLoeschen').hidden = feld('teAbbrechen').hidden = false;
+      zeigeEditorMeldung('');
+      feld('terminEditor').scrollIntoView({ block: 'center' });
+      zeichne();
     }
   });
-  tabelle.addEventListener('submit', e => {
+  rumpf.addEventListener('submit', e => {
     const f = e.target.closest('form.termin-form');
     if (!f) return;
     e.preventDefault();
-    const datum = f.dataset.datum, name = f.querySelector('input').value.replace(/\s+/g, ' ').trim().slice(0, 30);
-    if (!name) return melde(datum, 'Bitte einen Namen eintragen.');
-    if (!verbunden || !window.towTermin) return melde(datum, keineVerbindung);
-    speichereName(name);
-    const knopf = f.querySelector('button'); knopf.disabled = true;
-    window.towTermin.anmelden(datum, name)
-      .then(() => melde(datum, ''))
-      .catch(() => { knopf.disabled = false; melde(datum, 'Anmelden hat nicht geklappt.'); });
+    const id = f.dataset.id, name = f.querySelector('input').value.replace(/\s+/g, ' ').trim().slice(0, 30);
+    if (!name) return melde(id, 'Bitte einen Namen eintragen.');
+    if (!bereit()) return melde(id, keineVerbindung);
+    if (!termine || !termine[id]) return melde(id, 'Anmeldung ist für diesen Termin noch nicht freigeschaltet.');
+    schreibe(NAME_KEY, name);
+    const ok = f.querySelector('button'); ok.disabled = true;
+    window.towTermin.anmelden(id, name)
+      .then(() => melde(id, ''))
+      .catch(() => { ok.disabled = false; melde(id, 'Anmelden hat nicht geklappt.'); });
   });
 
-  // Admin
+  // Editor (nur Admin)
+  function zeigeEditorMeldung(t) { feld('teMeldung').textContent = t; feld('teMeldung').hidden = !t; }
+  function leereEditor() {
+    bearbeite = null;
+    feld('teTitel').textContent = 'Neuer Termin';
+    feld('teDatum').value = ''; feld('teArt').value = 'Spieltag'; feld('teBeginn').value = ''; feld('teEnde').value = '';
+    feld('teLoeschen').hidden = feld('teAbbrechen').hidden = true;
+  }
+  feld('terminEditor').addEventListener('submit', e => {
+    e.preventDefault();
+    const t = { datum: feld('teDatum').value, art: feld('teArt').value.replace(/\s+/g, ' ').trim().slice(0, 30),
+                beginn: feld('teBeginn').value, ende: feld('teEnde').value };
+    if (!gueltig(t) || !t.art) return zeigeEditorMeldung('Bitte Datum, Art, Beginn und Ende ausfüllen.');
+    if (t.ende <= t.beginn) return zeigeEditorMeldung('Das Ende muss nach dem Beginn liegen.');
+    if (!bereit()) return zeigeEditorMeldung(keineVerbindung);
+    if (dbLeer) return zeigeEditorMeldung('Erst die 25 Termine 2027 übernehmen.');
+    window.towTermin.terminSpeichern(bearbeite, t)
+      .then(() => { leereEditor(); zeigeEditorMeldung(''); zeichne(); })
+      .catch(() => zeigeEditorMeldung('Speichern hat nicht geklappt.'));
+  });
+  feld('teAbbrechen').addEventListener('click', () => { leereEditor(); zeigeEditorMeldung(''); zeichne(); });
+  feld('teLoeschen').addEventListener('click', () => {
+    const id = bearbeite;
+    if (!id || !bestaetigt('termin/' + id)) return;
+    if (!bereit()) return zeigeEditorMeldung(keineVerbindung);
+    window.towTermin.terminLoeschen(id)
+      .then(() => { leereEditor(); zeigeEditorMeldung(''); zeichne(); })
+      .catch(() => zeigeEditorMeldung('Löschen hat nicht geklappt.'));
+  });
+  feld('teUebernehmen').addEventListener('click', () => {
+    if (!bereit()) return zeigeEditorMeldung(keineVerbindung);
+    window.towTermin.termineUebernehmen(startTermine()).catch(() => zeigeEditorMeldung('Übernehmen hat nicht geklappt.'));
+  });
+
+  // Admin-Anmeldung
   const adminMeldung = t => { feld('terminAdminMeldung').textContent = t; feld('terminAdminMeldung').hidden = !t; };
   feld('terminAdminForm').addEventListener('submit', e => {
     e.preventDefault();
@@ -2894,12 +2984,19 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
 
   // Schnittstelle fuer das Firebase-Modul
   window.towTerminSeite = {
-    daten(d) { daten = d && typeof d === 'object' ? d : {}; zeichne(); },
+    termine(d) {
+      dbLeer = !d;
+      termine = d && typeof d === 'object' ? d : null;
+      if (termine) schreibe(CACHE_KEY, JSON.stringify(termine));
+      zeichne();
+    },
+    daten(d) { anmeldungen = d && typeof d === 'object' ? d : {}; zeichne(); },
     uid(u) { meinUid = u; zeichne(); },
-    admin(a) { admin = a; feld('terminAdminForm').hidden = a; feld('terminAdminAn').hidden = !a; zeichne(); },
+    admin(a) { admin = a; feld('terminAdminForm').hidden = a; feld('terminAdminAn').hidden = !a; if (!a) leereEditor(); zeichne(); },
     verbunden(v) { verbunden = v; feld('terminStatus').hidden = v;
       if (!v) feld('terminStatus').textContent = 'Keine Verbindung zur Datenbank – Anmeldungen werden gerade nicht angezeigt.'; }
   };
+  leereEditor();
   zeichne();
   // Kommt nach 8 Sekunden keine Verbindung zustande, Hinweis zeigen
   setTimeout(() => { if (!verbunden) window.towTerminSeite.verbunden(false); }, 8000);
@@ -4249,7 +4346,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
      laedt es nicht, laeuft die Seite ohne Anmeldung weiter. -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import { getDatabase, ref, onValue, push, set, remove, serverTimestamp }
+import { getDatabase, ref, onValue, push, set, remove, update, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -4271,6 +4368,7 @@ if (seite) {
   const auth = getAuth(app), authAdmin = getAuth(appAdmin);
   let admin = false;
 
+  onValue(ref(db, "termine"), s => seite.termine(s.val()), () => seite.verbunden(false));
   onValue(ref(db, "anmeldungen"), s => seite.daten(s.val()), () => seite.verbunden(false));
   onValue(ref(db, ".info/connected"), s => seite.verbunden(!!s.val()));
   onAuthStateChanged(auth, u => seite.uid(u ? u.uid : null));
@@ -4278,9 +4376,13 @@ if (seite) {
 
   const anonym = () => auth.currentUser ? Promise.resolve(auth.currentUser) : signInAnonymously(auth).then(r => r.user);
   window.towTermin = {
-    anmelden: (datum, name) => anonym().then(u =>
-      set(push(ref(db, "anmeldungen/" + datum)), { name, uid: u.uid, zeit: serverTimestamp() })),
-    abmelden: (datum, id) => remove(ref(admin ? dbAdmin : db, "anmeldungen/" + datum + "/" + id)),
+    anmelden: (termin, name) => anonym().then(u =>
+      set(push(ref(db, "anmeldungen/" + termin)), { name, uid: u.uid, zeit: serverTimestamp() })),
+    abmelden: (termin, id) => remove(ref(admin ? dbAdmin : db, "anmeldungen/" + termin + "/" + id)),
+    // Termine schreibt nur der Admin; geloescht wird ein Termin samt seinen Anmeldungen
+    terminSpeichern: (id, t) => id ? set(ref(dbAdmin, "termine/" + id), t) : set(push(ref(dbAdmin, "termine")), t),
+    terminLoeschen: id => update(ref(dbAdmin), { ["termine/" + id]: null, ["anmeldungen/" + id]: null }),
+    termineUebernehmen: alle => update(ref(dbAdmin, "termine"), alle),
     adminAn: pw => signInWithEmailAndPassword(authAdmin, ADMIN_KONTO, pw),
     adminAus: () => signOut(authAdmin)
   };
