@@ -4,6 +4,22 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OTZMO-TOW</title>
+<meta name="description" content="Warhammer: The Old World – Regeln für Battle March und Core Battle, Kartenbau, Rechner und Spieltermine mit Anmeldung.">
+<meta name="theme-color" content="#e6dbc2">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="OTZMO-TOW">
+<meta property="og:title" content="OTZMO-TOW – Warhammer: The Old World">
+<meta property="og:description" content="Regeln für Battle March und Core Battle, Kartenbau, Rechner und Spieltermine mit Anmeldung.">
+<meta property="og:url" content="https://otzmo.github.io/Battle-March/">
+<meta property="og:image" content="https://otzmo.github.io/Battle-March/vorschau.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="de_DE">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap">
 <style>
 :root{
@@ -1216,7 +1232,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <div><span class="sr-titel">Bannwurf</span><label class="ar-haken"><input type="checkbox" id="zrBWdh"> Wiederholen, wenn er misslingt</label></div>
 </div>
 <table class="ar-tabelle zr-tabelle"><tbody id="zrTabelle"></tbody></table>
-<p class="sr-hint" style="margin-top:10px;">Der Zauber gelingt, wenn der Zauberwurf den Zauberwert erreicht. Ein Pasch aus Einsen misslingt immer und ist ein Patzer (<a href="#" id="zrZuPatzer">zu den Zauberpatzern</a>), ein Pasch aus Sechsen gelingt immer. Gebannt ist er, wenn der Bannwurf (2W6 + Stufe/2 des Banners, aufgerundet) höher ist als der Zauberwurf – ein Pasch aus Sechsen bannt immer. Stufe 0 = Banner ohne Magierstufe.</p>
+<p class="sr-hint" style="margin-top:10px;">Der Zauber gelingt, wenn der Zauberwurf den Zauberwert erreicht. Ein Pasch aus Einsen misslingt immer und ist ein Patzer (<a href="#patzer" id="zrZuPatzer">zu den Zauberpatzern</a>), ein Pasch aus Sechsen gelingt immer. Gebannt ist er, wenn der Bannwurf (2W6 + Stufe/2 des Banners, aufgerundet) höher ist als der Zauberwurf – ein Pasch aus Sechsen bannt immer. Stufe 0 = Banner ohne Magierstufe.</p>
 </div>
 </div>
 
@@ -2711,7 +2727,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
       if (sel && fokus) t.focus();
     });
   }
-  function activate(name, focusTab) {
+  function activate(name, focusTab, merken = true) {
     if (unter[name]) name = zuletzt[name];      // Oberpunkt -> sein letzter Unterpunkt
     const gruppe = gruppeVon[name];
     if (gruppe) zuletzt[gruppe] = name;
@@ -2725,6 +2741,8 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     if (name === 'baukasten' && window.__refreshBuilder) window.__refreshBuilder();
     if (name === 'corebattle' && window.__refreshCore) window.__refreshCore();
     if (name === 'base' && window.__refreshBase) window.__refreshBase();
+    // Adresse zeigt den offenen Reiter (#termine, #baukasten ...), damit man direkt darauf verlinken kann
+    if (merken && location.hash !== '#' + name) { try { history.replaceState(null, '', '#' + name); } catch (e) {} }
   }
   [haupt].concat(Object.values(unter)).forEach(liste => liste.forEach((t, i) => {
     t.addEventListener('click', () => activate(t.dataset.tab));
@@ -2737,7 +2755,14 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
       }
     });
   }));
-  activate('leitfaden');
+  // Beim Laden und bei geaenderter Adresse den Reiter aus dem #-Teil oeffnen
+  const ausAdresse = () => {
+    const h = decodeURIComponent(location.hash.slice(1));
+    if (panels[h] || unter[h]) { activate(h, false, false); return true; }
+    return false;
+  };
+  window.addEventListener('hashchange', ausAdresse);
+  if (!ausAdresse()) activate('leitfaden', false, false);
 })();
 </script>
 
@@ -2984,6 +3009,8 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
 
   // Schnittstelle fuer das Firebase-Modul
   window.towTerminSeite = {
+    // Kommt 8 Sekunden nach Ladebeginn keine Verbindung zustande, Hinweis zeigen
+    laedt() { setTimeout(() => { if (!verbunden) window.towTerminSeite.verbunden(false); }, 8000); },
     termine(d) {
       dbLeer = !d;
       termine = d && typeof d === 'object' ? d : null;
@@ -2998,8 +3025,6 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   };
   leereEditor();
   zeichne();
-  // Kommt nach 8 Sekunden keine Verbindung zustande, Hinweis zeigen
-  setTimeout(() => { if (!verbunden) window.towTerminSeite.verbunden(false); }, 8000);
 })();
 </script>
 <script>
@@ -4345,12 +4370,9 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
 <!-- Anmeldungen zu den Terminen (Firebase, Projekt spieltageuebersicht). Getrennt als Modul:
      laedt es nicht, laeuft die Seite ohne Anmeldung weiter. -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import { getDatabase, ref, onValue, push, set, remove, update, serverTimestamp }
-  from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
-import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-
+/* Firebase wird erst geladen, wenn der Reiter "Termine" sichtbar ist – die anderen Reiter
+   laden so schneller. initializeAuth ohne Popup-Unterstuetzung spart das Google-iframe. */
+const V = "https://www.gstatic.com/firebasejs/12.19.0/";
 const ADMIN_KONTO = "philip.scherer85@gmail.com";
 const konfig = {
   apiKey: "AIzaSyAaJnnjszYwNcCF9v7RM2aTSBAjOJZ2Izo",
@@ -4359,33 +4381,51 @@ const konfig = {
   projectId: "spieltageuebersicht",
   storageBucket: "spieltageuebersicht.firebasestorage.app"
 };
-const seite = window.towTerminSeite;
-if (seite) {
-  // Zwei getrennte Instanzen: das Geraet bleibt anonym angemeldet (eigene Namen),
-  // der Admin meldet sich daneben an, ohne die anonyme Kennung zu verlieren.
-  const app = initializeApp(konfig, "termine"), appAdmin = initializeApp(konfig, "termine-admin");
-  const db = getDatabase(app), dbAdmin = getDatabase(appAdmin);
-  const auth = getAuth(app), authAdmin = getAuth(appAdmin);
-  let admin = false;
+const seite = window.towTerminSeite, panel = document.getElementById("panel-termine");
+let gestartet = false;
+async function starte() {
+  if (gestartet || !seite) return;
+  gestartet = true;
+  seite.laedt();
+  try {
+    const [{ initializeApp }, { getDatabase, ref, onValue, push, set, remove, update, serverTimestamp },
+           { initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, signInAnonymously,
+             signInWithEmailAndPassword, signOut, onAuthStateChanged }] =
+      await Promise.all([import(V + "firebase-app.js"), import(V + "firebase-database.js"), import(V + "firebase-auth.js")]);
+    // Zwei getrennte Instanzen: das Geraet bleibt anonym angemeldet (eigene Namen),
+    // der Admin meldet sich daneben an, ohne die anonyme Kennung zu verlieren.
+    const app = initializeApp(konfig, "termine"), appAdmin = initializeApp(konfig, "termine-admin");
+    const db = getDatabase(app), dbAdmin = getDatabase(appAdmin);
+    const speicher = { persistence: [indexedDBLocalPersistence, browserLocalPersistence] };
+    const auth = initializeAuth(app, speicher), authAdmin = initializeAuth(appAdmin, speicher);
+    let admin = false;
 
-  onValue(ref(db, "termine"), s => seite.termine(s.val()), () => seite.verbunden(false));
-  onValue(ref(db, "anmeldungen"), s => seite.daten(s.val()), () => seite.verbunden(false));
-  onValue(ref(db, ".info/connected"), s => seite.verbunden(!!s.val()));
-  onAuthStateChanged(auth, u => seite.uid(u ? u.uid : null));
-  onAuthStateChanged(authAdmin, u => { admin = !!u; seite.admin(admin); });
+    onValue(ref(db, "termine"), s => seite.termine(s.val()), () => seite.verbunden(false));
+    onValue(ref(db, "anmeldungen"), s => seite.daten(s.val()), () => seite.verbunden(false));
+    onValue(ref(db, ".info/connected"), s => seite.verbunden(!!s.val()));
+    onAuthStateChanged(auth, u => seite.uid(u ? u.uid : null));
+    onAuthStateChanged(authAdmin, u => { admin = !!u; seite.admin(admin); });
 
-  const anonym = () => auth.currentUser ? Promise.resolve(auth.currentUser) : signInAnonymously(auth).then(r => r.user);
-  window.towTermin = {
-    anmelden: (termin, name) => anonym().then(u =>
-      set(push(ref(db, "anmeldungen/" + termin)), { name, uid: u.uid, zeit: serverTimestamp() })),
-    abmelden: (termin, id) => remove(ref(admin ? dbAdmin : db, "anmeldungen/" + termin + "/" + id)),
-    // Termine schreibt nur der Admin; geloescht wird ein Termin samt seinen Anmeldungen
-    terminSpeichern: (id, t) => id ? set(ref(dbAdmin, "termine/" + id), t) : set(push(ref(dbAdmin, "termine")), t),
-    terminLoeschen: id => update(ref(dbAdmin), { ["termine/" + id]: null, ["anmeldungen/" + id]: null }),
-    termineUebernehmen: alle => update(ref(dbAdmin, "termine"), alle),
-    adminAn: pw => signInWithEmailAndPassword(authAdmin, ADMIN_KONTO, pw),
-    adminAus: () => signOut(authAdmin)
-  };
+    const anonym = () => auth.currentUser ? Promise.resolve(auth.currentUser) : signInAnonymously(auth).then(r => r.user);
+    window.towTermin = {
+      anmelden: (termin, name) => anonym().then(u =>
+        set(push(ref(db, "anmeldungen/" + termin)), { name, uid: u.uid, zeit: serverTimestamp() })),
+      abmelden: (termin, id) => remove(ref(admin ? dbAdmin : db, "anmeldungen/" + termin + "/" + id)),
+      // Termine schreibt nur der Admin; geloescht wird ein Termin samt seinen Anmeldungen
+      terminSpeichern: (id, t) => id ? set(ref(dbAdmin, "termine/" + id), t) : set(push(ref(dbAdmin, "termine")), t),
+      terminLoeschen: id => update(ref(dbAdmin), { ["termine/" + id]: null, ["anmeldungen/" + id]: null }),
+      termineUebernehmen: alle => update(ref(dbAdmin, "termine"), alle),
+      adminAn: pw => signInWithEmailAndPassword(authAdmin, ADMIN_KONTO, pw),
+      adminAus: () => signOut(authAdmin)
+    };
+  } catch (e) {
+    seite.verbunden(false);   // offline oder blockiert: Seite bleibt ohne Anmeldung nutzbar
+  }
+}
+if (panel) {
+  if (!panel.hidden) starte();
+  else new MutationObserver((_, beob) => { if (!panel.hidden) { beob.disconnect(); starte(); } })
+    .observe(panel, { attributes: true, attributeFilter: ["hidden"] });
 }
 </script>
 <!-- Besucherzählung (GoatCounter, ohne Cookies) -->
