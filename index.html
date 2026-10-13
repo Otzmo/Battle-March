@@ -18,10 +18,14 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<link rel="preload" href="fonts/crimson-pro.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* Schriften liegen im Repo (fonts/, SIL Open Font License) statt bei Google Fonts:
+   kein Warten auf einen fremden Server, keine Besucherdaten an Google.
+   Crimson Pro ist eine variable Schrift – eine Datei deckt 400 bis 700 ab. */
+@font-face{ font-family:"Crimson Pro"; font-style:normal; font-weight:200 900; font-display:swap; src:url(fonts/crimson-pro.woff2) format("woff2"); }
+@font-face{ font-family:"Crimson Pro"; font-style:italic; font-weight:200 900; font-display:swap; src:url(fonts/crimson-pro-italic.woff2) format("woff2"); }
+@font-face{ font-family:"IM Fell English SC"; font-style:normal; font-weight:400; font-display:swap; src:url(fonts/im-fell-english-sc.woff2) format("woff2"); }
 :root{
   --maroon:#4a3b28; --maroon-dark:#2e2418;
   --tan:#e3d6b8; --beige:#f3ecdc;
@@ -49,6 +53,12 @@ h1, h2, h3{ font-family:"Crimson Pro",Georgia,serif; font-weight:700; }
 
 /* ---------- Seitenkopf ---------- */
 .page-header{ text-align:center; max-width:1320px; margin:0 auto 10px; }
+.page-header h1 a{ color:inherit; text-decoration:none; border-radius:4px; }
+.page-header h1 a:hover{ color:var(--maroon-dark); }
+.page-header h1 a:focus-visible{ outline:3px solid #8a6a3b; outline-offset:4px; }
+.start-liste{ list-style:none; padding:0; margin:1rem 0 0; display:grid; gap:10px; }
+.start-liste li{ background:#fff; border:1.5px solid var(--grey-line); border-left:5px solid var(--maroon); border-radius:4px; padding:10px 14px; }
+.start-liste b{ display:block; color:var(--maroon); font-size:1.1rem; }
 .page-header h1{ color:var(--maroon); font-size:2.1rem; letter-spacing:.05em; margin:0 0 2px; }
 
 /* ---------- Tabs ---------- */
@@ -423,7 +433,7 @@ button:hover{ background:var(--maroon-dark); }
 <body>
 
 <div class="page-header">
-  <h1>OTZMO-TOW</h1>
+  <h1><a href="./" id="startLink" title="Zur Startseite">OTZMO-TOW</a></h1>
 </div>
 
 <nav class="tabnav">
@@ -431,7 +441,6 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-battlemarch" data-tab="battlemarch" aria-selected="true" tabindex="0">Battle March</button>
   <button class="tab-btn" role="tab" id="tab-core" data-tab="core" aria-selected="false" tabindex="-1">Core Battle</button>
   <button class="tab-btn" role="tab" id="tab-kartenbau" data-tab="kartenbau" aria-selected="false" tabindex="-1">Kartenbau</button>
-  <button class="tab-btn" role="tab" id="tab-base" data-tab="base" aria-controls="panel-base" aria-selected="false" tabindex="-1">BASE</button>
   <button class="tab-btn" role="tab" id="tab-tools" data-tab="tools" aria-selected="false" tabindex="-1">Tools</button>
   <button class="tab-btn" role="tab" id="tab-termine" data-tab="termine" aria-controls="panel-termine" aria-selected="false" tabindex="-1">Termine</button>
 </div>
@@ -452,6 +461,7 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-angriff" data-tab="angriff" aria-controls="panel-angriff" aria-selected="false" tabindex="-1">Ansturm&shy;rechner</button>
   <button class="tab-btn" role="tab" id="tab-zauber" data-tab="zauber" aria-controls="panel-zauber" aria-selected="false" tabindex="-1">Zauber&shy;rechner</button>
   <button class="tab-btn" role="tab" id="tab-patzer" data-tab="patzer" aria-controls="panel-patzer" aria-selected="false" tabindex="-1">Zauber&shy;patzer</button>
+  <button class="tab-btn" role="tab" id="tab-base" data-tab="base" aria-controls="panel-base" aria-selected="false" tabindex="-1">BASE</button>
 </div>
 </nav>
 
@@ -1262,6 +1272,21 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <tr><td><b>10–11</b></td><td>13,9</td><td><b>Magischer Angelpunkt:</b> Der Magier (und jede Einheit, der er angeschlossen ist) weicht sofort 2" direkt von der nächsten feindlichen Einheit zurück und wird verwirrt (siehe Rückschlag). Kann er nicht zurückweichen, erleidet er einen Treffer S6, DS -2.</td></tr>
 <tr><td><b>12</b></td><td>2,8</td><td><b>Preis der Macht:</b> Der Zauber wird mit perfekter Anrufung gewirkt. Der Magier verliert sofort eine Magiestufe und vergisst diesen Zauber für den Rest des Spiels. In diesem Zug können keine weiteren Zauber gewirkt werden.</td></tr>
 </tbody></table>
+</div>
+</div>
+
+<!-- ===================== STARTSEITE ===================== -->
+<div class="tab-content" id="panel-start" tabindex="-1" hidden="">
+<div class="guide">
+<h1>Willkommen bei OTZMO-TOW</h1>
+<p>Hier findest du alles für unsere Spiele von Warhammer: The Old World.</p>
+<ul class="start-liste">
+  <li><b>Battle March</b>Regeln und Armeebau für das kleine Format</li>
+  <li><b>Core Battle</b>Rules und Army Building für das große Format</li>
+  <li><b>Kartenbau</b>Spielfeld, Mission und Gelände auswürfeln</li>
+  <li><b>Tools</b>Schablonen-, Ansturm- und Zauberrechner, Zauberpatzer und BASE-Generator für den 3D-Druck</li>
+  <li><b>Termine</b>Unsere Spieltage mit Anmeldung und Kalender-Abo</li>
+</ul>
 </div>
 </div>
 
@@ -2741,9 +2766,14 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     if (name === 'baukasten' && window.__refreshBuilder) window.__refreshBuilder();
     if (name === 'corebattle' && window.__refreshCore) window.__refreshCore();
     if (name === 'base' && window.__refreshBase) window.__refreshBase();
-    // Adresse zeigt den offenen Reiter (#termine, #baukasten ...), damit man direkt darauf verlinken kann
-    if (merken && location.hash !== '#' + name) { try { history.replaceState(null, '', '#' + name); } catch (e) {} }
+    // Ohne markierten Reiter (Startseite) bleibt der erste per Tab-Taste erreichbar
+    if (!haupt.some(t => t.tabIndex === 0)) haupt[0].tabIndex = 0;
+    // Adresse zeigt den offenen Reiter (#termine, #baukasten ...), damit man direkt darauf verlinken kann;
+    // die Startseite hat keinen #-Teil
+    const ziel = name === 'start' ? location.pathname + location.search : '#' + name;
+    if (merken && (name === 'start' ? location.hash : location.hash !== ziel)) { try { history.replaceState(null, '', ziel); } catch (e) {} }
   }
+  document.getElementById('startLink').addEventListener('click', e => { e.preventDefault(); activate('start'); window.scrollTo(0, 0); });
   [haupt].concat(Object.values(unter)).forEach(liste => liste.forEach((t, i) => {
     t.addEventListener('click', () => activate(t.dataset.tab));
     t.addEventListener('keydown', (e) => {
@@ -2762,7 +2792,8 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     return false;
   };
   window.addEventListener('hashchange', ausAdresse);
-  if (!ausAdresse()) activate('leitfaden', false, false);
+  window.addEventListener('hashchange', () => { if (!location.hash) activate('start', false, false); });
+  if (!ausAdresse()) activate('start', false, false);
 })();
 </script>
 
