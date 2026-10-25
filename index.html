@@ -81,6 +81,7 @@ h1, h2, h3{ font-family:"Crimson Pro",Georgia,serif; font-weight:700; }
 }
 .tab-btn[aria-selected="true"]{ background:var(--maroon); color:#fff; }
 .tab-btn:hover{ background:var(--maroon); color:#fff; }
+.tab-link{ text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
 .tab-btn:focus-visible{ outline:3px solid #8a6a3b; outline-offset:2px; }
 
 .tab-content{ max-width:1320px; margin:0 auto; }
@@ -443,6 +444,7 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-kartenbau" data-tab="kartenbau" aria-selected="false" tabindex="-1">Kartenbau</button>
   <button class="tab-btn" role="tab" id="tab-tools" data-tab="tools" aria-selected="false" tabindex="-1">Tools</button>
   <button class="tab-btn" role="tab" id="tab-termine" data-tab="termine" aria-controls="panel-termine" aria-selected="false" tabindex="-1">Termine</button>
+  <a class="tab-btn tab-link" href="https://otzmo.github.io/TOW-Game/" target="_blank" rel="noopener">TOW-Game&nbsp;↗</a>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Battle March" data-gruppe="battlemarch">
   <button class="tab-btn" role="tab" id="tab-leitfaden" data-tab="leitfaden" aria-controls="panel-leitfaden" aria-selected="true" tabindex="0">Regeln</button>
@@ -2731,7 +2733,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   // Oberpunkte mit eigener Unterleiste: "Battle March" (Leitfaden, Armee & Magie)
   // und "Kartenbau" (Battle March, Core Battle). Welche Unterleiste zu welchem
   // Oberpunkt gehoert, steht im data-gruppe der Leiste.
-  const haupt = Array.from(document.querySelectorAll('.tabbar .tab-btn'));
+  const haupt = Array.from(document.querySelectorAll('.tabbar .tab-btn[data-tab]'));   // ohne externe Links
   const leisten = Array.from(document.querySelectorAll('.subtabbar'));
   const unter = {};          // Gruppe -> Knoepfe der Unterleiste
   const zuletzt = {};        // Gruppe -> zuletzt offener Unterpunkt
