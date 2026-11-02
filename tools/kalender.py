@@ -60,13 +60,15 @@ def kalender(termine, stempel):
     gueltig = [(k, t) for k, t in termine.items()
                if isinstance(t, dict) and TERMIN.match(str(t.get("datum", "")))
                and UHR.match(str(t.get("beginn", ""))) and UHR.match(str(t.get("ende", "")))
-               and isinstance(t.get("art"), str)]
+               and isinstance(t.get("art"), str)
+               and (t.get("bis") is None or (TERMIN.match(str(t["bis"])) and t["bis"] > t["datum"]))]
     for k, t in sorted(gueltig, key=lambda x: (x[1]["datum"], x[1]["beginn"])):
         d = t["datum"].replace("-", "")
+        e = (t.get("bis") or t["datum"]).replace("-", "")   # mehrtaegig: Ende am letzten Tag
         titel = text(t["art"].strip()[:30] + " The Old World")
         zeilen += ["BEGIN:VEVENT", "UID:" + uid(k), "DTSTAMP:" + stempel,
                    "DTSTART;TZID=Europe/Berlin:%sT%s00" % (d, t["beginn"].replace(":", "")),
-                   "DTEND;TZID=Europe/Berlin:%sT%s00" % (d, t["ende"].replace(":", "")),
+                   "DTEND;TZID=Europe/Berlin:%sT%s00" % (e, t["ende"].replace(":", "")),
                    "SUMMARY:" + titel,
                    "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + titel, "TRIGGER:-P2D", "END:VALARM",
                    "END:VEVENT"]

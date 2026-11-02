@@ -1508,6 +1508,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <h2 id="teTitel">Neuer Termin</h2>
 <div class="termin-editor-felder">
   <label>Datum<input type="date" id="teDatum" required></label>
+  <label>Bis (optional)<input type="date" id="teBis"></label>
   <label>Art<input type="text" id="teArt" list="teArten" maxlength="30" required></label>
   <label>Beginn<input type="time" id="teBeginn" required></label>
   <label>Ende<input type="time" id="teEnde" required></label>
@@ -3044,7 +3045,10 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   try { const c = JSON.parse(lese(CACHE_KEY)); if (c && typeof c === 'object') termine = c; } catch (e) {}
   const offen = new Set(), sicher = new Set();
 
-  const gueltig = t => t && /^\d{4}-\d\d-\d\d$/.test(t.datum) && typeof t.art === 'string' && /^\d\d:\d\d$/.test(t.beginn) && /^\d\d:\d\d$/.test(t.ende);
+  // bis = optionaler letzter Tag eines mehrtaegigen Termins (Beginn am ersten, Ende am letzten Tag)
+  const gueltig = t => t && /^\d{4}-\d\d-\d\d$/.test(t.datum) && typeof t.art === 'string' && /^\d\d:\d\d$/.test(t.beginn) && /^\d\d:\d\d$/.test(t.ende)
+    && (t.bis === undefined || (/^\d{4}-\d\d-\d\d$/.test(t.bis) && t.bis > t.datum));
+  const tm = d => d.slice(8) + '.' + d.slice(5, 7) + '.';   // 2027-05-14 wird 14.05.
   const liste = () => Object.entries(termine || startTermine()).filter(([, t]) => gueltig(t))
     .sort((x, y) => (x[1].datum + x[1].beginn).localeCompare(y[1].datum + y[1].beginn));
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -3088,12 +3092,18 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
         th.colSpan = 5; tr.appendChild(th); rumpf.appendChild(tr);
       }
       const tr = el('tr'); tr.dataset.id = id;
-      const vorbei = tag < heute;
+      const vorbei = new Date((t.bis || t.datum) + 'T00:00:00') < heute;   // mehrtaegig: erst nach dem letzten Tag vorbei
       if (vorbei) tr.classList.add('vorbei'); else if (!naechster) { tr.classList.add('naechster'); naechster = true; }
       const wt = TAGE[tag.getDay()], tdTag = el('td', null, wt.slice(0, 2)), tdUhr = el('td', null, uhr(t.beginn) + '–' + uhr(t.ende));
       tdTag.appendChild(el('span', 'termin-lang', wt.slice(2)));
       tdUhr.appendChild(el('span', 'termin-lang', ' Uhr'));
-      tr.append(el('td', null, t.datum.slice(8) + '.' + t.datum.slice(5, 7) + '.'), tdTag, el('td', null, t.art), tdUhr);
+      let datumText = tm(t.datum);
+      if (t.bis) {   // 14.-16.05. bzw. 30.04.-02.05., Tag Fr-So
+        const wb = TAGE[new Date(t.bis + 'T00:00:00').getDay()];
+        datumText = (t.bis.slice(0, 7) === t.datum.slice(0, 7) ? t.datum.slice(8) + '.' : tm(t.datum)) + '–' + tm(t.bis);
+        tdTag.append('–' + wb.slice(0, 2)); tdTag.appendChild(el('span', 'termin-lang', wb.slice(2)));
+      }
+      tr.append(el('td', null, datumText), tdTag, el('td', null, t.art), tdUhr);
 
       const listeA = eintraege(id), ich = listeA.some(([, v]) => meinUid && v.uid === meinUid);
       const zelle = el('td', 'termin-spieler');
@@ -3169,7 +3179,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
       if (!t) { zeigeEditorMeldung(dbLeer ? 'Erst die 25 Termine 2027 übernehmen.' : keineVerbindung); feld('terminEditor').scrollIntoView({ block: 'center' }); return; }
       bearbeite = id;
       feld('teTitel').textContent = 'Termin bearbeiten';
-      feld('teDatum').value = t.datum; feld('teArt').value = t.art; feld('teBeginn').value = t.beginn; feld('teEnde').value = t.ende;
+      feld('teDatum').value = t.datum; feld('teBis').value = t.bis || ''; feld('teArt').value = t.art; feld('teBeginn').value = t.beginn; feld('teEnde').value = t.ende;
       feld('teLoeschen').hidden = feld('teAbbrechen').hidden = false;
       zeigeEditorMeldung('');
       feld('terminEditor').scrollIntoView({ block: 'center' });
@@ -3196,15 +3206,18 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   function leereEditor() {
     bearbeite = null;
     feld('teTitel').textContent = 'Neuer Termin';
-    feld('teDatum').value = ''; feld('teArt').value = 'Spieltag'; feld('teBeginn').value = ''; feld('teEnde').value = '';
+    feld('teDatum').value = ''; feld('teBis').value = ''; feld('teArt').value = 'Spieltag'; feld('teBeginn').value = ''; feld('teEnde').value = '';
     feld('teLoeschen').hidden = feld('teAbbrechen').hidden = true;
   }
   feld('terminEditor').addEventListener('submit', e => {
     e.preventDefault();
     const t = { datum: feld('teDatum').value, art: feld('teArt').value.replace(/\s+/g, ' ').trim().slice(0, 30),
                 beginn: feld('teBeginn').value, ende: feld('teEnde').value };
+    const bis = feld('teBis').value;
+    if (bis && bis < t.datum) return zeigeEditorMeldung('„Bis“ darf nicht vor dem Datum liegen.');
+    if (bis && bis > t.datum) t.bis = bis;   // gleicher Tag = eintaegig; Firebase speichert kein undefined, darum nur bei Bedarf setzen
     if (!gueltig(t) || !t.art) return zeigeEditorMeldung('Bitte Datum, Art, Beginn und Ende ausfüllen.');
-    if (t.ende <= t.beginn) return zeigeEditorMeldung('Das Ende muss nach dem Beginn liegen.');
+    if (!t.bis && t.ende <= t.beginn) return zeigeEditorMeldung('Das Ende muss nach dem Beginn liegen.');
     if (!bereit()) return zeigeEditorMeldung(keineVerbindung);
     if (dbLeer) return zeigeEditorMeldung('Erst die 25 Termine 2027 übernehmen.');
     window.towTermin.terminSpeichern(bearbeite, t)
