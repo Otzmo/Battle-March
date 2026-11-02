@@ -264,6 +264,7 @@ button:hover{ background:var(--maroon-dark); }
 .sr-hint{ text-align:center; font-size:.9rem; color:#3e3226; margin:0 0 10px; }
 .sr-feld{ background:#fff; border:2px solid var(--maroon); border-radius:4px; touch-action:none; cursor:grab; display:block; width:100%; height:auto; }
 .sr-feld.zieht{ cursor:grabbing; }
+.sr-feld .sr-griff{ cursor:alias; }
 .sr-legende{ display:flex; justify-content:center; flex-wrap:wrap; gap:6px 18px; font-size:.82rem; margin:10px 0 12px; }
 .sr-legende i{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:5px; vertical-align:-1px; border:1px solid rgba(0,0,0,.25); }
 .sr-zahlen{ display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-bottom:12px; }
@@ -1152,7 +1153,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <p class="sr-hint">Zieh die Schablone über die Einheit, um zu sehen, wen sie trifft.</p>
 <svg class="sr-feld" id="srFeld" role="img" aria-label="Einheit mit Schablone"></svg>
 <div class="sr-legende">
-  <span><i style="background:#a8442a"></i>Automatisch getroffen (ganz darunter oder unter der Mitte)</span>
+  <span><i style="background:#a8442a"></i>Automatisch getroffen (<span id="srAutoText">ganz darunter oder unter der Mitte</span>)</span>
   <span><i style="background:#e0a53a"></i>Getroffen bei 4+ (teilweise darunter)</span>
   <span><i style="background:#ddd6cc"></i>Nicht berührt</span>
 </div>
@@ -1183,10 +1184,9 @@ GermanComp is a complete restriction, balance and tournament system, developed b
     <button type="button" data-art="r5" aria-pressed="false">Rund 5"</button>
     <button type="button" data-art="flamme" aria-pressed="false">Flammen</button>
   </div></div>
-  <div id="srDrehBox" hidden><label for="srDreh">Drehung Flammen</label><input type="range" id="srDreh" min="0" max="355" step="5" value="0"></div>
   <div><button type="button" id="srMitte">⌖ Schablone zentrieren</button></div>
 </div>
-<p class="sr-hint" style="margin-top:10px;">Breite = Modelle pro Glied (Reihen), Tiefe = Anzahl Glieder. Jede Base unter der Mitte der Schablone ist immer voll getroffen – liegt die Mitte auf mehreren Bases, gilt das für alle. Erwartete Treffer = automatische Treffer + die Hälfte der Treffer bei 4+. Die Flammenschablone ist 8" lang, vorne 0,5" und hinten 2,5" breit.</p>
+<p class="sr-hint" style="margin-top:10px;">Breite = Modelle pro Glied (Reihen), Tiefe = Anzahl Glieder. Bei den runden Schablonen ist jede Base unter der Mitte immer voll getroffen – liegt die Mitte auf mehreren Bases, gilt das für alle. Bei der Flammenschablone sind nur Bases ganz darunter automatisch getroffen. Erwartete Treffer = automatische Treffer + die Hälfte der Treffer bei 4+. Die Flammenschablone ist 8" lang, vorne 0,5" und hinten 2,5" breit; zum Drehen den runden Griff ⟳ an der Schablone ziehen.</p>
 </div>
 </div>
 
@@ -3140,9 +3140,10 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
    Alle Masse in mm. Eine Base ist automatisch getroffen, wenn sie ganz unter
    der Schablone liegt, und bei 4+, wenn sie die Schablone nur teilweise
    beruehrt. Beide Schablonenformen sind konvex: liegen alle vier Ecken einer
-   Base darin, liegt die ganze Base darin. Jede Base unter der Mitte der
-   Schablone ist immer voll getroffen - liegt die Mitte genau auf einer
-   Grenze, also alle Bases, die sie beruehrt. */
+   Base darin, liegt die ganze Base darin. Bei runden Schablonen ist jede Base
+   unter der Mitte immer voll getroffen - liegt die Mitte genau auf einer
+   Grenze, also alle Bases, die sie beruehrt. Bei der Flamme zaehlen nur
+   Bases ganz darunter als automatisch getroffen. */
 (function () {
   const ZOLL = 25.4;
   const svg = document.getElementById('srFeld');
@@ -3159,7 +3160,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     if (ganz(g.tiefe, 1, 12)) st.tiefe = g.tiefe;
     if ([...document.getElementById('srBase').options].some(o => o.value === g.base)) st.base = g.base;
     if (['r3', 'r5', 'flamme'].includes(g.art)) st.art = g.art;
-    if (ganz(g.dreh, 0, 355)) st.dreh = g.dreh;
+    if (ganz(g.dreh, 0, 359)) st.dreh = g.dreh;
     if (zahl(g.x) && zahl(g.y)) { st.x = g.x; st.y = g.y; }   // zeichne() zieht sie ins Feld
   } catch (e) { /* egal */ }
   const merke = () => { try { localStorage.setItem('battleMarchSchablone', JSON.stringify(st)); } catch (e) { /* egal */ } };
@@ -3225,7 +3226,8 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     for (let r = 0; r < st.tiefe; r++) for (let c = 0; c < st.breite; c++) {
       const x0 = RAND + c * bw, y0 = RAND + r * bt;
       let t = treffer(f, x0, y0, bw, bt);
-      if (st.x >= x0 && st.x <= x0 + bw && st.y >= y0 && st.y <= y0 + bt) t = 'auto';   // unter der Mitte: immer voll getroffen
+      // Runde Schablonen: die Base unter der Mitte ist immer voll getroffen. Bei der Flamme zaehlen nur Bases ganz darunter.
+      if (f.rund && st.x >= x0 && st.x <= x0 + bw && st.y >= y0 && st.y <= y0 + bt) t = 'auto';
       n[t]++;
       const re = document.createElementNS(NS, 'rect');
       Object.entries({ x: x0, y: y0, width: bw, height: bt, fill: FARBE[t], stroke: '#5a4a36', 'stroke-width': 0.8 })
@@ -3245,24 +3247,56 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     }
     Object.entries({ fill: 'rgba(31,63,107,.15)', stroke: '#1f3f6b', 'stroke-width': 1.6 }).forEach(([k, v]) => s.setAttribute(k, v));
     svg.appendChild(s);
-    const m = document.createElementNS(NS, 'circle');
-    Object.entries({ cx: st.x, cy: st.y, r: 2.2, fill: '#1f3f6b' }).forEach(([k, v]) => m.setAttribute(k, v));
-    svg.appendChild(m);
+    if (f.rund) {   // Mittelpunkt zaehlt nur bei runden Schablonen
+      const m = document.createElementNS(NS, 'circle');
+      Object.entries({ cx: st.x, cy: st.y, r: 2.2, fill: '#1f3f6b' }).forEach(([k, v]) => m.setAttribute(k, v));
+      svg.appendChild(m);
+    }
+    // Drehgriff in der Mitte des breiten Endes: ziehen dreht die Flamme um ihre Mitte
+    if (!f.rund) {
+      const g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'sr-griff');
+      g.dataset.griff = '1';
+      const kreis = (attr) => { const c = document.createElementNS(NS, 'circle'); Object.entries(attr).forEach(([k, v]) => c.setAttribute(k, v)); g.appendChild(c); };
+      // Groesse in Bildschirmpixeln festhalten (ca. 13 px Griff, 24 px Trefferflaeche), damit er am Handy greifbar bleibt
+      const pxProMm = (svg.getScreenCTM() || { a: 1 }).a || 1;
+      const rg = Math.min(18, Math.max(7, 13 / pxProMm)), rt = Math.min(30, Math.max(14, 24 / pxProMm));
+      kreis({ cx: f.bx, cy: f.by, r: rt, fill: 'transparent' });   // groessere Trefferflaeche fuer Finger
+      kreis({ cx: f.bx, cy: f.by, r: rg, fill: '#fff', stroke: '#1f3f6b', 'stroke-width': rg / 5 });
+      // Drehpfeil: Dreiviertelkreis mit Spitze (als Linie, nicht als Schriftzeichen)
+      const rr = rg * 0.55, w1 = -Math.PI / 3, w2 = w1 + Math.PI * 1.5;
+      const P = w => [f.bx + rr * Math.cos(w), f.by + rr * Math.sin(w)];
+      const [x1, y1] = P(w1), [x2, y2] = P(w2), sp = rg * 0.35;
+      const tx = -Math.sin(w2), ty = Math.cos(w2);   // Tangente am Ende (Drehrichtung)
+      const bogen = document.createElementNS(NS, 'path');
+      Object.entries({ d: `M${x1} ${y1} A${rr} ${rr} 0 1 1 ${x2} ${y2}`, fill: 'none', stroke: '#1f3f6b', 'stroke-width': rg / 5, 'stroke-linecap': 'round' })
+        .forEach(([k, v]) => bogen.setAttribute(k, v));
+      g.appendChild(bogen);
+      const kopf = document.createElementNS(NS, 'path');
+      kopf.setAttribute('d', `M${x2 + tx * sp} ${y2 + ty * sp} L${x2 - ty * sp * 0.8} ${y2 + tx * sp * 0.8} L${x2 + ty * sp * 0.8} ${y2 - tx * sp * 0.8} Z`);
+      kopf.setAttribute('fill', '#1f3f6b');
+      g.appendChild(kopf);
+      const titel = document.createElementNS(NS, 'title'); titel.textContent = 'Ziehen zum Drehen'; g.appendChild(titel);
+      svg.appendChild(g);
+    }
 
-    // Pfeil von der Mitte der Einheit zur Mitte der Schablone, mit Abstand in Zoll
-    const ex = RAND + ew / 2, ey = RAND + et / 2, abstand = Math.hypot(st.x - ex, st.y - ey);
+    // Pfeil von der Mitte der Einheit zur Mitte der Schablone, mit Abstand in Zoll (nur runde Schablonen)
+    const zx = st.x, zy = st.y, versatz = 2.2;
+    const ex = RAND + ew / 2, ey = RAND + et / 2, abstand = Math.hypot(zx - ex, zy - ey);
     const zollText = (Math.round(abstand / ZOLL * 10) / 10).toLocaleString('de-DE') + '"';
     document.getElementById('srAbstand').textContent = zollText;
-    if (abstand > 3) {
+    document.getElementById('srAbstand').parentElement.hidden = !f.rund;
+    document.getElementById('srAutoText').textContent = f.rund ? 'ganz darunter oder unter der Mitte' : 'ganz darunter';
+    if (f.rund && abstand > 3) {
       const neu = (tag, attr) => { const el = document.createElementNS(NS, tag); Object.entries(attr).forEach(([k, v]) => el.setAttribute(k, v)); svg.appendChild(el); return el; };
-      const ux = (st.x - ex) / abstand, uy = (st.y - ey) / abstand;
+      const ux = (zx - ex) / abstand, uy = (zy - ey) / abstand;
       const spitze = Math.min(6, abstand * 0.4);   // Laenge der Pfeilspitze in mm
-      const sx = st.x - ux * 2.2, sy = st.y - uy * 2.2;   // Spitze endet am Mittelpunkt der Schablone
+      const sx = zx - ux * versatz, sy = zy - uy * versatz;   // Spitze endet am Zielpunkt
       const bx = sx - ux * spitze, by = sy - uy * spitze;
       neu('circle', { cx: ex, cy: ey, r: 1.8, fill: '#1a1a1a' });
       neu('line', { x1: ex, y1: ey, x2: bx, y2: by, stroke: '#1a1a1a', 'stroke-width': 1.4 });
       neu('path', { d: `M${sx} ${sy} L${bx - uy * spitze / 2} ${by + ux * spitze / 2} L${bx + uy * spitze / 2} ${by - ux * spitze / 2} Z`, fill: '#1a1a1a' });
-      const t = neu('text', { x: (ex + st.x) / 2 - uy * 5, y: (ey + st.y) / 2 + ux * 5, 'text-anchor': 'middle', 'dominant-baseline': 'middle',
+      const t = neu('text', { x: (ex + zx) / 2 - uy * 5, y: (ey + zy) / 2 + ux * 5, 'text-anchor': 'middle', 'dominant-baseline': 'middle',
         'font-size': 7, 'font-weight': 'bold', fill: '#1a1a1a', stroke: '#fff', 'stroke-width': 2, 'paint-order': 'stroke' });
       t.textContent = zollText;
     }
@@ -3275,8 +3309,6 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     document.getElementById('srTiefe').textContent = st.tiefe;
     document.getElementById('srBase').value = st.base;
     document.querySelectorAll('#srArt button').forEach(b => b.setAttribute('aria-pressed', b.dataset.art === st.art ? 'true' : 'false'));
-    document.getElementById('srDrehBox').hidden = st.art !== 'flamme';
-    document.getElementById('srDreh').value = st.dreh;
     merke();
   }
 
@@ -3285,11 +3317,22 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   const punkt = e => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
   svg.addEventListener('pointerdown', e => {
     const p = punkt(e);
+    if (e.target.closest && e.target.closest('[data-griff]')) {   // Drehgriff der Flamme
+      zug = { drehen: true }; svg.setPointerCapture(e.pointerId); return;
+    }
     zug = { dx: st.x - p.x, dy: st.y - p.y };
     if (!form().innen(p.x, p.y)) { zug = { dx: 0, dy: 0 }; st.x = p.x; st.y = p.y; zeichne(); }   // daneben getippt: Schablone springt hin
     svg.setPointerCapture(e.pointerId); svg.classList.add('zieht');
   });
-  svg.addEventListener('pointermove', e => { if (!zug) return; const p = punkt(e); st.x = p.x + zug.dx; st.y = p.y + zug.dy; zeichne(); });
+  svg.addEventListener('pointermove', e => {
+    if (!zug) return;
+    const p = punkt(e);
+    if (zug.drehen) {
+      if (Math.hypot(p.x - st.x, p.y - st.y) < 1) return;
+      st.dreh = (Math.round(Math.atan2(p.y - st.y, p.x - st.x) * 180 / Math.PI) + 360) % 360;
+    } else { st.x = p.x + zug.dx; st.y = p.y + zug.dy; }
+    zeichne();
+  });
   const los = () => { zug = null; svg.classList.remove('zieht'); };
   svg.addEventListener('pointerup', los); svg.addEventListener('pointercancel', los);
 
@@ -3305,7 +3348,6 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     if (st.x !== null) { st.x += rand() - alt; st.y += rand() - alt; }   // gleiche Lage zur Einheit
     zeichne();
   }));
-  document.getElementById('srDreh').addEventListener('input', e => { st.dreh = Number(e.target.value); zeichne(); });
   document.getElementById('srMitte').addEventListener('click', () => { st.x = null; zeichne(); });   // null = Mitte der Einheit
   zeichne();
 })();
