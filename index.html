@@ -373,6 +373,8 @@ button:hover{ background:var(--maroon-dark); }
 .version-box{ background:#fff; border:1.5px solid var(--maroon); border-left:5px solid var(--maroon); border-radius:4px; padding:9px 14px; margin:.4rem 0 1.2rem; font-size:.85rem; color:#3e3226; }
 .version-box b{ color:var(--maroon); }
 .guide .gc-table td:first-child{ font-weight:bold; }
+.guide .turnier-tabelle td:first-child{ width:9.5em; white-space:nowrap; }
+#panel-coreturnier a{ color:var(--maroon); font-weight:600; }
 .guide .termin-tabelle tr.termin-monat th{ background:var(--maroon); color:#fff; }
 .guide .termin-tabelle tr.vorbei td{ color:#9a8f7a; }
 .guide .termin-tabelle tr.naechster td{ background:#cfe3c1; font-weight:bold; }
@@ -523,6 +525,7 @@ button:hover{ background:var(--maroon-dark); }
 <div class="subtabbar" role="tablist" aria-label="Core Battle" data-gruppe="core" hidden="">
   <button class="tab-btn" role="tab" id="tab-coreleitfaden" data-tab="coreleitfaden" aria-controls="panel-coreleitfaden" aria-selected="true" tabindex="0">Rules</button>
   <button class="tab-btn" role="tab" id="tab-corearmee" data-tab="corearmee" aria-controls="panel-corearmee" aria-selected="false" tabindex="-1">Army Building</button>
+  <button class="tab-btn" role="tab" id="tab-coreturnier" data-tab="coreturnier" aria-controls="panel-coreturnier" aria-selected="false" tabindex="-1">Tournament</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Kartenbau" data-gruppe="kartenbau" hidden="">
   <button class="tab-btn" role="tab" id="tab-baukasten" data-tab="baukasten" aria-controls="panel-baukasten" aria-selected="true" tabindex="0">Battle March</button>
@@ -1215,6 +1218,37 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 </div>
 </div>
 
+<!-- ===================== CORE: TOURNAMENT ===================== -->
+<div class="tab-content" id="panel-coreturnier" role="tabpanel" aria-labelledby="tab-coreturnier" tabindex="0" hidden="">
+<div class="guide" lang="en">
+<h1>Tournaments</h1>
+<h2>Poza Boyz TOW GT 2</h2>
+<table class="gc-table turnier-tabelle"><tbody>
+<tr><td>Date</td><td>14–16 May 2027</td></tr>
+<tr><td>Venue</td><td>An Sankt Josef 19b, 53225 Bonn</td></tr>
+<tr><td>Format</td><td>Singles, 2,000 points, 5 games over 3 days (3 hours per game)</td></tr>
+<tr><td>Players</td><td>max. 20</td></tr>
+<tr><td>Entry fee</td><td>60 €</td></tr>
+<tr><td>Drinks</td><td>Free</td></tr>
+<tr><td>Comp</td><td>GermanComp with GermanComp missions, Renegade army lists</td></tr>
+<tr><td>List deadline</td><td>2 May 2027</td></tr>
+<tr><td>Registration</td><td><a href="https://oldworldrankings.com/de/tournaments/poza-boyz-tow-gt-2" target="_blank" rel="noopener">oldworldrankings.com ↗</a></td></tr>
+</tbody></table>
+<h2>Poza Boyz TOW GT 3</h2>
+<table class="gc-table turnier-tabelle"><tbody>
+<tr><td>Date</td><td>15–17 October 2027</td></tr>
+<tr><td>Venue</td><td>An Sankt Josef 19b, 53225 Bonn</td></tr>
+<tr><td>Format</td><td>Singles, 2,000 points, 5 games over 3 days (3 hours per game)</td></tr>
+<tr><td>Players</td><td>max. 20</td></tr>
+<tr><td>Entry fee</td><td>60 €</td></tr>
+<tr><td>Drinks</td><td>Free</td></tr>
+<tr><td>Comp</td><td>GermanComp with GermanComp missions, Renegade army lists</td></tr>
+<tr><td>List deadline</td><td>tba</td></tr>
+<tr><td>Registration</td><td><a href="https://oldworldrankings.com/de/tournaments/poza-boyz-tow-gt-3" target="_blank" rel="noopener">oldworldrankings.com ↗</a></td></tr>
+</tbody></table>
+</div>
+</div>
+
 <!-- ===================== TOOLS: SCHABLONENRECHNER ===================== -->
 <div class="tab-content" id="panel-schablone" role="tabpanel" aria-labelledby="tab-schablone" tabindex="0" hidden="">
 <div class="guide sr">
@@ -1443,7 +1477,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <p>Hier findest du alles für unsere Spiele von Warhammer: The Old World.</p>
 <ul class="start-liste">
   <li><b>Battle March</b>Regeln und Armeebau für das kleine Format</li>
-  <li><b>Core Battle</b>Rules und Army Building für das große Format</li>
+  <li><b>Core Battle</b>Rules, Army Building und unsere Turniere für das große Format</li>
   <li><b>Kartenbau</b>Spielfeld, Mission und Gelände auswürfeln</li>
   <li><b>Tools</b>Schablonen-, Ansturm- und Zauberrechner, Zauberpatzer, Fehlfunktionen von Kriegsmaschinen und BASE-Generator für den 3D-Druck</li>
   <li><b>Termine</b>Unsere Spieltage mit Anmeldung und Kalender-Abo</li>
