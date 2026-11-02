@@ -313,6 +313,15 @@ button:hover{ background:var(--maroon-dark); }
 .zr-tabelle td:nth-child(3), .zr-tabelle th:nth-child(3){ text-align:right; }
 .guide table[hidden]{ display:none !important; }
 .guide .patzer-tabelle td:nth-child(-n+2){ white-space:nowrap; vertical-align:top; }
+.pt-wahl{ display:grid; gap:4px; margin:4px 0 10px; }
+.pt-wahl .sr-titel{ display:block; font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; color:#5a4a36; margin-top:4px; }
+.pt-wuerfel{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; background:var(--beige); border:1.5px solid var(--maroon); border-radius:4px; padding:8px 10px; margin-bottom:8px; }
+.pt-wuerfel button{ padding:6px 14px; }
+.pt-ergebnis{ font-weight:bold; color:var(--maroon); }
+.pt-ergebnis small{ font-weight:normal; color:#5a4a36; }
+.pt-info{ font-size:.9rem; color:#3e3226; margin:.2rem 0 .4rem; }
+.guide .patzer-tabelle tr.pt-treffer td{ background:#e8d9b5; font-weight:bold; }
+.guide .patzer-tabelle tr.pt-treffer td b{ color:var(--maroon); }
 .sr a{ color:var(--maroon); font-weight:600; }
 .ar-tabelle tr.ar-ziel td{ background:#e8d9b5; font-weight:bold; }
 
@@ -523,7 +532,7 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-schablone" data-tab="schablone" aria-controls="panel-schablone" aria-selected="true" tabindex="0"><span class="t-lang">Schablonen&shy;rechner</span><span class="t-kurz">Schablone</span></button>
   <button class="tab-btn" role="tab" id="tab-angriff" data-tab="angriff" aria-controls="panel-angriff" aria-selected="false" tabindex="-1"><span class="t-lang">Ansturm&shy;rechner</span><span class="t-kurz">Ansturm</span></button>
   <button class="tab-btn" role="tab" id="tab-zauber" data-tab="zauber" aria-controls="panel-zauber" aria-selected="false" tabindex="-1"><span class="t-lang">Zauber&shy;rechner</span><span class="t-kurz">Zauber</span></button>
-  <button class="tab-btn" role="tab" id="tab-patzer" data-tab="patzer" aria-controls="panel-patzer" aria-selected="false" tabindex="-1"><span class="t-lang">Zauber&shy;patzer</span><span class="t-kurz">Patzer</span></button>
+  <button class="tab-btn" role="tab" id="tab-patzer" data-tab="patzer" aria-controls="panel-patzer" aria-selected="false" tabindex="-1"><span class="t-lang">Patzer</span><span class="t-kurz">Patzer</span></button>
   <button class="tab-btn" role="tab" id="tab-base" data-tab="base" aria-controls="panel-base" aria-selected="false" tabindex="-1">BASE</button>
 </div>
 </nav>
@@ -1332,12 +1341,31 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <!-- ===================== TOOLS: ZAUBERPATZER ===================== -->
 <div class="tab-content" id="panel-patzer" role="tabpanel" aria-labelledby="tab-patzer" tabindex="0" hidden="">
 <div class="guide sr">
-<h1>Zauberpatzer</h1>
-<p>Pasch aus Einsen beim Zauberwurf: Patzer – der Zauber wird, sofern nicht anders angegeben, nicht gewirkt. Sofort 2W6 auf der Tabelle würfeln.</p>
-<div class="sr-wahl" id="ptWahl" style="margin:4px 0 6px;">
-  <button type="button" data-pt="normal" aria-pressed="true">Patzertabelle</button>
-  <button type="button" data-pt="katastrophal" aria-pressed="false">Katastrophale Patzertabelle</button>
+<h1>Patzer &amp; Fehlfunktionen</h1>
+<p data-pt-tabelle="normal katastrophal">Pasch aus Einsen beim Zauberwurf: Patzer – der Zauber wird, sofern nicht anders angegeben, nicht gewirkt. Sofort 2W6 auf der Tabelle würfeln.</p>
+<div class="pt-wahl" id="ptWahl">
+  <span class="sr-titel">Zauberpatzer (2W6)</span>
+  <div class="sr-wahl">
+    <button type="button" data-pt="normal" aria-pressed="true">Patzertabelle</button>
+    <button type="button" data-pt="katastrophal" aria-pressed="false">Katastrophale Patzertabelle</button>
+  </div>
+  <span class="sr-titel">Fehlfunktion von Kriegsmaschinen (W6)</span>
+  <div class="sr-wahl">
+    <button type="button" data-pt="schwarzpulver" aria-pressed="false">Schwarzpulver</button>
+    <button type="button" data-pt="steinschleuder" aria-pressed="false">Steinschleuder</button>
+    <button type="button" data-pt="bombarde" aria-pressed="false">Bombarde</button>
+    <button type="button" data-pt="hoellenkanone" aria-pressed="false">Höllenkanone</button>
+    <button type="button" data-pt="warpblitz" aria-pressed="false">Warpblitzkanone</button>
+    <button type="button" data-pt="ironblaster" aria-pressed="false">Ironblaster</button>
+    <button type="button" data-pt="schrottschleuder" aria-pressed="false">Schrottschleuder</button>
+  </div>
 </div>
+<div class="pt-wuerfel">
+  <button type="button" data-pt-wurf="1">🎲 W6</button>
+  <button type="button" data-pt-wurf="2">🎲 2W6</button>
+  <span class="pt-ergebnis" id="ptErgebnis" aria-live="polite"></span>
+</div>
+<p data-pt-tabelle="schwarzpulver steinschleuder bombarde hoellenkanone warpblitz ironblaster schrottschleuder" hidden>Fällt auf dem Artilleriewürfel eine Fehlfunktion, sofort W6 auf der passenden Tabelle würfeln.</p>
 <table class="patzer-tabelle" data-pt-tabelle="normal"><tbody>
 <tr><th>2W6</th><th>%</th><th>Ergebnis</th></tr>
 <tr><td><b>2–4</b></td><td>16,7</td><td><b>Dimensionskaskade:</b> 5"-Schablone mittig über den Magier. Jedes Modell (Freund oder Feind) unter der Schablone kann getroffen werden: ein Treffer S10, DS -4.</td></tr>
@@ -1355,6 +1383,56 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <tr><td><b>10–11</b></td><td>13,9</td><td><b>Magischer Angelpunkt:</b> Der Magier (und jede Einheit, der er angeschlossen ist) weicht sofort 2" direkt von der nächsten feindlichen Einheit zurück und wird verwirrt (siehe Rückschlag). Kann er nicht zurückweichen, erleidet er einen Treffer S6, DS -2.</td></tr>
 <tr><td><b>12</b></td><td>2,8</td><td><b>Preis der Macht:</b> Der Zauber wird mit perfekter Anrufung gewirkt. Der Magier verliert sofort eine Magiestufe und vergisst diesen Zauber für den Rest des Spiels. In diesem Zug können keine weiteren Zauber gewirkt werden.</td></tr>
 </tbody></table>
+<p class="pt-info" data-pt-tabelle="schwarzpulver" hidden>Regelbuch, S. 229. Gilt für alle Schwarzpulverwaffen: Kanone, Orgelkanone, Mörser, Flammenwerfer, Raketenbatterien und Ähnliches.</p>
+<table class="patzer-tabelle" data-pt-tabelle="schwarzpulver" hidden><tbody>
+<tr><th>W6</th><th>%</th><th>Ergebnis</th></tr>
+<tr><td><b>1</b></td><td>16,7</td><td><b>Zerstört:</b> Die Waffe explodiert mit lautem Knall. Das Modell wird zerstört und sofort entfernt.</td></tr>
+<tr><td><b>2–4</b></td><td>50,0</td><td><b>Fehlfunktion:</b> Ein Besatzungsmitglied hat sich im Mechanismus verfangen. Die Besatzung verliert sofort einen Lebenspunkt, das Modell schießt diesen Zug nicht und kann vor dem Ende der nächsten Runde nicht schießen.</td></tr>
+<tr><td><b>5–6</b></td><td>33,3</td><td><b>Pffft:</b> Die Lunte ist erloschen. Das Modell schießt diesen Zug nicht.</td></tr>
+</tbody></table>
+<p class="pt-info" data-pt-tabelle="steinschleuder" hidden>Regelbuch, S. 225. Gilt für Steinschleudern, Trebuchets und Katapulte, z. B. Feldtrebuchet, Grollschleuder, Doom-Diver.</p>
+<table class="patzer-tabelle" data-pt-tabelle="steinschleuder" hidden><tbody>
+<tr><th>W6</th><th>%</th><th>Ergebnis</th></tr>
+<tr><td><b>1</b></td><td>16,7</td><td><b>Zerstört:</b> Die Maschine hält der Belastung nicht stand und bricht auseinander. Das Modell wird zerstört und sofort entfernt.</td></tr>
+<tr><td><b>2–4</b></td><td>50,0</td><td><b>Fehlfunktion:</b> Ein Besatzungsmitglied hat sich im Mechanismus verfangen. Die Besatzung verliert sofort einen Lebenspunkt, das Modell schießt diesen Zug nicht und kann vor dem Ende der nächsten Runde nicht schießen.</td></tr>
+<tr><td><b>5–6</b></td><td>33,3</td><td><b>Twang:</b> Etwas ist gerissen. Das Modell schießt diesen Zug nicht.</td></tr>
+</tbody></table>
+<p class="pt-info" data-pt-tabelle="bombarde" hidden>Arcane Journal: Kingdom of Bretonnia, S. 45. Gilt für die Border Princes Bombard der Bretonen.</p>
+<table class="patzer-tabelle" data-pt-tabelle="bombarde" hidden><tbody>
+<tr><th>W6</th><th>%</th><th>Ergebnis</th></tr>
+<tr><td><b>1</b></td><td>16,7</td><td><b>Zerstört:</b> Die Waffe explodiert mit lautem Knall. Das Modell wird zerstört und sofort entfernt.</td></tr>
+<tr><td><b>2–3</b></td><td>33,3</td><td><b>Fehlfunktion:</b> Die Ladung zündet falsch, verletzt einen Mann der Besatzung und wirft die Bombarde um. Die Besatzung verliert sofort einen Lebenspunkt, das Modell schießt diesen Zug nicht.</td></tr>
+<tr><td><b>4–5</b></td><td>33,3</td><td><b>Pffft:</b> Die Lunte ist erloschen. Das Modell schießt diesen Zug nicht.</td></tr>
+<tr><td><b>6</b></td><td>16,7</td><td><b>Boom!</b> Die Bombarde feuert mit ohrenbetäubendem Knall und wird von der Lafette geworfen. Sie schießt diesen Zug, als wäre auf dem Artilleriewürfel eine 2 statt einer Fehlfunktion gefallen. In der nächsten Runde kann sie nicht schießen.</td></tr>
+</tbody></table>
+<p class="pt-info" data-pt-tabelle="hoellenkanone" hidden>Ravening Hordes, S. 76. Gilt für die Höllenkanone der Warriors of Chaos (auch für ihr Doomfire).</p>
+<table class="patzer-tabelle" data-pt-tabelle="hoellenkanone" hidden><tbody>
+<tr><th>W6</th><th>%</th><th>Ergebnis</th></tr>
+<tr><td><b>1</b></td><td>16,7</td><td><b>Endlich frei!</b> Der Dämon reißt sich los. Jede Einheit (Freund oder Feind) innerhalb von 3W6" erleidet W6 Treffer mit S5, DS -1. Danach wird die Höllenkanone als Verlust entfernt.</td></tr>
+<tr><td><b>2–4</b></td><td>50,0</td><td><b>Happs!</b> Die Treiber werden zum Schlund des Dämons gezogen. Entferne einen der Chaoszwerg-Treiber der Höllenkanone.</td></tr>
+<tr><td><b>5–6</b></td><td>33,3</td><td><b>Bluuut!</b> Die Höllenkanone sprengt ihre Ketten und bewegt sich sofort 3W6", als unterläge sie der Sonderregel Zufällige Bewegung und als wäre dies die Unterphase „Pflichtbewegungen“.</td></tr>
+</tbody></table>
+<p class="pt-info" data-pt-tabelle="warpblitz" hidden>Skaven, S. 19. Wird gewürfelt, wenn beim Bestimmen der Stärke der Warpblitzkanone eine Fehlfunktion fällt.</p>
+<table class="patzer-tabelle" data-pt-tabelle="warpblitz" hidden><tbody>
+<tr><th>W6</th><th>%</th><th>Ergebnis</th></tr>
+<tr><td><b>1</b></td><td>16,7</td><td><b>Kernschmelze:</b> Maschine und Besatzung vergehen in einem grünen Feuerball. Das Modell schießt diesen Zug nicht, sondern wird zerstört und sofort entfernt.</td></tr>
+<tr><td><b>2–4</b></td><td>50,0</td><td><b>Energieüberladung:</b> Die Warpblitzkanone schießt mit Stärke 6 in eine zufällige Richtung, bestimmt mit dem Abweichungswürfel.</td></tr>
+<tr><td><b>5–6</b></td><td>33,3</td><td><b>Fzzzt:</b> Die Energie verpufft harmlos. Das Modell schießt diesen Zug nicht.</td></tr>
+</tbody></table>
+<p class="pt-info" data-pt-tabelle="ironblaster" hidden>Ogre Kingdoms, S. 13. Gilt für die Kanone der Himmelstitanen (Ironblaster) der Oger.</p>
+<table class="patzer-tabelle" data-pt-tabelle="ironblaster" hidden><tbody>
+<tr><th>W6</th><th>%</th><th>Ergebnis</th></tr>
+<tr><td><b>1</b></td><td>16,7</td><td><b>Kaboom!</b> Die Kanone explodiert. Das Modell wird zerstört und sofort entfernt.</td></tr>
+<tr><td><b>2–3</b></td><td>33,3</td><td><b>Krrack!</b> Das Rohr reißt der Länge nach. Das Modell kann für den Rest des Spiels nicht mehr mit dieser Waffe schießen.</td></tr>
+<tr><td><b>4–6</b></td><td>50,0</td><td><b>Ack!</b> Der Gnoblar-Schrauber steckt im Mechanismus fest. Das Modell schießt diesen Zug nicht und kann in der nächsten Runde nicht mit dieser Waffe schießen.</td></tr>
+</tbody></table>
+<p class="pt-info" data-pt-tabelle="schrottschleuder" hidden>Ogre Kingdoms, S. 14. Gilt für die Gnoblar-Schrottschleuder (Scraplauncher) der Oger.</p>
+<table class="patzer-tabelle" data-pt-tabelle="schrottschleuder" hidden><tbody>
+<tr><th>W6</th><th>%</th><th>Ergebnis</th></tr>
+<tr><td><b>1</b></td><td>16,7</td><td><b>Kerr-unch!</b> Die Schrottschleuder zerfällt in einem Regen aus Metall und Holz. Das Modell wird zerstört und sofort entfernt.</td></tr>
+<tr><td><b>2–3</b></td><td>33,3</td><td><b>Snap!</b> Der Wurfarm bricht entzwei. Das Modell kann für den Rest des Spiels nicht mehr mit dieser Waffe schießen.</td></tr>
+<tr><td><b>4–6</b></td><td>50,0</td><td><b>Splang!</b> Schrott fliegt in alle Richtungen, vor allem nach oben. Das Modell schießt diesen Zug nicht und kann in der nächsten Runde nicht mit dieser Waffe schießen.</td></tr>
+</tbody></table>
 </div>
 </div>
 
@@ -1367,7 +1445,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <li><b>Battle March</b>Regeln und Armeebau für das kleine Format</li>
   <li><b>Core Battle</b>Rules und Army Building für das große Format</li>
   <li><b>Kartenbau</b>Spielfeld, Mission und Gelände auswürfeln</li>
-  <li><b>Tools</b>Schablonen-, Ansturm- und Zauberrechner, Zauberpatzer und BASE-Generator für den 3D-Druck</li>
+  <li><b>Tools</b>Schablonen-, Ansturm- und Zauberrechner, Zauberpatzer, Fehlfunktionen von Kriegsmaschinen und BASE-Generator für den 3D-Druck</li>
   <li><b>Termine</b>Unsere Spieltage mit Anmeldung und Kalender-Abo</li>
 </ul>
 </div>
@@ -3728,22 +3806,53 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   feld('zrWdh').addEventListener('change', e => { st.wdh = e.target.checked; zeige(); });
   feld('zrBann').addEventListener('change', e => { st.bann = e.target.checked; zeige(); });
   feld('zrBWdh').addEventListener('change', e => { st.bWdh = e.target.checked; zeige(); });
-  feld('zrZuPatzer').addEventListener('click', e => { e.preventDefault(); feld('tab-patzer').click(); });
+  feld('zrZuPatzer').addEventListener('click', e => {
+    e.preventDefault(); feld('tab-patzer').click();
+    const k = document.querySelector('#ptWahl [data-pt="normal"]'); if (k) k.click();   // Zauberpatzer, nicht Fehlfunktion
+  });
   zeige();
 })();
 </script>
 <script>
-/* ================= Tools: Zauberpatzer – Wahl der Tabelle ================= */
+/* ================= Tools: Patzer & Fehlfunktionen – Wahl der Tabelle, W6/2W6 ================= */
 (function () {
   const knoepfe = document.querySelectorAll('#ptWahl button');
   if (!knoepfe.length) return;
-  function zeige(wahl) {
-    knoepfe.forEach(k => k.setAttribute('aria-pressed', k.dataset.pt === wahl ? 'true' : 'false'));
-    document.querySelectorAll('[data-pt-tabelle]').forEach(t => { t.hidden = t.dataset.ptTabelle !== wahl; });
-    try { localStorage.setItem('battleMarchPatzer', wahl); } catch (e) { /* egal */ }
+  const erlaubt = [...knoepfe].map(k => k.dataset.pt);
+  let wahl = 'normal', wurf = null;   // wurf = { art: 1|2, werte: [..] }
+  const sichtbar = () => document.querySelector(`table[data-pt-tabelle="${wahl}"]`);
+  // Zeile der Tabelle markieren, deren Bereich (z. B. "2–4") die Summe enthaelt - nur bei passendem Wuerfel
+  function markiere() {
+    document.querySelectorAll('.patzer-tabelle tr.pt-treffer').forEach(z => z.classList.remove('pt-treffer'));
+    const out = document.getElementById('ptErgebnis');
+    out.replaceChildren();
+    if (!wurf) return;
+    const summe = wurf.werte.reduce((a, b) => a + b, 0);
+    out.append((wurf.art === 2 ? '2W6: ' + wurf.werte.join(' + ') + ' = ' : 'W6: ') + summe);
+    const t = sichtbar(), braucht = t && t.querySelector('th').textContent.trim() === '2W6' ? 2 : 1;
+    if (braucht !== wurf.art) {
+      const k = document.createElement('small'); k.textContent = ' – diese Tabelle nutzt ' + (braucht === 2 ? '2W6' : 'W6');
+      out.append(k); return;
+    }
+    [...t.querySelectorAll('tr')].slice(1).forEach(z => {
+      const [lo, hi = lo] = z.cells[0].textContent.split(/[–-]/).map(Number);
+      if (summe >= lo && summe <= hi) z.classList.add('pt-treffer');
+    });
   }
+  function zeige(neu) {
+    wahl = neu;
+    knoepfe.forEach(k => k.setAttribute('aria-pressed', k.dataset.pt === wahl ? 'true' : 'false'));
+    document.querySelectorAll('[data-pt-tabelle]').forEach(t => { t.hidden = !t.dataset.ptTabelle.split(' ').includes(wahl); });
+    try { localStorage.setItem('battleMarchPatzer', wahl); } catch (e) { /* egal */ }
+    markiere();
+  }
+  document.querySelectorAll('[data-pt-wurf]').forEach(b => b.addEventListener('click', () => {
+    const art = Number(b.dataset.ptWurf);
+    wurf = { art, werte: Array.from({ length: art }, () => 1 + Math.floor(Math.random() * 6)) };
+    markiere();
+  }));
   let start = 'normal';
-  try { if (localStorage.getItem('battleMarchPatzer') === 'katastrophal') start = 'katastrophal'; } catch (e) { /* egal */ }
+  try { const g = localStorage.getItem('battleMarchPatzer'); if (erlaubt.includes(g)) start = g; } catch (e) { /* egal */ }
   knoepfe.forEach(k => k.addEventListener('click', () => zeige(k.dataset.pt)));
   zeige(start);
 })();
