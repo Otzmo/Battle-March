@@ -3511,7 +3511,10 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   svg.addEventListener('pointerdown', e => {
     const p = punkt(e);
     if (e.target.closest && e.target.closest('[data-griff]')) {   // Drehgriff der Flamme
-      zug = { drehen: true }; svg.setPointerCapture(e.pointerId); return;
+      // Drehpunkt ist der Beginn der Flamme (duennes Ende): er bleibt liegen, damit der Abstand gleich bleibt
+      const w = st.dreh * Math.PI / 180;
+      zug = { drehen: true, sx: st.x - Math.cos(w) * FLAMME.lang / 2, sy: st.y - Math.sin(w) * FLAMME.lang / 2 };
+      svg.setPointerCapture(e.pointerId); return;
     }
     if (wurf) wurfWeg(false);   // neu zielen verwirft die Abweichung
     zug = { dx: st.x - p.x, dy: st.y - p.y };
@@ -3522,8 +3525,10 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     if (!zug) return;
     const p = punkt(e);
     if (zug.drehen) {
-      if (Math.hypot(p.x - st.x, p.y - st.y) < 1) return;
-      st.dreh = (Math.round(Math.atan2(p.y - st.y, p.x - st.x) * 180 / Math.PI) + 360) % 360;
+      if (Math.hypot(p.x - zug.sx, p.y - zug.sy) < 1) return;
+      st.dreh = (Math.round(Math.atan2(p.y - zug.sy, p.x - zug.sx) * 180 / Math.PI) + 360) % 360;
+      const w = st.dreh * Math.PI / 180;
+      st.x = zug.sx + Math.cos(w) * FLAMME.lang / 2; st.y = zug.sy + Math.sin(w) * FLAMME.lang / 2;
     } else { st.x = p.x + zug.dx; st.y = p.y + zug.dy; }
     zeichne();
   });
