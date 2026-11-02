@@ -417,6 +417,7 @@ button:hover{ background:var(--maroon-dark); }
   .guide .termin-tabelle th,.guide .termin-tabelle td{ padding:5px 5px; font-size:.82rem; }
   .termin-lang{ display:none; }
   .guide .termin-tabelle td:nth-child(4){ white-space:nowrap; }
+  .guide .termin-tabelle td.termin-mehrtag{ white-space:normal; }
   .termin-mini{ padding:4px 6px; font-size:.78rem; }
   .guide td.termin-spieler{ white-space:normal; }
   .termin-mini + .termin-mini{ margin:4px 0 0; display:block; }
@@ -3102,6 +3103,10 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
         const wb = TAGE[new Date(t.bis + 'T00:00:00').getDay()];
         datumText = (t.bis.slice(0, 7) === t.datum.slice(0, 7) ? t.datum.slice(8) + '.' : tm(t.datum)) + '–' + tm(t.bis);
         tdTag.append('–' + wb.slice(0, 2)); tdTag.appendChild(el('span', 'termin-lang', wb.slice(2)));
+        // Zeiten mit Tag: Beginn am ersten, Ende am letzten Tag
+        tdUhr.replaceChildren(wt.slice(0, 2) + ' ' + uhr(t.beginn) + ' –', document.createElement('wbr'), ' ' + wb.slice(0, 2) + ' ' + uhr(t.ende));
+        tdUhr.appendChild(el('span', 'termin-lang', ' Uhr'));
+        tdUhr.className = 'termin-mehrtag';
       }
       tr.append(el('td', null, datumText), tdTag, el('td', null, t.art), tdUhr);
 
