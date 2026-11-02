@@ -1162,7 +1162,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <div class="sr-zahl"><span>Bei 4+</span><b id="srVier">0</b></div>
   <div class="sr-zahl"><span>Gefährdete Modelle</span><b id="srAlle">0</b></div>
   <div class="sr-zahl"><span>Erwartete Treffer</span><b id="srErw">0</b></div>
-  <div class="sr-zahl"><span>Abstand zur Mitte</span><b id="srAbstand">0"</b></div>
+  <div class="sr-zahl"><span id="srAbstandText">Abstand zur Mitte</span><b id="srAbstand">0"</b></div>
 </div>
 <div class="sr-steuer">
   <div><span class="sr-titel">Reihen</span><div class="sr-zaehler"><button type="button" data-feld="breite" data-schritt="-1" aria-label="Reihen weniger">−</button><output id="srBreite">6</output><button type="button" data-feld="breite" data-schritt="1" aria-label="Reihen mehr">+</button></div></div>
@@ -3280,14 +3280,19 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
       svg.appendChild(g);
     }
 
-    // Pfeil von der Mitte der Einheit zur Mitte der Schablone, mit Abstand in Zoll (nur runde Schablonen)
-    const zx = st.x, zy = st.y, versatz = 2.2;
+    // Pfeil von der Mitte der Einheit zur Mitte der Schablone, mit Abstand in Zoll;
+    // bei der Flamme zu ihrem Beginn (Spitze des duennen Endes)
+    let zx = st.x, zy = st.y, versatz = 2.2;
+    if (!f.rund) {
+      const w = st.dreh * Math.PI / 180;
+      zx = f.ax - Math.cos(w) * FLAMME.rKlein; zy = f.ay - Math.sin(w) * FLAMME.rKlein; versatz = 0;
+    }
     const ex = RAND + ew / 2, ey = RAND + et / 2, abstand = Math.hypot(zx - ex, zy - ey);
     const zollText = (Math.round(abstand / ZOLL * 10) / 10).toLocaleString('de-DE') + '"';
     document.getElementById('srAbstand').textContent = zollText;
-    document.getElementById('srAbstand').parentElement.hidden = !f.rund;
+    document.getElementById('srAbstandText').textContent = f.rund ? 'Abstand zur Mitte' : 'Abstand zum Beginn der Flamme';
     document.getElementById('srAutoText').textContent = f.rund ? 'ganz darunter oder unter der Mitte' : 'ganz darunter';
-    if (f.rund && abstand > 3) {
+    if (abstand > 3) {
       const neu = (tag, attr) => { const el = document.createElementNS(NS, tag); Object.entries(attr).forEach(([k, v]) => el.setAttribute(k, v)); svg.appendChild(el); return el; };
       const ux = (zx - ex) / abstand, uy = (zy - ey) / abstand;
       const spitze = Math.min(6, abstand * 0.4);   // Laenge der Pfeilspitze in mm
