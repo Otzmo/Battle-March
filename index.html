@@ -87,6 +87,7 @@ h1, h2, h3{ font-family:"Crimson Pro",Georgia,serif; font-weight:700; }
 .tab-content{ max-width:1320px; margin:0 auto; }
 .tab-content[hidden]{ display:none; }
 
+
 /* ---------- Leitfaden ---------- */
 .guide{
   max-width:900px; margin:0 auto;
@@ -284,6 +285,23 @@ button:hover{ background:var(--maroon-dark); }
 .sr-wahl button[aria-pressed="true"]{ background:var(--maroon); color:#fff; }
 .sr-steuer input[type=range]{ width:160px; accent-color:var(--maroon); }
 #srMitte{ padding:7px 14px; }
+.sr-wuerfel{ background:var(--beige); border:1.5px solid var(--maroon); border-radius:4px; padding:12px 14px; margin:0 0 12px; }
+.sr-wuerfel[hidden]{ display:none; }
+.sr-wuerfel h2{ margin:0 0 8px; font-size:1.05rem; }
+.sr-haken{ display:grid; gap:4px; margin-bottom:10px; }
+.sr-haken label{ display:flex; align-items:center; gap:8px; cursor:pointer; font-size:.95rem; }
+.sr-haken input{ accent-color:var(--maroon); width:18px; height:18px; flex:none; }
+.sr-wurfknoepfe{ display:flex; flex-wrap:wrap; gap:8px; }
+.sr-wurfknoepfe button{ padding:7px 14px; }
+.sr-wurfknoepfe button.leise{ background:#fff; color:var(--maroon); border:1.5px solid var(--maroon); }
+.sr-ergebnis{ list-style:none; margin:10px 0 0; padding:0; display:grid; gap:6px; }
+.sr-ergebnis li{ display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--grey-line); border-radius:4px; padding:5px 6px 5px 10px; }
+.sr-ergebnis li span{ flex:1; }
+.sr-ergebnis li b{ color:var(--maroon); }
+.sr-ergebnis li button{ padding:3px 10px; font-size:.85rem; background:#fff; color:var(--maroon); border:1.5px solid var(--maroon); }
+.sr-ergebnis li.summe{ background:var(--maroon); color:#fff; border-color:var(--maroon); font-weight:bold; padding:8px 10px; }
+.sr-ergebnis li.summe b{ color:#fff; }
+.sr-pfeil{ display:inline-block; font-weight:bold; }
 .ar-ergebnis{ text-align:center; background:var(--beige); border:2px solid var(--maroon); border-radius:4px; padding:14px; margin-bottom:12px; }
 .ar-ergebnis span{ display:block; font-size:.75rem; letter-spacing:.04em; text-transform:uppercase; color:#5a4a36; }
 .ar-ergebnis b{ display:block; font-size:2.4rem; color:var(--maroon); line-height:1.2; }
@@ -430,6 +448,48 @@ button:hover{ background:var(--maroon-dark); }
 .bg-note{ font-size:.78rem; color:#5a4a36; text-align:center; line-height:1.4; }
 .bg-note.error{ color:var(--maroon); font-weight:bold; font-style:normal; }
 @media (max-width:760px){ .basegen .layout{ flex-direction:column; } }
+/* ---------- Tools kompakt ---------- */
+.t-kurz{ display:none; }
+.sr-info{ margin-top:12px; font-size:.9rem; color:#3e3226; }
+.sr-info summary{ cursor:pointer; color:var(--maroon); font-weight:600; text-align:center; }
+.sr-info p{ margin:.5rem 0 0; }
+.sr .sr-steuer + .sr-wuerfel{ margin-top:12px; }
+.sr-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+.sr-chip{ position:relative; display:inline-flex; cursor:pointer; }
+.sr-chip input{ position:absolute; opacity:0; width:1px; height:1px; }
+.sr-chip span{ display:inline-block; padding:6px 12px; border:1.5px solid var(--maroon); border-radius:16px; background:#fff; color:var(--maroon); font-size:.9rem; }
+.sr-chip input:checked + span{ background:var(--maroon); color:#fff; }
+.sr-chip input:focus-visible + span{ outline:3px solid #8a6a3b; outline-offset:2px; }
+.sr-chip-info{ font-size:.78rem; color:#5a4a36; margin:0 0 10px; }
+.ar-tabelle:not(.ar-alle) tr.ar-weit{ display:none; }
+.sr-mehr{ display:block; margin:6px auto 0; background:#fff; color:var(--maroon); border:1.5px solid var(--maroon); padding:5px 12px; font-size:.88rem; }
+.sr-mehr[hidden]{ display:none; }
+@media (max-width:720px){
+  body{ padding:8px 6px 20px; }
+  .page-header{ margin-bottom:4px; }
+  .page-header h1{ font-size:1.35rem; }
+  .tabnav{ margin-bottom:8px; padding:4px 0; }
+  .tab-btn{ padding:6px 3px; font-size:.8rem; line-height:1.15; }
+  .subtabbar{ padding-top:5px; }
+  .subtabbar .tab-btn{ padding:5px 3px; font-size:.8rem; }
+  .t-lang{ display:none; }
+  .t-kurz{ display:inline; }
+  .guide{ padding:4px 10px 18px; }
+  .sr h1{ margin-top:.8rem; }
+  .sr-steuer{ padding:10px; gap:10px 14px; }
+  .sr-wuerfel{ padding:10px; }
+  /* Schablone: Ergebnis als eine Zeile */
+  .sr-zahlen{ grid-template-columns:repeat(4, 1fr); gap:4px; }
+  .sr-zahl, .sr-zahl:last-child{ grid-column:auto; padding:4px 6px; }
+  .sr-zahl span{ font-size:.58rem; letter-spacing:0; }
+  .sr-zahl b{ font-size:1.15rem; }
+  .sr-zahl-summe{ display:none; }
+  /* Ansturm/Zauber: Ergebnis bleibt beim Scrollen sichtbar */
+  .ar-ergebnis{ position:sticky; top:var(--nav-h, 0px); z-index:5; padding:8px; margin-bottom:10px; box-shadow:0 2px 6px rgba(42,38,34,.12); }
+  .ar-ergebnis b{ font-size:1.8rem; }
+  .ar-ergebnis small{ font-size:.82rem; }
+}
+
 </style>
 </head>
 <body>
@@ -460,10 +520,10 @@ button:hover{ background:var(--maroon-dark); }
   <button class="tab-btn" role="tab" id="tab-corebattle" data-tab="corebattle" aria-controls="panel-corebattle" aria-selected="false" tabindex="-1">Core Battle</button>
 </div>
 <div class="subtabbar" role="tablist" aria-label="Tools" data-gruppe="tools" hidden="">
-  <button class="tab-btn" role="tab" id="tab-schablone" data-tab="schablone" aria-controls="panel-schablone" aria-selected="true" tabindex="0">Schablonen&shy;rechner</button>
-  <button class="tab-btn" role="tab" id="tab-angriff" data-tab="angriff" aria-controls="panel-angriff" aria-selected="false" tabindex="-1">Ansturm&shy;rechner</button>
-  <button class="tab-btn" role="tab" id="tab-zauber" data-tab="zauber" aria-controls="panel-zauber" aria-selected="false" tabindex="-1">Zauber&shy;rechner</button>
-  <button class="tab-btn" role="tab" id="tab-patzer" data-tab="patzer" aria-controls="panel-patzer" aria-selected="false" tabindex="-1">Zauber&shy;patzer</button>
+  <button class="tab-btn" role="tab" id="tab-schablone" data-tab="schablone" aria-controls="panel-schablone" aria-selected="true" tabindex="0"><span class="t-lang">Schablonen&shy;rechner</span><span class="t-kurz">Schablone</span></button>
+  <button class="tab-btn" role="tab" id="tab-angriff" data-tab="angriff" aria-controls="panel-angriff" aria-selected="false" tabindex="-1"><span class="t-lang">Ansturm&shy;rechner</span><span class="t-kurz">Ansturm</span></button>
+  <button class="tab-btn" role="tab" id="tab-zauber" data-tab="zauber" aria-controls="panel-zauber" aria-selected="false" tabindex="-1"><span class="t-lang">Zauber&shy;rechner</span><span class="t-kurz">Zauber</span></button>
+  <button class="tab-btn" role="tab" id="tab-patzer" data-tab="patzer" aria-controls="panel-patzer" aria-selected="false" tabindex="-1"><span class="t-lang">Zauber&shy;patzer</span><span class="t-kurz">Patzer</span></button>
   <button class="tab-btn" role="tab" id="tab-base" data-tab="base" aria-controls="panel-base" aria-selected="false" tabindex="-1">BASE</button>
 </div>
 </nav>
@@ -1150,20 +1210,6 @@ GermanComp is a complete restriction, balance and tournament system, developed b
 <div class="tab-content" id="panel-schablone" role="tabpanel" aria-labelledby="tab-schablone" tabindex="0" hidden="">
 <div class="guide sr">
 <h1>Schablonenrechner</h1>
-<p class="sr-hint">Zieh die Schablone über die Einheit, um zu sehen, wen sie trifft.</p>
-<svg class="sr-feld" id="srFeld" role="img" aria-label="Einheit mit Schablone"></svg>
-<div class="sr-legende">
-  <span><i style="background:#a8442a"></i>Automatisch getroffen (<span id="srAutoText">ganz darunter oder unter der Mitte</span>)</span>
-  <span><i style="background:#e0a53a"></i>Getroffen bei 4+ (teilweise darunter)</span>
-  <span><i style="background:#ddd6cc"></i>Nicht berührt</span>
-</div>
-<div class="sr-zahlen" aria-live="polite">
-  <div class="sr-zahl"><span>Automatisch</span><b id="srAuto">0</b></div>
-  <div class="sr-zahl"><span>Bei 4+</span><b id="srVier">0</b></div>
-  <div class="sr-zahl"><span>Gefährdete Modelle</span><b id="srAlle">0</b></div>
-  <div class="sr-zahl"><span>Erwartete Treffer</span><b id="srErw">0</b></div>
-  <div class="sr-zahl"><span id="srAbstandText">Abstand zur Mitte</span><b id="srAbstand">0"</b></div>
-</div>
 <div class="sr-steuer">
   <div><span class="sr-titel">Reihen</span><div class="sr-zaehler"><button type="button" data-feld="breite" data-schritt="-1" aria-label="Reihen weniger">−</button><output id="srBreite">6</output><button type="button" data-feld="breite" data-schritt="1" aria-label="Reihen mehr">+</button></div></div>
   <div><span class="sr-titel">Glieder</span><div class="sr-zaehler"><button type="button" data-feld="tiefe" data-schritt="-1" aria-label="Glieder weniger">−</button><output id="srTiefe">4</output><button type="button" data-feld="tiefe" data-schritt="1" aria-label="Glieder mehr">+</button></div></div>
@@ -1186,7 +1232,37 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   </div></div>
   <div><button type="button" id="srMitte">⌖ Schablone zentrieren</button></div>
 </div>
-<p class="sr-hint" style="margin-top:10px;">Breite = Modelle pro Glied (Reihen), Tiefe = Anzahl Glieder. Bei den runden Schablonen ist jede Base unter der Mitte immer voll getroffen – liegt die Mitte auf mehreren Bases, gilt das für alle. Bei der Flammenschablone sind nur Bases ganz darunter automatisch getroffen. Erwartete Treffer = automatische Treffer + die Hälfte der Treffer bei 4+. Die Flammenschablone ist 8" lang, vorne 0,5" und hinten 2,5" breit; zum Drehen den runden Griff ⟳ an der Schablone ziehen.</p>
+<div class="sr-wuerfel" id="srWuerfel">
+  <h2>Abweichung würfeln</h2>
+  <div class="sr-chips" role="group" aria-label="Würfel für die Abweichung">
+    <label class="sr-chip" title="Richtung – Treffer = Volltreffer"><input type="checkbox" data-wuerfel="abw" checked><span>Abweichung</span></label>
+    <label class="sr-chip" title="Entfernung – Fehlfunktion = kein Schuss"><input type="checkbox" data-wuerfel="art" checked><span>Artillerie</span></label>
+    <label class="sr-chip" title="von der Entfernung abziehen"><input type="checkbox" data-wuerfel="w3"><span>−W3</span></label>
+    <label class="sr-chip" title="Entfernung"><input type="checkbox" data-wuerfel="w6"><span>W6</span></label>
+    <label class="sr-chip" title="Entfernung"><input type="checkbox" data-wuerfel="w2"><span>2W6</span></label>
+  </div>
+  <p class="sr-chip-info">Abweichung: Richtung (Treffer = Volltreffer) · Artillerie: Entfernung (Fehlfunktion = kein Schuss) · W3 wird abgezogen</p>
+  <div class="sr-wurfknoepfe">
+    <button type="button" id="srWerfen">🎲 Würfeln</button>
+    <button type="button" class="leise" id="srZurueck" hidden>↺ Zurück zum Zielpunkt</button>
+  </div>
+  <ul class="sr-ergebnis" id="srErgebnis" aria-live="polite"></ul>
+</div>
+<p class="sr-hint">Zieh die Schablone über die Einheit, um zu sehen, wen sie trifft.</p>
+<svg class="sr-feld" id="srFeld" role="img" aria-label="Einheit mit Schablone"></svg>
+<div class="sr-legende">
+  <span><i style="background:#a8442a"></i>Automatisch getroffen (<span id="srAutoText">ganz darunter oder unter der Mitte</span>)</span>
+  <span><i style="background:#e0a53a"></i>Getroffen bei 4+ (teilweise darunter)</span>
+  <span><i style="background:#ddd6cc"></i>Nicht berührt</span>
+</div>
+<div class="sr-zahlen" aria-live="polite">
+  <div class="sr-zahl"><span>Automatisch</span><b id="srAuto">0</b></div>
+  <div class="sr-zahl"><span>Bei 4+</span><b id="srVier">0</b></div>
+  <div class="sr-zahl sr-zahl-summe"><span>Gefährdete Modelle</span><b id="srAlle">0</b></div>
+  <div class="sr-zahl"><span>Erwartete Treffer</span><b id="srErw">0</b></div>
+  <div class="sr-zahl"><span id="srAbstandText">Abstand zur Mitte</span><b id="srAbstand">0"</b></div>
+</div>
+<details class="sr-info"><summary>ℹ So wird gerechnet</summary><p>Breite = Modelle pro Glied (Reihen), Tiefe = Anzahl Glieder. Bei den runden Schablonen ist jede Base unter der Mitte immer voll getroffen – liegt die Mitte auf mehreren Bases, gilt das für alle. Bei der Flammenschablone sind nur Bases ganz darunter automatisch getroffen. Erwartete Treffer = automatische Treffer + die Hälfte der Treffer bei 4+. Die Flammenschablone ist 8" lang, vorne 0,5" und hinten 2,5" breit; zum Drehen den runden Griff ⟳ an der Schablone ziehen.</p></details>
 </div>
 </div>
 
@@ -1216,7 +1292,8 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   </div></div>
 </div>
 <table class="ar-tabelle"><tbody id="arTabelle"></tbody></table>
-<p class="sr-hint" style="margin-top:10px;">Der Angriff gelingt, wenn Bewegung + Wurf mindestens die Entfernung erreicht. Die Tabelle zeigt die Chance für jede Entfernung, die mit dieser Bewegung erreichbar ist.</p>
+<button type="button" class="sr-mehr" id="arAlle" aria-expanded="false">Alle Entfernungen anzeigen ▾</button>
+<details class="sr-info"><summary>ℹ So wird gerechnet</summary><p>Der Angriff gelingt, wenn Bewegung + Wurf mindestens die Entfernung erreicht. Die Tabelle zeigt die Chance für jede Entfernung, die mit dieser Bewegung erreichbar ist.</p></details>
 </div>
 </div>
 
@@ -1248,7 +1325,7 @@ GermanComp is a complete restriction, balance and tournament system, developed b
   <div><span class="sr-titel">Bannwurf</span><label class="ar-haken"><input type="checkbox" id="zrBWdh"> Wiederholen, wenn er misslingt</label></div>
 </div>
 <table class="ar-tabelle zr-tabelle"><tbody id="zrTabelle"></tbody></table>
-<p class="sr-hint" style="margin-top:10px;">Der Zauber gelingt, wenn der Zauberwurf den Zauberwert erreicht. Ein Pasch aus Einsen misslingt immer und ist ein Patzer (<a href="#patzer" id="zrZuPatzer">zu den Zauberpatzern</a>), ein Pasch aus Sechsen gelingt immer. Gebannt ist er, wenn der Bannwurf (2W6 + Stufe/2 des Banners, aufgerundet) höher ist als der Zauberwurf – ein Pasch aus Sechsen bannt immer. Stufe 0 = Banner ohne Magierstufe.</p>
+<details class="sr-info"><summary>ℹ So wird gerechnet</summary><p>Der Zauber gelingt, wenn der Zauberwurf den Zauberwert erreicht. Ein Pasch aus Einsen misslingt immer und ist ein Patzer (<a href="#patzer" id="zrZuPatzer">zu den Zauberpatzern</a>), ein Pasch aus Sechsen gelingt immer. Gebannt ist er, wenn der Bannwurf (2W6 + Stufe/2 des Banners, aufgerundet) höher ist als der Zauberwurf – ein Pasch aus Sechsen bannt immer. Stufe 0 = Banner ohne Magierstufe.</p></details>
 </div>
 </div>
 
@@ -2737,7 +2814,11 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   // Oberpunkte mit eigener Unterleiste: "Battle March" (Leitfaden, Armee & Magie)
   // und "Kartenbau" (Battle March, Core Battle). Welche Unterleiste zu welchem
   // Oberpunkt gehoert, steht im data-gruppe der Leiste.
-  const haupt = Array.from(document.querySelectorAll('.tabbar .tab-btn[data-tab]'));   // ohne externe Links
+  const haupt = Array.from(document.querySelectorAll('.tabbar .tab-btn[data-tab]'));
+  // Hoehe der klebenden Leiste merken: darunter kleben die Ergebnisse der Rechner
+  const nav = document.querySelector('.tabnav');
+  const navHoehe = () => document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
+  if (nav) { navHoehe(); if (window.ResizeObserver) new ResizeObserver(navHoehe).observe(nav); }   // ohne externe Links
   const leisten = Array.from(document.querySelectorAll('.subtabbar'));
   const unter = {};          // Gruppe -> Knoepfe der Unterleiste
   const zuletzt = {};        // Gruppe -> zuletzt offener Unterpunkt
@@ -3152,6 +3233,9 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   // Platz um die Einheit - so viel, dass die Schablone ganz neben die Einheit passt
   const rand = () => (st.art === 'r3' ? 2 : st.art === 'r5' ? 3 : 4.5) * ZOLL;
   const st = { breite: 6, tiefe: 4, base: '25x25', art: 'r3', dreh: 0, x: null, y: null };
+  /* Abweichungswurf (nur runde Schablonen): ziel = Punkt vor dem Wuerfeln, dazu die Wuerfe.
+     null = kein Wurf aktiv. Wird verworfen, sobald die Schablone anders bewegt oder die Einheit geaendert wird. */
+  let wurf = null;
   try {
     const g = JSON.parse(localStorage.getItem('battleMarchSchablone')) || {};
     const ganz = (v, min, max) => Number.isInteger(v) && v >= min && v <= max;
@@ -3218,16 +3302,24 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     const [bw, bt] = baseMass(), [ew, et] = einheit();
     const RAND = rand(), breite = ew + 2 * RAND, hoehe = et + 2 * RAND;
     if (st.x === null) { st.x = breite / 2; st.y = hoehe / 2; }
-    st.x = Math.max(0, Math.min(breite, st.x)); st.y = Math.max(0, Math.min(hoehe, st.y));
-    svg.setAttribute('viewBox', '0 0 ' + breite + ' ' + hoehe);
+    let vb = [0, 0, breite, hoehe];
+    if (!wurf) { st.x = Math.max(0, Math.min(breite, st.x)); st.y = Math.max(0, Math.min(hoehe, st.y)); }
+    else {   // nach einer Abweichung darf die Schablone neben dem Feld landen: Ausschnitt vergroessern
+      const rr = (st.art === 'r3' ? 3 : 5) * ZOLL / 2 + 6;
+      const x0 = Math.min(0, st.x - rr, wurf.ziel.x - rr), y0 = Math.min(0, st.y - rr, wurf.ziel.y - rr);
+      const x1 = Math.max(breite, st.x + rr, wurf.ziel.x + rr), y1 = Math.max(hoehe, st.y + rr, wurf.ziel.y + rr);
+      vb = [x0, y0, x1 - x0, y1 - y0];
+    }
+    svg.setAttribute('viewBox', vb.join(' '));
+    const fehl = !!(wurf && wurf.art === 'F');
     svg.replaceChildren();
     const f = form();
     const n = { auto: 0, vier: 0, nein: 0 };
     for (let r = 0; r < st.tiefe; r++) for (let c = 0; c < st.breite; c++) {
       const x0 = RAND + c * bw, y0 = RAND + r * bt;
-      let t = treffer(f, x0, y0, bw, bt);
+      let t = fehl ? 'nein' : treffer(f, x0, y0, bw, bt);
       // Runde Schablonen: die Base unter der Mitte ist immer voll getroffen. Bei der Flamme zaehlen nur Bases ganz darunter.
-      if (f.rund && st.x >= x0 && st.x <= x0 + bw && st.y >= y0 && st.y <= y0 + bt) t = 'auto';
+      if (!fehl && f.rund && st.x >= x0 && st.x <= x0 + bw && st.y >= y0 && st.y <= y0 + bt) t = 'auto';
       n[t]++;
       const re = document.createElementNS(NS, 'rect');
       Object.entries({ x: x0, y: y0, width: bw, height: bt, fill: FARBE[t], stroke: '#5a4a36', 'stroke-width': 0.8 })
@@ -3246,8 +3338,25 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
       s.setAttribute('d', `M${p1} L${p2} A${FLAMME.rGross} ${FLAMME.rGross} 0 1 0 ${p3} L${p4} A${FLAMME.rKlein} ${FLAMME.rKlein} 0 0 0 ${p1} Z`);
     }
     Object.entries({ fill: 'rgba(31,63,107,.15)', stroke: '#1f3f6b', 'stroke-width': 1.6 }).forEach(([k, v]) => s.setAttribute(k, v));
-    svg.appendChild(s);
-    if (f.rund) {   // Mittelpunkt zaehlt nur bei runden Schablonen
+    if (!fehl) svg.appendChild(s);
+    // Zielpunkt vor der Abweichung: gestrichelt, mit Pfeil zur neuen Lage
+    if (wurf) {
+      const neu = (tag, attr) => { const el = document.createElementNS(NS, tag); Object.entries(attr).forEach(([k, v]) => el.setAttribute(k, v)); svg.appendChild(el); return el; };
+      neu('circle', { cx: wurf.ziel.x, cy: wurf.ziel.y, r: f.r, fill: 'none', stroke: '#1f3f6b', 'stroke-width': 1.2, 'stroke-dasharray': '4 3' });
+      neu('circle', { cx: wurf.ziel.x, cy: wurf.ziel.y, r: 1.6, fill: '#1f3f6b' });
+      const d = Math.hypot(st.x - wurf.ziel.x, st.y - wurf.ziel.y);
+      if (!fehl && d > 4) {
+        const ux = (st.x - wurf.ziel.x) / d, uy = (st.y - wurf.ziel.y) / d, sp = 5;
+        const sx = st.x - ux * 2.2, sy = st.y - uy * 2.2, bx = sx - ux * sp, by = sy - uy * sp;
+        neu('line', { x1: wurf.ziel.x, y1: wurf.ziel.y, x2: bx, y2: by, stroke: '#1f3f6b', 'stroke-width': 1.4, 'stroke-dasharray': '4 3' });
+        neu('path', { d: `M${sx} ${sy} L${bx - uy * sp / 2} ${by + ux * sp / 2} L${bx + uy * sp / 2} ${by - ux * sp / 2} Z`, fill: '#1f3f6b' });
+      }
+      if (fehl) {
+        const t = neu('text', { x: wurf.ziel.x, y: wurf.ziel.y - f.r - 4, 'text-anchor': 'middle', 'font-size': 8, 'font-weight': 'bold', fill: '#a33', stroke: '#fff', 'stroke-width': 2, 'paint-order': 'stroke' });
+        t.textContent = 'Fehlfunktion – kein Schuss';
+      }
+    }
+    if (f.rund && !fehl) {   // Mittelpunkt zaehlt nur bei runden Schablonen
       const m = document.createElementNS(NS, 'circle');
       Object.entries({ cx: st.x, cy: st.y, r: 2.2, fill: '#1f3f6b' }).forEach(([k, v]) => m.setAttribute(k, v));
       svg.appendChild(m);
@@ -3292,7 +3401,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     document.getElementById('srAbstand').textContent = zollText;
     document.getElementById('srAbstandText').textContent = f.rund ? 'Abstand zur Mitte' : 'Abstand zum Beginn der Flamme';
     document.getElementById('srAutoText').textContent = f.rund ? 'ganz darunter oder unter der Mitte' : 'ganz darunter';
-    if (abstand > 3) {
+    if (abstand > 3 && !fehl) {
       const neu = (tag, attr) => { const el = document.createElementNS(NS, tag); Object.entries(attr).forEach(([k, v]) => el.setAttribute(k, v)); svg.appendChild(el); return el; };
       const ux = (zx - ex) / abstand, uy = (zy - ey) / abstand;
       const spitze = Math.min(6, abstand * 0.4);   // Laenge der Pfeilspitze in mm
@@ -3314,6 +3423,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     document.getElementById('srTiefe').textContent = st.tiefe;
     document.getElementById('srBase').value = st.base;
     document.querySelectorAll('#srArt button').forEach(b => b.setAttribute('aria-pressed', b.dataset.art === st.art ? 'true' : 'false'));
+    document.getElementById('srWuerfel').hidden = !f.rund;
     merke();
   }
 
@@ -3325,6 +3435,7 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     if (e.target.closest && e.target.closest('[data-griff]')) {   // Drehgriff der Flamme
       zug = { drehen: true }; svg.setPointerCapture(e.pointerId); return;
     }
+    if (wurf) wurfWeg(false);   // neu zielen verwirft die Abweichung
     zug = { dx: st.x - p.x, dy: st.y - p.y };
     if (!form().innen(p.x, p.y)) { zug = { dx: 0, dy: 0 }; st.x = p.x; st.y = p.y; zeichne(); }   // daneben getippt: Schablone springt hin
     svg.setPointerCapture(e.pointerId); svg.classList.add('zieht');
@@ -3342,18 +3453,102 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   svg.addEventListener('pointerup', los); svg.addEventListener('pointercancel', los);
 
   document.querySelectorAll('.sr-zaehler button[data-feld]').forEach(b => b.addEventListener('click', () => {
+    wurfWeg(true);
     const feld = b.dataset.feld, alt = einheit();
     st[feld] = Math.max(1, Math.min(feld === 'breite' ? 20 : 12, st[feld] + Number(b.dataset.schritt)));
     const neu = einheit(); st.x += (neu[0] - alt[0]) / 2; st.y += (neu[1] - alt[1]) / 2;   // Schablone bleibt relativ mittig
     zeichne();
   }));
-  document.getElementById('srBase').addEventListener('change', e => { st.base = e.target.value; st.x = null; zeichne(); });
+  document.getElementById('srBase').addEventListener('change', e => { wurfWeg(true); st.base = e.target.value; st.x = null; zeichne(); });
   document.querySelectorAll('#srArt button').forEach(b => b.addEventListener('click', () => {
+    wurfWeg(true);
     const alt = rand(); st.art = b.dataset.art;
     if (st.x !== null) { st.x += rand() - alt; st.y += rand() - alt; }   // gleiche Lage zur Einheit
     zeichne();
   }));
-  document.getElementById('srMitte').addEventListener('click', () => { st.x = null; zeichne(); });   // null = Mitte der Einheit
+  document.getElementById('srMitte').addEventListener('click', () => { wurfWeg(false); st.x = null; zeichne(); });   // null = Mitte der Einheit
+
+  /* Abweichung wuerfeln. Abweichungswuerfel: 2 von 6 Seiten "Treffer", sonst Pfeil in zufaellige Richtung.
+     Artilleriewuerfel: 2, 4, 6, 8, 10 oder Fehlfunktion (kein Schuss). Entfernung = Summe der angehakten
+     Entfernungswuerfel minus W3, mindestens 0". Jeder Wurf laesst sich einzeln wiederholen. */
+  const W = n => 1 + Math.floor(Math.random() * n);
+  const WUERFE = {
+    abw: () => (W(6) <= 2 ? { treffer: true } : { treffer: false, winkel: Math.floor(Math.random() * 360) }),
+    art: () => [2, 4, 6, 8, 10, 'F'][W(6) - 1],
+    w3: () => W(3), w6: () => W(6), w2: () => [W(6), W(6)]
+  };
+  const NAMEN = { abw: 'Abweichungswürfel', art: 'Artilleriewürfel', w3: '−W3', w6: 'W6', w2: '2W6' };
+  const haken = () => [...document.querySelectorAll('#srWuerfel [data-wuerfel]')].filter(h => h.checked).map(h => h.dataset.wuerfel);
+  const PFEILE = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
+  const pfeil = w => PFEILE[Math.round(w / 45) % 8];
+
+  function entfernung() {
+    let e = 0;
+    if (typeof wurf.art === 'number') e += wurf.art;
+    if (wurf.w6) e += wurf.w6;
+    if (wurf.w2) e += wurf.w2[0] + wurf.w2[1];
+    if (wurf.w3) e -= wurf.w3;
+    return Math.max(0, e);
+  }
+  function wende() {   // Lage der Schablone aus Zielpunkt und Wuerfen
+    const e = entfernung(), a = wurf.abw;
+    if (wurf.art === 'F' || !a || a.treffer || e === 0) { st.x = wurf.ziel.x; st.y = wurf.ziel.y; }
+    else { const w = a.winkel * Math.PI / 180; st.x = wurf.ziel.x + Math.cos(w) * e * ZOLL; st.y = wurf.ziel.y + Math.sin(w) * e * ZOLL; }
+    zeichne(); zeigeWurf();
+  }
+  function zeigeWurf() {
+    const ul = document.getElementById('srErgebnis');
+    ul.replaceChildren();
+    document.getElementById('srZurueck').hidden = !wurf;
+    if (!wurf) return;
+    const zeile = (cls, text, wert, art) => {
+      const li = document.createElement('li'); if (cls) li.className = cls;
+      const sp = document.createElement('span'); sp.textContent = text + ' ';
+      const b = document.createElement('b'); b.textContent = wert; sp.appendChild(b); li.appendChild(sp);
+      if (art) {
+        const k = document.createElement('button'); k.type = 'button'; k.dataset.neu = art; k.textContent = '↻ neu';
+        k.setAttribute('aria-label', NAMEN[art] + ' neu würfeln'); li.appendChild(k);
+      }
+      ul.appendChild(li);
+    };
+    if (wurf.abw) zeile('', NAMEN.abw + ':', wurf.abw.treffer ? 'Treffer' : pfeil(wurf.abw.winkel) + ' Pfeil', 'abw');
+    if (wurf.art !== undefined) zeile('', NAMEN.art + ':', wurf.art === 'F' ? 'Fehlfunktion' : wurf.art + '"', 'art');
+    if (wurf.w3) zeile('', NAMEN.w3 + ':', '−' + wurf.w3 + '"', 'w3');
+    if (wurf.w6) zeile('', NAMEN.w6 + ':', wurf.w6 + '"', 'w6');
+    if (wurf.w2) zeile('', NAMEN.w2 + ':', wurf.w2[0] + ' + ' + wurf.w2[1] + ' = ' + (wurf.w2[0] + wurf.w2[1]) + '"', 'w2');
+    const e = entfernung();
+    let summe;
+    if (wurf.art === 'F') summe = 'Fehlfunktion – kein Schuss';
+    else if (!wurf.abw) summe = 'ohne Abweichungswürfel keine Richtung – Schablone bleibt liegen';
+    else if (wurf.abw.treffer) summe = 'Volltreffer – keine Abweichung';
+    else if (e === 0) summe = 'Entfernung 0" – keine Abweichung';
+    else summe = e + '" ' + pfeil(wurf.abw.winkel);
+    zeile('summe', 'Ergebnis:', summe);
+  }
+  function wurfWeg(zurueck) {
+    if (!wurf) return;
+    if (zurueck) { st.x = wurf.ziel.x; st.y = wurf.ziel.y; }
+    wurf = null; zeigeWurf();
+  }
+  document.getElementById('srWerfen').addEventListener('click', () => {
+    const ziel = wurf ? wurf.ziel : { x: st.x, y: st.y };
+    wurf = { ziel };
+    haken().forEach(k => { wurf[k] = WUERFE[k](); });
+    wende();
+  });
+  document.getElementById('srZurueck').addEventListener('click', () => { wurfWeg(true); zeichne(); });
+  document.getElementById('srErgebnis').addEventListener('click', e => {
+    const k = e.target.closest('[data-neu]');
+    if (!k || !wurf) return;
+    wurf[k.dataset.neu] = WUERFE[k.dataset.neu]();
+    wende();
+  });
+  // Haken nach dem Wurf: Wuerfel kommt dazu (wird gewuerfelt) oder faellt weg
+  document.querySelectorAll('#srWuerfel [data-wuerfel]').forEach(h => h.addEventListener('change', () => {
+    if (!wurf) return;
+    if (h.checked) wurf[h.dataset.wuerfel] = WUERFE[h.dataset.wuerfel](); else delete wurf[h.dataset.wuerfel];
+    wende();
+  }));
   zeichne();
 })();
 </script>
@@ -3420,11 +3615,16 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
     document.querySelectorAll('#arSonder button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sonder === st.sonder ? 'true' : 'false'));
     feld('arSchwer').checked = st.schwer;
     document.querySelectorAll('#arWdh button').forEach(b => b.setAttribute('aria-pressed', b.dataset.wdh === st.wdh ? 'true' : 'false'));
+    // Ohne "alle anzeigen" nur die Zeilen um die gewaehlte Entfernung (+-2)
     const zeilen = ['<tr><th>Entfernung</th><th>Chance</th></tr>'];
-    for (let d = st.bew + minWurf(); d <= st.bew + maxWurf(); d++) {
-      zeilen.push('<tr' + (Math.ceil(st.dist) === d ? ' class="ar-ziel"' : '') + '><td>bis ' + zoll(d) + '</td><td>' + prozent(chance(d)) + '</td></tr>');
+    const von = st.bew + minWurf(), bis = st.bew + maxWurf();
+    const mitte = Math.max(von, Math.min(bis, Math.ceil(st.dist)));
+    for (let d = von; d <= bis; d++) {
+      const kl = [Math.ceil(st.dist) === d ? 'ar-ziel' : '', Math.abs(d - mitte) > 2 ? 'ar-weit' : ''].filter(Boolean).join(' ');
+      zeilen.push('<tr' + (kl ? ' class="' + kl + '"' : '') + '><td>bis ' + zoll(d) + '</td><td>' + prozent(chance(d)) + '</td></tr>');
     }
     feld('arTabelle').innerHTML = zeilen.join('');
+    feld('arAlle').hidden = !feld('arTabelle').querySelector('.ar-weit');
     merke();
   }
   document.querySelectorAll('[data-ar]').forEach(b => b.addEventListener('click', () => {
@@ -3435,6 +3635,11 @@ kartenbau({ endung: '-core', w: 72, h: 48, kreis: 18, zonenTiefe: 12, passAbstan
   document.querySelectorAll('#arSonder button').forEach(b => b.addEventListener('click', () => { st.sonder = b.dataset.sonder; zeige(); }));
   feld('arSchwer').addEventListener('change', e => { st.schwer = e.target.checked; zeige(); });
   document.querySelectorAll('#arWdh button').forEach(b => b.addEventListener('click', () => { st.wdh = b.dataset.wdh; zeige(); }));
+  feld('arAlle').addEventListener('click', () => {
+    const t = feld('arTabelle').closest('table'), alle = t.classList.toggle('ar-alle');
+    feld('arAlle').textContent = alle ? 'Weniger anzeigen ▴' : 'Alle Entfernungen anzeigen ▾';
+    feld('arAlle').setAttribute('aria-expanded', alle ? 'true' : 'false');
+  });
   zeige();
 })();
 </script>
