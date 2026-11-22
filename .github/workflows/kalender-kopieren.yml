@@ -1,0 +1,35 @@
+# Alte Kalender-Abos (webcal://otzmo.github.io/Battle-March/termine.ics) weiter versorgen:
+# Kalender-Apps folgen keiner Weiterleitungsseite, deshalb wird die Datei von der neuen Adresse kopiert.
+name: Kalender von TOW kopieren
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kalender
+  cancel-in-progress: false
+
+jobs:
+  kopieren:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Kalenderdateien holen
+        run: |
+          for f in termine.ics termine-2027.ics; do
+            curl -fsSL "https://otzmo.github.io/TOW/$f" -o "$f.neu" && mv "$f.neu" "$f" || rm -f "$f.neu"
+          done
+      - name: Commit, falls geändert
+        run: |
+          if [ -n "$(git status --porcelain -- '*.ics')" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+            git add -- *.ics
+            git commit -m "Kalender von TOW übernommen"
+            git push
+          fi
